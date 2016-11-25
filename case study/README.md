@@ -2,7 +2,11 @@
 
 ## Description
 
-Blabla case study
+First, generally a bike sharing class is implemented in MATSim. Secondly, this class is applied onto the case of Zurich and the effects of using different parameters is tried and the effects on the demand is studied (sensitivity analysis). In consequence, the set of parameters that has highest usage/demand is determined.
+The relevant parameters include fleet size, type of system (free floating vs. station based), no. of stations, type of bike (electric vs conventional), price and smaller factors of the system (vehicle comfort, access time and reliability etc.).
+The overall aim is to gather the potential of bike sharing as part of the Zurich transport system.
+This is based upon classes for car sharing, as well as an implementation of bicycle traffic.
+
 
 ## Questions
 
