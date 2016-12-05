@@ -25,6 +25,7 @@ package playground.ikaddoura.decongestion;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
+import org.matsim.analysis.ScoreStatsControlerListener.ScoreItem;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.config.Config;
@@ -34,14 +35,11 @@ import org.matsim.core.controler.OutputDirectoryHierarchy;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 
-import playground.ikaddoura.analysis.vtts.VTTSHandler;
 import playground.ikaddoura.decongestion.DecongestionConfigGroup.TollingApproach;
 import playground.ikaddoura.decongestion.data.DecongestionInfo;
 
 /**
  * 
- * Tests a router which accounts for the agent's real VTTS.
- * The VTTS is computed by {@link VTTSHandler}. 
  * 
  * @author ikaddoura
  *
@@ -90,7 +88,8 @@ public class DecongestionPricingTest {
 		Assert.assertEquals("Wrong travel time. The run output seems to have changed.", 3835.328125, tt2, MatsimTestUtils.EPSILON);
 		Assert.assertEquals("Wrong travel time. The run output seems to have changed.", 3835.328125, tt3, MatsimTestUtils.EPSILON);
 		
-		double avgScore = controler.getScoreStats().getHistory()[3][config.controler().getLastIteration() - config.controler().getFirstIteration()];
+		final int index = config.controler().getLastIteration() - config.controler().getFirstIteration();
+		double avgScore = controler.getScoreStats().getScoreHistory().get( ScoreItem.executed ).get(index) ;
 		Assert.assertEquals("Wrong average executed score. The run output seems to have changed.", -11757.488437376147, avgScore, MatsimTestUtils.EPSILON);		
 	}
 	
@@ -132,7 +131,9 @@ public class DecongestionPricingTest {
 		Assert.assertEquals("Wrong travel time. The run output seems to have changed.", 5343.2, tt2, MatsimTestUtils.EPSILON);
 		Assert.assertEquals("Wrong travel time. The run output seems to have changed.", 5343.2, tt3, MatsimTestUtils.EPSILON);
 		
-		double avgScore = controler.getScoreStats().getHistory()[3][config.controler().getLastIteration() - config.controler().getFirstIteration()];
+		final int index = config.controler().getLastIteration() - config.controler().getFirstIteration();
+//		double avgScore = controler.getScoreStats().getScoreHistory()[3][index];
+		double avgScore = controler.getScoreStats().getScoreHistory().get( ScoreItem.executed ).get( index ) ;
 		Assert.assertEquals("Wrong average executed score. The run output seems to have changed.", -55.08439467592601, avgScore, MatsimTestUtils.EPSILON);		
 	}
 	

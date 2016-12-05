@@ -17,9 +17,6 @@
  *                                                                         *
  * *********************************************************************** */
 
-/**
- * 
- */
 package org.matsim.contrib.accessibility.run;
 
 import java.io.File;
@@ -28,10 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-
 import org.apache.log4j.Logger;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,15 +37,12 @@ import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.NetworkWriter;
-import org.matsim.contrib.accessibility.AccessibilityCalculator;
 import org.matsim.contrib.accessibility.AccessibilityConfigGroup;
+import org.matsim.contrib.accessibility.AccessibilityConfigGroup.AreaOfAccesssibilityComputation;
 import org.matsim.contrib.accessibility.AccessibilityContributionCalculator;
 import org.matsim.contrib.accessibility.AccessibilityStartupListener;
 import org.matsim.contrib.accessibility.ConstantSpeedModeProvider;
-import org.matsim.contrib.accessibility.FacilityTypes;
 import org.matsim.contrib.accessibility.FreeSpeedNetworkModeProvider;
-import org.matsim.contrib.accessibility.AccessibilityConfigGroup.AreaOfAccesssibilityComputation;
-import org.matsim.contrib.accessibility.GridBasedAccessibilityShutdownListenerV3;
 import org.matsim.contrib.accessibility.Modes4Accessibility;
 import org.matsim.contrib.accessibility.NetworkModeProvider;
 import org.matsim.contrib.accessibility.gis.GridUtils;
@@ -62,14 +54,9 @@ import org.matsim.contrib.matrixbasedptrouter.PtMatrix;
 import org.matsim.contrib.matrixbasedptrouter.utils.BoundingBox;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.ReflectiveConfigGroup.StringGetter;
-import org.matsim.core.config.ReflectiveConfigGroup.StringSetter;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy;
-import org.matsim.core.controler.listener.ControlerListener;
-import org.matsim.core.router.costcalculators.TravelDisutilityFactory;
-import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.facilities.ActivityFacilities;
@@ -82,19 +69,19 @@ import com.google.inject.Key;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import com.vividsolutions.jts.geom.Envelope;
+import com.vividsolutions.jts.geom.Geometry;
 
-import junit.framework.Assert;
 
 /**
  * @author nagel
- *
  */
 public class AccessibilityIntegrationTest {
 	
-	private static final Logger log = Logger.getLogger(AccessibilityIntegrationTest.class);
+	private static final Logger LOG = Logger.getLogger(AccessibilityIntegrationTest.class);
 	
 	@Rule public MatsimTestUtils utils = new MatsimTestUtils();
 	
+
 	@Ignore
 	@SuppressWarnings("static-method")
 	@Test
@@ -133,17 +120,19 @@ public class AccessibilityIntegrationTest {
 		org.matsim.contrib.accessibility.run.RunAccessibilityExample.run(sc);
 	}
 
+
 	@Test
 	public void testWithBoundingBox() {
 		final Config config = ConfigUtils.createConfig();
 		
-		// test values to define bounding box.
-		// these values usually come from a config file
+		// test values to define bounding box; these values usually come from a config file
 		double min = 0.;
 		double max = 200.;
 
-		final AccessibilityConfigGroup acm = new AccessibilityConfigGroup();
-		config.addModule( acm);
+		final AccessibilityConfigGroup acm = ConfigUtils.addOrGetModule(config, AccessibilityConfigGroup.class);
+		acm.setCellSizeCellBasedAccessibility(100);
+
+		// set bounding box manually in this test
 		acm.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromBoundingBox.toString());
 		acm.setBoundingBoxBottom(min);
 		acm.setBoundingBoxTop(max);
@@ -172,10 +161,10 @@ public class AccessibilityIntegrationTest {
 		final PtMatrix ptMatrix = PtMatrix.createPtMatrix(config.plansCalcRoute(), BoundingBox.createBoundingBox(sc.getNetwork()), mbConfig) ;
 
 		run(sc, ptMatrix);
-		
 		// compare some results -> done in EvaluateTestResults
 	}
 
+	
 	private void run(MutableScenario scenario, PtMatrix ptMatrix) {
 		Controler controler = new Controler(scenario);
 
@@ -185,45 +174,57 @@ public class AccessibilityIntegrationTest {
 			Id<ActivityFacility> id = Id.create(link.getId(), ActivityFacility.class);
 			Coord coord = link.getCoord();
 			ActivityFacility facility = opportunities.getFactory().createActivityFacility(id, coord);
+			facility.addActivityOption(opportunities.getFactory().createActivityOption("Dummy")); // TODO new
+			// In current implementation (StatupListener), we iterate over option types; therefore there need to be
+			// facilities with an activity option assigned; dz, dec'16
 			opportunities.addActivityFacility(facility);
 		}
 
 		// yyyy the following is taken from AccessibilityTest without any consideration of a good design.
-		final double cellSize = 100. ;
 
 //		controler.addOverridingModule(new GridBasedAccessibilityModule(ptMatrix, cellSize));
 		// yy the correct test is essentially already in AccessibilityTest.testAccessibilityMeasure().  kai, jun'13
 		// But that test uses the matsim4urbansim setup, which we don't want to use in the present test.
 
-		boolean push2Geoserver = false;
-		
-//		controler.run();
-		// Storage objects
-		final List<String> modes = new ArrayList<>();
-
-		List<String> activityTypes = AccessibilityUtils.collectAllFacilityOptionTypes(scenario);
-		
-		// Collect homes for density layer
-		String activityFacilityType = FacilityTypes.HOME;
-		final ActivityFacilities densityFacilities = AccessibilityUtils.collectActivityFacilitiesWithOptionOfType(scenario, activityFacilityType);
-		
-		String top = scenario.getConfig().getModule("accessibility").getValue("boundingBoxTop");
-		String bottom = scenario.getConfig().getModule("accessibility").getValue("boundingBoxBottom");
-		String left = scenario.getConfig().getModule("accessibility").getValue("boundingBoxLeft");
-		String right = scenario.getConfig().getModule("accessibility").getValue("boundingBoxRight");
-		
-		Envelope envelope = new Envelope(Double.parseDouble(left), Double.parseDouble(right), Double.parseDouble(bottom), Double.parseDouble(top));
-
-		// new
-		// Controller
-		//				final Controler controler = new Controler(sc);
-
 		controler.getConfig().controler().setOverwriteFileSetting(OutputDirectoryHierarchy.OverwriteFileSetting.overwriteExistingFiles);
 		controler.getConfig().controler().setCreateGraphs(false);
-
-		String crs = null;
-		String runId = "test";
-		controler.addControlerListener(new AccessibilityStartupListener(activityTypes, densityFacilities, crs, runId, envelope, cellSize, push2Geoserver));
+		
+		// ------------------ NEW FROM HERE
+		final List<String> activityTypes = AccessibilityUtils.collectAllFacilityOptionTypes(scenario);
+		if (activityTypes.isEmpty()) {
+			throw new RuntimeException("There are no activity types at all!");
+		};
+		
+		AccessibilityConfigGroup acg = ConfigUtils.addOrGetModule(scenario.getConfig(), AccessibilityConfigGroup.GROUP_NAME, AccessibilityConfigGroup.class);
+		double cellSize_m = acg.getCellSizeCellBasedAccessibility();
+		
+		BoundingBox boundingBox;
+		if (cellSize_m <= 0) {
+			throw new RuntimeException("Cell Size needs to be assigned a value greater than zero.");
+		}
+		if(acg.getAreaOfAccessibilityComputation().equals(AreaOfAccesssibilityComputation.fromShapeFile.toString())) {
+			Geometry boundary = GridUtils.getBoundary(acg.getShapeFileCellBasedAccessibility());
+			Envelope envelope = boundary.getEnvelopeInternal();
+			boundingBox = BoundingBox.createBoundingBox(envelope.getMinX(), envelope.getMinY(), envelope.getMaxX(), envelope.getMaxY());
+			LOG.info("Using shape file to determine the area for accessibility computation.");
+		} else if(acg.getAreaOfAccessibilityComputation().equals(AreaOfAccesssibilityComputation.fromBoundingBox.toString())) {
+			boundingBox = BoundingBox.createBoundingBox(acg.getBoundingBoxLeft(), acg.getBoundingBoxBottom(), acg.getBoundingBoxRight(), acg.getBoundingBoxTop());
+			LOG.info("Using custom bounding box to determine the area for accessibility computation.");
+		} else {
+			boundingBox = BoundingBox.createBoundingBox(scenario.getNetwork());
+			LOG.info("Using the boundary of the network file to determine the area for accessibility computation.");
+			LOG.warn("This could lead to memory issues when the network is large and/or the cell size is too fine!");
+		}
+		final Envelope envelope = new Envelope(boundingBox.getXMin(), boundingBox.getXMax(), boundingBox.getYMin(), boundingBox.getYMax());
+		
+		AccessibilityStartupListener asl = new AccessibilityStartupListener(activityTypes, null, null, null, envelope, cellSize_m, false);
+		controler.addControlerListener(asl);
+		EvaluateTestResults etr = new EvaluateTestResults(true, true, true, true, false);
+		asl.addAdditionalSpatialDataGridExchangeListener(etr);
+		// ------------------ NEW END HERE
+		
+		// Storage objects
+		final List<String> modes = new ArrayList<>();
 
 		// Add calculators
 		controler.addOverridingModule(new AbstractModule() {
@@ -231,7 +232,7 @@ public class AccessibilityIntegrationTest {
 			public void install() {
 				MapBinder<String,AccessibilityContributionCalculator> accBinder = MapBinder.newMapBinder(this.binder(), String.class, AccessibilityContributionCalculator.class);
 				{
-					String mode = "freeSpeed";
+					String mode = "freespeed";
 					this.binder().bind(AccessibilityContributionCalculator.class).annotatedWith(Names.named(mode)).toProvider(new FreeSpeedNetworkModeProvider(TransportMode.car));
 					accBinder.addBinding(mode).to(Key.get(AccessibilityContributionCalculator.class, Names.named(mode)));
 					modes.add(mode);
@@ -257,17 +258,15 @@ public class AccessibilityIntegrationTest {
 			}
 		});
 		controler.run();
-		// end new
 	}
+
 
 	@Test
 	public void testWithExtentDeterminedByNetwork() {
 		final Config config = ConfigUtils.createConfig();
-
-		final AccessibilityConfigGroup acm = new AccessibilityConfigGroup();
-		config.addModule( acm);
-//		acm.setCellBasedAccessibilityNetwork(true);
-		// is now default
+		
+		final AccessibilityConfigGroup acg = ConfigUtils.addOrGetModule(config, AccessibilityConfigGroup.class);
+		acg.setCellSizeCellBasedAccessibility(100);
 		
 		// modify config according to needs
 		Network network = CreateTestNetwork.createTestNetwork();
@@ -282,9 +281,9 @@ public class AccessibilityIntegrationTest {
 		mbConfig.setUsingPtStops(true);
 		mbConfig.setUsingTravelTimesAndDistances(true);
 		config.addModule(mbConfig);
+		
 		config.controler().setLastIteration(10);
 		config.controler().setOutputDirectory(utils.getOutputDirectory());
-
 
 		final MutableScenario sc = (MutableScenario) ScenarioUtils.loadScenario(config);
 
@@ -292,27 +291,27 @@ public class AccessibilityIntegrationTest {
 
 		run(sc, ptMatrix);
 		// compare some results -> done in EvaluateTestResults
-        
 	}
 	
+
 	@Test
 	public void testWithExtentDeterminedShapeFile() {
 		
 		Config config = ConfigUtils.createConfig();
 
 //		URL url = AccessibilityIntegrationTest.class.getClassLoader().getResource(new File(this.utils.getInputDirectory()).getAbsolutePath() + "shapeFile2.shp");
-
 		File f = new File(this.utils.getInputDirectory() + "shapefile.shp"); // shape file completely covers the road network
 
 		if(!f.exists()){
-			log.error("Shape file not found! testWithExtentDeterminedShapeFile could not be tested...");
+			LOG.error("Shape file not found! testWithExtentDeterminedShapeFile could not be tested...");
 			Assert.assertTrue(f.exists());
 		}
 
-		final AccessibilityConfigGroup acm = new AccessibilityConfigGroup();
-		config.addModule( acm);
+		final AccessibilityConfigGroup acm = ConfigUtils.addOrGetModule(config, AccessibilityConfigGroup.class);
+		acm.setCellSizeCellBasedAccessibility(100);
+		// set area by shapefile in this test
 		acm.setAreaOfAccessibilityComputation(AreaOfAccesssibilityComputation.fromShapeFile.toString());
-//		 acm.setShapeFileCellBasedAccessibility(url.getPath()); // yyyyyy todo
+//		acm.setShapeFileCellBasedAccessibility(url.getPath()); // yyyyyy todo
 		acm.setShapeFileCellBasedAccessibility(f.getAbsolutePath());
 		
 		// modify config according to needs
@@ -328,30 +327,30 @@ public class AccessibilityIntegrationTest {
 		mbConfig.setUsingPtStops(true);
 		mbConfig.setUsingTravelTimesAndDistances(true);
 		config.addModule(mbConfig);
+		
 		config.controler().setLastIteration(10);
 		config.controler().setOutputDirectory(utils.getOutputDirectory());
 
 		final MutableScenario sc = (MutableScenario) ScenarioUtils.loadScenario(config);
-		PtMatrix ptMatrix = PtMatrix.createPtMatrix(config.plansCalcRoute(), BoundingBox.createBoundingBox(sc.getNetwork()), mbConfig) ;
+		
+		PtMatrix ptMatrix = PtMatrix.createPtMatrix(config.plansCalcRoute(), BoundingBox.createBoundingBox(sc.getNetwork()), mbConfig);
+		
 		run(sc, ptMatrix);
 
 		// compare some results -> done in EvaluateTestResults 
-        
 	}
+
 	
 	/**
-	 * This is called by the GridBasedAccessibilityListener and 
-	 * gets the resulting SpatialGrids. This test checks if the 
-	 * SpatialGrids for activated transport modes (see above) are 
-	 * instantiated or null if the specific transport mode is not 
-	 * activated.
+	 * This is called by the GridBasedAccessibilityListener and gets the resulting SpatialGrids. This test checks if the 
+	 * SpatialGrids for activated transport modes (see above) are instantiated or null if the specific transport mode is
+	 * not activated.
 	 * 
 	 * @author thomas
-	 *
 	 */
-	public class EvaluateTestResults implements SpatialGridDataExchangeInterface{
+	public static class EvaluateTestResults implements SpatialGridDataExchangeInterface{
 		
-//		private Map<Modes4Accessibility,Boolean> isComputingMode = new HashMap<Modes4Accessibility,Boolean>();
+		private Map<Modes4Accessibility,Boolean> isComputingMode = new HashMap<Modes4Accessibility,Boolean>();
 		
 		/**
 		 * constructor
@@ -366,16 +365,13 @@ public class AccessibilityIntegrationTest {
 		 * @param usingWalkGrid
 		 * @param usingPtGrid
 		 */
-		// new
-		public EvaluateTestResults(){
-//		public EvaluateTestResults(boolean usingFreeSpeedGrid, boolean usingCarGrid, boolean usingBikeGrid, boolean usingWalkGrid, boolean usingPtGrid){
-//			this.isComputingMode.put( Modes4Accessibility.freeSpeed, usingFreeSpeedGrid ) ;
-//			this.isComputingMode.put( Modes4Accessibility.car, usingCarGrid ) ;
-//			this.isComputingMode.put( Modes4Accessibility.bike, usingBikeGrid ) ;
-//			this.isComputingMode.put( Modes4Accessibility.walk, usingWalkGrid ) ;
-//			this.isComputingMode.put( Modes4Accessibility.pt, usingPtGrid ) ;
+		public EvaluateTestResults(boolean usingFreeSpeedGrid, boolean usingCarGrid, boolean usingBikeGrid, boolean usingWalkGrid, boolean usingPtGrid){
+			this.isComputingMode.put( Modes4Accessibility.freespeed, usingFreeSpeedGrid ) ;
+			this.isComputingMode.put( Modes4Accessibility.car, usingCarGrid ) ;
+			this.isComputingMode.put( Modes4Accessibility.bike, usingBikeGrid ) ;
+			this.isComputingMode.put( Modes4Accessibility.walk, usingWalkGrid ) ;
+			this.isComputingMode.put( Modes4Accessibility.pt, usingPtGrid ) ;
 		}
-		// end new
 		
 		/**
 		 * This gets the resulting SpatialGrids from the GridBasedAccessibilityListener.
@@ -386,15 +382,16 @@ public class AccessibilityIntegrationTest {
 		@Override
 		public void setAndProcessSpatialGrids( Map<String,SpatialGrid> spatialGrids ){
 			
-			log.info("Evaluating resuts ...");
+			LOG.info("Evaluating resuts ...");
 			
-//			for ( Modes4Accessibility mode : Modes4Accessibility.values() ) {
-//				if ( this.isComputingMode.get(mode)) {
-//					Assert.assertNotNull( spatialGrids.get(mode) ) ;
-//				} else {
-//					Assert.assertNull( spatialGrids.get(mode) ) ;
-//				}
-//			}
+			for ( Modes4Accessibility modeEnum : Modes4Accessibility.values() ) {
+				String mode = modeEnum.toString(); // TODO only temporarily
+				if ( this.isComputingMode.get(modeEnum)) {
+					Assert.assertNotNull( spatialGrids.get(mode) ) ;
+				} else {
+					Assert.assertNull( spatialGrids.get(mode) ) ;
+				}
+			}
 			
 			for(double x = 50; x < 200; x += 100){
 				
@@ -409,7 +406,7 @@ public class AccessibilityIntegrationTest {
 						expected.accessibilityCar = 2.14860942375311;
 						expected.accessibilityBike = 2.2257398663221;
 						expected.accessibilityWalk = 1.70054725728361;
-						expected.accessibilityPt = 0.461863556339195;
+//						expected.accessibilityPt = 0.461863556339195;
 						
 					} else if(x == 50 && y == 150){
 						
@@ -422,8 +419,9 @@ public class AccessibilityIntegrationTest {
 						expected.accessibilityFreespeed = 2.1766435716006005;
 						expected.accessibilityCar = 2.1766435716006005;
 						expected.accessibilityBike = 2.2445468698643367;
+//						expected.accessibilityBike = 1.; // deliberately false for testing
 						expected.accessibilityWalk = 1.7719146868026079;
-						expected.accessibilityPt = 0.461863556339195;
+//						expected.accessibilityPt = 0.461863556339195;
 						
 					} else if(x == 150 && y == 150){
 						
@@ -437,16 +435,21 @@ public class AccessibilityIntegrationTest {
 						expected.accessibilityCar = 2.2055702759681273;
 						expected.accessibilityBike = 2.2637376515333636;
 						expected.accessibilityWalk = 1.851165291193725;
-						expected.accessibilityPt = 0.624928280738513;
+//						expected.accessibilityPt = 0.624928280738513;
 						
 					}
 
 					final AccessibilityResults actual = new AccessibilityResults();
-					actual.accessibilityFreespeed = spatialGrids.get(Modes4Accessibility.freeSpeed).getValue(new Coord(x, y));
-					actual.accessibilityCar = spatialGrids.get(Modes4Accessibility.car).getValue(new Coord(x, y));
-					actual.accessibilityBike = spatialGrids.get(Modes4Accessibility.bike).getValue(new Coord(x, y));
-					actual.accessibilityWalk = spatialGrids.get(Modes4Accessibility.walk).getValue(new Coord(x, y));
-					actual.accessibilityPt = spatialGrids.get(Modes4Accessibility.pt).getValue(new Coord(x, y));
+//					actual.accessibilityFreespeed = spatialGrids.get(Modes4Accessibility.freespeed).getValue(new Coord(x, y));
+//					actual.accessibilityCar = spatialGrids.get(Modes4Accessibility.car).getValue(new Coord(x, y));
+//					actual.accessibilityBike = spatialGrids.get(Modes4Accessibility.bike).getValue(new Coord(x, y));
+//					actual.accessibilityWalk = spatialGrids.get(Modes4Accessibility.walk).getValue(new Coord(x, y));
+//					actual.accessibilityPt = spatialGrids.get(Modes4Accessibility.pt).getValue(new Coord(x, y));
+					actual.accessibilityFreespeed = spatialGrids.get("freespeed").getValue(new Coord(x, y));
+					actual.accessibilityCar = spatialGrids.get(TransportMode.car).getValue(new Coord(x, y));
+					actual.accessibilityBike = spatialGrids.get(TransportMode.bike).getValue(new Coord(x, y));
+					actual.accessibilityWalk = spatialGrids.get(TransportMode.walk).getValue(new Coord(x, y));
+//					actual.accessibilityPt = spatialGrids.get(Modes4Accessibility.pt).getValue(new Coord(x, y));
 
 					Assert.assertTrue(
 							"accessibility at coord " + x + "," + y + " does not match for "+
@@ -456,7 +459,7 @@ public class AccessibilityIntegrationTest {
 				
 			}
 			
-			log.info("... done!");
+			LOG.info("... done!");
 		}
 	}
 
@@ -534,50 +537,4 @@ public class AccessibilityIntegrationTest {
 					'}';
 		}
 	}
-
-//	private class GridBasedAccessibilityModule extends AbstractModule {
-//		private final PtMatrix ptMatrix;
-//		private final double cellSize;
-//
-//		public GridBasedAccessibilityModule(PtMatrix ptMatrix, double cellSize) {
-//			this.ptMatrix = ptMatrix;
-//			this.cellSize = cellSize;
-//		}
-//
-//		@Override
-//		public void install() {
-//			addControlerListenerBinding().toProvider(new Provider<ControlerListener>() {
-//				@Inject Scenario scenario;
-//				@Inject Config config;
-//				@Inject ActivityFacilities opportunities;
-//				@Inject Map<String, TravelTime> travelTimes;
-//				@Inject Map<String, TravelDisutilityFactory> travelDisutilityFactories;
-//
-//				@Override
-//				public ControlerListener get() {
-//					BoundingBox bb = BoundingBox.createBoundingBox(scenario.getNetwork());
-//					AccessibilityCalculator accessibilityCalculator = new AccessibilityCalculator(scenario);
-//					accessibilityCalculator.setMeasuringPoints(GridUtils.createGridLayerByGridSizeByBoundingBoxV2(bb.getXMin(), bb.getYMin(), bb.getXMax(), bb.getYMax(), cellSize));
-//					GridBasedAccessibilityShutdownListenerV3 gacl = new GridBasedAccessibilityShutdownListenerV3(accessibilityCalculator, opportunities, ptMatrix, scenario.getConfig(), scenario, bb.getXMin(), bb.getYMin(),bb.getXMax(), bb.getYMax(), cellSize);
-//					// activating transport modes of interest
-//					for ( Modes4Accessibility mode : Modes4Accessibility.values() ) {
-//						accessibilityCalculator.setComputingAccessibilityForMode(mode, true);
-//					}
-//					//		gacl.setComputingAccessibilityForMode( Modes4Accessibility.pt, false );
-//					// not sure why this is "false"; presumably, the test is not configured. kai, feb'14
-//
-//					// this will be called by the accessibility listener after the accessibility calculations are finished
-//					// It checks if the SpatialGrid for activated (true) transport modes are instantiated or null if not (false)
-//					// new
-////					EvaluateTestResults etr = new EvaluateTestResults(true, true, true, true, true);
-//					EvaluateTestResults etr = new EvaluateTestResults();
-//					// end new
-//					gacl.addSpatialGridDataExchangeListener(etr);
-//
-//					return gacl;
-//				}
-//			});
-//
-//		}
-//	}
 }

@@ -58,6 +58,17 @@ public class VariableAccessConfigGroup extends ReflectiveConfigGroup {
 	    {
 	        addParameterSet(modeConfig);
 	    }
+	  
+		@Override
+		public ConfigGroup createParameterSet(final String type) {
+			switch ( type ) {
+				
+				case MODEGROUPNAME:
+					return new VariableAccessModeConfigGroup();
+				default:
+					throw new IllegalArgumentException( type );
+			}
+		}
 
 
 }

@@ -27,11 +27,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.contrib.emissions.utils.EmissionsConfigGroup;
+import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.testcases.MatsimTestUtils;
 import playground.ikaddoura.analysis.linkDemand.LinkDemandEventHandler;
+import playground.ikaddoura.integrationCNE.CNEIntegration.CongestionTollingApproach;
 import playground.vsp.airPollution.exposure.GridTools;
 import playground.vsp.airPollution.exposure.ResponsibilityGridTools;
 
@@ -64,6 +67,7 @@ public class CNETest {
 		// congestion pricing
 		CNEIntegration cneIntegration2 = new CNEIntegration(configFile, testUtils.getOutputDirectory() + "c");
 		cneIntegration2.setCongestionPricing(true);
+		cneIntegration2.setCongestionTollingApproach(CongestionTollingApproach.QBPV3);
 		Controler controler2 = cneIntegration2.prepareControler();
 		LinkDemandEventHandler handler2 = new LinkDemandEventHandler(controler2.getScenario().getNetwork());
 		controler2.getEvents().addHandler(handler2);
@@ -82,6 +86,7 @@ public class CNETest {
 		// congestion + noise pricing
 		CNEIntegration cneIntegration4 = new CNEIntegration(configFile, testUtils.getOutputDirectory() + "cn");
 		cneIntegration4.setCongestionPricing(true);
+		cneIntegration4.setCongestionTollingApproach(CongestionTollingApproach.QBPV3);
 		cneIntegration4.setNoisePricing(true);
 		Controler controler4 = cneIntegration4.prepareControler();
 		LinkDemandEventHandler handler4 = new LinkDemandEventHandler(controler4.getScenario().getNetwork());
@@ -189,7 +194,7 @@ public class CNETest {
 		Double timeBinSize = 3600.;
 		int noOfTimeBins = 1;
 
-		Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile));
+		Scenario scenario = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile, new NoiseConfigGroup(), new EmissionsConfigGroup()));
 		scenario.getConfig().controler().setOutputDirectory(testUtils.getOutputDirectory() + "e");
 		Controler controler2 = new Controler(scenario);
 		GridTools gt = new GridTools(scenario.getNetwork().getLinks(),xMin, xMax, yMin, yMax, noOfXCells, noOfYCells);
@@ -214,7 +219,7 @@ public class CNETest {
 		controler3.run();
 						
 		// air pollution + noise pricing
-		Scenario scenario4 = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile));
+		Scenario scenario4 = ScenarioUtils.loadScenario(ConfigUtils.loadConfig(configFile, new NoiseConfigGroup(), new EmissionsConfigGroup()));
 		scenario4.getConfig().controler().setOutputDirectory(testUtils.getOutputDirectory() + "cn");
 		Controler controler4 = new Controler(scenario4);
 		CNEIntegration cneIntegration4 = new CNEIntegration(controler4, gt, rgt );
@@ -244,16 +249,16 @@ public class CNETest {
 		System.out.println("Simultaneous pricing:");
 		printResults2(handler4);
 						
-		Assert.assertEquals("BC: all agents should use the high speed route.", 11, demand_highSpeed_lowN_highE(handler1));		
-		Assert.assertEquals("E: all agents should use the medium speed + low e cost route.", 11, demand_mediumSpeed_highN_lowE(handler2));		
-		Assert.assertEquals("N: all agents should use the high speed + low n cost route.", 11, demand_highSpeed_lowN_highE(handler3));		
-		Assert.assertEquals("N+E: most agents should use the low speed + low n cost  + low e cost route.", true, demand_lowSpeed_lowN_lowE(handler4) > (demand_mediumSpeed_highN_lowE(handler4) + demand_highSpeed_lowN_highE(handler4)) );		
+		Assert.assertEquals("BC: all agents should use the short distance route.", 11, demand_highSpeed_lowN_highE(handler1));		
+		Assert.assertEquals("E: no agent should use the high air pollution emission cost route.", 0, demand_highSpeed_lowN_highE(handler2));		
+		Assert.assertEquals("N: all agents should use the short distance + low n cost route.", 11, demand_highSpeed_lowN_highE(handler3));		
+		Assert.assertEquals("N+E: most agents should use the long distance + low n cost  + low e cost route.", true, demand_lowSpeed_lowN_lowE(handler4) > (demand_mediumSpeed_highN_lowE(handler4) + demand_highSpeed_lowN_highE(handler4)) );		
 	}
 
 	private void printResults2(LinkDemandEventHandler handler) {
-		System.out.println("high speed + low N costs + high E costs: " + demand_highSpeed_lowN_highE(handler));
-		System.out.println("low speed + low N costs + low E costs: " + demand_lowSpeed_lowN_lowE(handler));
-		System.out.println("medium speed + high N costs + low E costs: " + demand_mediumSpeed_highN_lowE(handler));
+		System.out.println("short distance + low N costs + high E costs: " + demand_highSpeed_lowN_highE(handler));
+		System.out.println("long distance + low N costs + low E costs: " + demand_lowSpeed_lowN_lowE(handler));
+		System.out.println("medium distance + high N costs + low E costs: " + demand_mediumSpeed_highN_lowE(handler));
 	}
 
 	private int demand_mediumSpeed_highN_lowE(LinkDemandEventHandler handler) {

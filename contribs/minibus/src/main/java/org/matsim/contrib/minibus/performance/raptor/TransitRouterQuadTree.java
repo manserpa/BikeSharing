@@ -111,7 +111,7 @@ public final class TransitRouterQuadTree {
 				int position = 0;
 				for (TransitRouteStop routeStop : route.getStops()) {
 					
-					String routeStopHash = this.getHash(route, routeStop, position);
+					String routeStopHash = this.getHash(line, route, routeStop, position);
 					WrappedTransitRouteStop wrappedRouteStop = new WrappedTransitRouteStop(routeStop);
 					hash2routeStop.put(routeStopHash, wrappedRouteStop);
 					
@@ -154,7 +154,14 @@ public final class TransitRouterQuadTree {
 				
 				for (TransitRouteStop stop : route.getStops()) {
 					for (int j = 0; j < departureTimes.length; j++) {
+						if (stop.getArrivalOffset() == Double.NEGATIVE_INFINITY) {
+							// There should always be a valid number set OR the field should not be present - it's optional
+							// Take the departure offset as fallback
+							arrivalTimesList.add(departureTimes[j] + stop.getDepartureOffset());
+						} else {
 						arrivalTimesList.add(departureTimes[j] + stop.getArrivalOffset());
+						}
+						
 						departureTimesList.add(departureTimes[j] + stop.getDepartureOffset());
 					}
 				}
@@ -172,7 +179,7 @@ public final class TransitRouterQuadTree {
 				// fill route stops
 				int placeOfCurrentStop = 0;
 				for (TransitRouteStop routeStop : route.getStops()) {
-					String routeStopHash = this.getHash(route, routeStop, placeOfCurrentStop);
+					String routeStopHash = this.getHash(line, route, routeStop, placeOfCurrentStop);
 					WrappedTransitRouteStop wrappedRouteStop = hash2routeStop.get(routeStopHash);
 					
 					placeOfCurrentStop++;
@@ -376,7 +383,7 @@ public final class TransitRouterQuadTree {
 	    return array;
 	}
 	
-	private String getHash(TransitRoute transitRoute, TransitRouteStop transitRouteStop, int position){
-		return transitRoute.getId().toString() + "-" + transitRouteStop.getStopFacility().getId().toString() + "-" + position;
+	private String getHash(TransitLine transitLine, TransitRoute transitRoute, TransitRouteStop transitRouteStop, int position){
+		return transitLine.getId().toString() + "-" + transitRoute.getId().toString() + "-" + transitRouteStop.getStopFacility().getId().toString() + "-" + position;
 	}
 }

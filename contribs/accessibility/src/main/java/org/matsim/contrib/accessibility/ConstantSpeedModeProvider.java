@@ -18,7 +18,8 @@
  * *********************************************************************** */
 package org.matsim.contrib.accessibility;
 
-import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.network.Network;
+import org.matsim.core.config.Config;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -29,7 +30,8 @@ import com.google.inject.Provider;
 public class ConstantSpeedModeProvider implements Provider<AccessibilityContributionCalculator>{
 
     private String mode;
-    @Inject Scenario scenario;
+    @Inject Config config ;
+    @Inject Network network ;
     
     public ConstantSpeedModeProvider(String mode) {
         this.mode = mode;
@@ -37,6 +39,6 @@ public class ConstantSpeedModeProvider implements Provider<AccessibilityContribu
     
     @Override
     public AccessibilityContributionCalculator get() {
-        return new ConstantSpeedAccessibilityExpContributionCalculator( mode, scenario);
+        return new ConstantSpeedAccessibilityExpContributionCalculator( mode, config, network);
     }
 }

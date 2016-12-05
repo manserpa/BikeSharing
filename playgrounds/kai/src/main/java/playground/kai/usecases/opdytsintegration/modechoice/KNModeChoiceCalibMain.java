@@ -20,6 +20,7 @@ import opdytsintegration.MATSimSimulator;
 import opdytsintegration.MATSimStateFactoryImpl;
 import opdytsintegration.utils.TimeDiscretization;
 import playground.kairuns.run.KNBerlinControler;
+import playground.kairuns.run.KNBerlinControler.A100;
 
 /**
  * 
@@ -30,10 +31,10 @@ class KNModeChoiceCalibMain {
 	public static void main(String[] args) {
 		boolean equil = true ;
 		boolean calib = true ;
-
+		boolean modeChoice = false ;
 		boolean assignment = false ;
 
-		final Config config = KNBerlinControler.prepareConfig(args, assignment, equil) ;
+		final Config config = KNBerlinControler.prepareConfig(args, assignment, equil, modeChoice, A100.base ) ;
 		
 		config.transitRouter().setDirectWalkFactor(1.e7);
 		
@@ -95,7 +96,8 @@ class KNModeChoiceCalibMain {
 
 		// ===
 
-		final Scenario scenario = KNBerlinControler.prepareScenario(equil, config) ;
+		boolean unterLindenQuiet = false ;
+		final Scenario scenario = KNBerlinControler.prepareScenario(equil, unterLindenQuiet, config) ;
 
 		// ===
 

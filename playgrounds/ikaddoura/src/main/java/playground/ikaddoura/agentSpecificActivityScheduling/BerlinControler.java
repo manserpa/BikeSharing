@@ -31,7 +31,12 @@ import org.matsim.core.scenario.ScenarioUtils;
 
 import playground.ikaddoura.analysis.detailedPersonTripAnalysis.PersonTripCongestionNoiseAnalysisMain;
 import playground.ikaddoura.analysis.pngSequence2Video.MATSimVideoUtils;
+import playground.ikaddoura.decongestion.Decongestion;
+import playground.ikaddoura.decongestion.DecongestionConfigGroup;
+import playground.ikaddoura.decongestion.DecongestionConfigGroup.TollingApproach;
+import playground.ikaddoura.decongestion.data.DecongestionInfo;
 import playground.ikaddoura.integrationCNE.CNEIntegration;
+import playground.ikaddoura.integrationCNE.CNEIntegration.CongestionTollingApproach;
 
 /**
 * @author ikaddoura
@@ -46,6 +51,7 @@ public class BerlinControler {
 	private static double activityDurationBin;
 	private static double tolerance;
 	private static boolean pricing;
+	private static double kp;
 	
 	public static void main(String[] args) throws IOException {
 
@@ -66,17 +72,19 @@ public class BerlinControler {
 			pricing = Boolean.parseBoolean(args[4]);			
 			log.info("pricing: "+ pricing);
 
+			kp = Double.parseDouble(args[5]);
+			log.info("kp: "+ kp);
+			
 		} else {
 			
-			configFile = "../../../runs-svn/berlin-dz-time/input/config_test.xml";
-//			configFile = "../../../runs-svn/berlin-an-time/input/config_test.xml";
+			configFile = "../../../runs-svn/berlin-dz-time/input/config.xml";
 			
 			addModifiedActivities = true;
 			activityDurationBin = 3600.;
-			tolerance = 900.;
+			tolerance = 7200.;
 			
-			pricing = false;
-			
+			pricing = true;
+			kp = 2 * ( 12. / 3600.);
 		}
 		
 		BerlinControler berlin = new BerlinControler();
@@ -97,7 +105,23 @@ public class BerlinControler {
 		}
 				
 		if (pricing) {
+			
+			final DecongestionConfigGroup decongestionSettings = new DecongestionConfigGroup();
+			decongestionSettings.setTOLLING_APPROACH(TollingApproach.PID);
+			decongestionSettings.setKp(kp);
+			decongestionSettings.setKi(0.);
+			decongestionSettings.setKd(0.);
+			decongestionSettings.setTOLL_BLEND_FACTOR(0.1);
+			decongestionSettings.setMsa(true);
+			decongestionSettings.setRUN_FINAL_ANALYSIS(false);
+			decongestionSettings.setWRITE_LINK_INFO_CHARTS(false);
+			
+//			final DecongestionInfo info = new DecongestionInfo(controler.getScenario(), decongestionSettings);
+//			final Decongestion decongestion = new Decongestion(info);
+//			controler = decongestion.getControler();
+				
 			CNEIntegration cne = new CNEIntegration(controler);
+			cne.setCongestionTollingApproach(CongestionTollingApproach.QBPV3);
 			cne.setCongestionPricing(true);
 			controler = cne.prepareControler();
 		}

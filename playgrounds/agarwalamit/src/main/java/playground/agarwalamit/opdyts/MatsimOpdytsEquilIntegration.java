@@ -54,7 +54,7 @@ import playground.kairuns.run.KNBerlinControler;
 
 public class MatsimOpdytsEquilIntegration {
 
-	public static final OpdytsObjectiveFunctionCases EQUIL = OpdytsObjectiveFunctionCases.EQUIL;
+	public static final OpdytsScenarios EQUIL = OpdytsScenarios.EQUIL;
 	private static final String EQUIL_DIR = "./matsim/examples/equil/";
 	private static final String OUT_DIR = "./playgrounds/agarwalamit/output/equil_car,pt_withoutHoles_200its/";
 
@@ -97,7 +97,7 @@ public class MatsimOpdytsEquilIntegration {
 
 		//==
 
-		Scenario scenario = KNBerlinControler.prepareScenario(true, config);
+		Scenario scenario = KNBerlinControler.prepareScenario(true, false, config);
 
 		double time = 6*3600. ;
 		for ( Person person : scenario.getPopulation().getPersons().values() ) {
@@ -119,7 +119,7 @@ public class MatsimOpdytsEquilIntegration {
 		modes2consider.add("car");
 		modes2consider.add("bike");
 
-		ModalStatsControlerListner stasControlerListner = new ModalStatsControlerListner(modes2consider,EQUIL);
+		OpdytsModalStatsControlerListener stasControlerListner = new OpdytsModalStatsControlerListener(modes2consider,EQUIL);
 
 		// following is the  entry point to start a matsim controler together with opdyts
 		MATSimSimulator<ModeChoiceDecisionVariable> simulator = new MATSimSimulator<>(new MATSimStateFactoryImpl<>(), scenario, timeDiscretization);

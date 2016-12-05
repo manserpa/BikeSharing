@@ -57,7 +57,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 
 	private static final String EQUIL_DIR = "./matsim/examples/equil-mixedTraffic/";
 	private static final String OUT_DIR = "./playgrounds/agarwalamit/output/equil-mixedTraffic/";
-	public static final OpdytsObjectiveFunctionCases EQUIL_MIXEDTRAFFIC = OpdytsObjectiveFunctionCases.EQUIL_MIXEDTRAFFIC;
+	public static final OpdytsScenarios EQUIL_MIXEDTRAFFIC = OpdytsScenarios.EQUIL_MIXEDTRAFFIC;
 
 	public static void main(String[] args) {
 		//see an example with detailed explanations -- package opdytsintegration.example.networkparameters.RunNetworkParameters 
@@ -111,7 +111,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		config.qsim().setUsingFastCapacityUpdate(true);
 		//==
 
-		Scenario scenario = KNBerlinControler.prepareScenario(true, config);
+		Scenario scenario = KNBerlinControler.prepareScenario(true, false, config);
 		scenario.getConfig().controler().setOverwriteFileSetting(OverwriteFileSetting.deleteDirectoryIfExists);
 
 		double time = 6*3600. ;
@@ -133,7 +133,7 @@ public class MatsimOpdytsEquilMixedTrafficIntegration {
 		modes2consider.add("car");
 		modes2consider.add("bike");
 
-		ModalStatsControlerListner stasControlerListner = new ModalStatsControlerListner(modes2consider,EQUIL_MIXEDTRAFFIC);
+		OpdytsModalStatsControlerListener stasControlerListner = new OpdytsModalStatsControlerListener(modes2consider,EQUIL_MIXEDTRAFFIC);
 
 		// following is the  entry point to start a matsim controler together with opdyts
 		MATSimSimulator<ModeChoiceDecisionVariable> simulator = new MATSimSimulator<>(new MATSimStateFactoryImpl<>(), scenario, timeDiscretization);

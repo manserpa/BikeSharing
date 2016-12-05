@@ -19,6 +19,11 @@
  * *********************************************************************** */
 package org.matsim.contrib.socnetsim.framework.controller;
 
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+import org.matsim.contrib.socnetsim.framework.SocialNetworkConfigGroup;
+import org.matsim.contrib.socnetsim.framework.population.SocialNetwork;
+import org.matsim.contrib.socnetsim.framework.population.SocialNetworkReader;
 import org.matsim.core.controler.AbstractModule;
 
 import org.matsim.contrib.socnetsim.framework.replanning.grouping.DynamicGroupIdentifier;
@@ -31,8 +36,12 @@ public class SocialNetworkModule extends AbstractModule {
 
 	@Override
 	public void install() {
-		// TODO Auto-generated method stub
 		bind( GroupIdentifier.class ).to( DynamicGroupIdentifier.class );
+	}
+
+	@Provides @Singleton
+	public SocialNetwork provideSocialNetwork( final SocialNetworkConfigGroup conf ) {
+		return new SocialNetworkReader().read( conf.getInputFile() );
 	}
 }
 

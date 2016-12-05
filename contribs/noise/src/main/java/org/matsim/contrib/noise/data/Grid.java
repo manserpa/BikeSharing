@@ -22,6 +22,8 @@
  */
 package org.matsim.contrib.noise.data;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +38,9 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.contrib.noise.NoiseConfigGroup;
 import org.matsim.core.utils.collections.Tuple;
+import org.matsim.core.utils.geometry.CoordinateTransformation;
+import org.matsim.core.utils.geometry.transformations.TransformationFactory;
+import org.matsim.core.utils.io.IOUtils;
 import org.matsim.pt.PtConstants;
 
 /**
@@ -99,7 +104,15 @@ public class Grid {
 
 	private void initialize() {
 		setActivityCoords();
-		createGrid();
+		
+		if (this.noiseParams.getReceiverPointsCSVFile() == null) {
+			log.info("Creating receiver point square grid...");
+			createGrid();
+		} else {
+			log.info("Loading receiver points based on provided point coordinates in " + this.noiseParams.getReceiverPointsCSVFile());
+			loadGrid();
+		}
+		
 		setActivityCoord2NearestReceiverPointId();
 		
 		// delete unnecessary information
@@ -140,6 +153,40 @@ public class Grid {
 		}
 	}
 	
+	private void loadGrid() {
+				
+		String gridCSVFile = this.noiseParams.getReceiverPointsCSVFile();
+		
+		Map<Id<ReceiverPoint>, Coord> gridPoints = null;
+		try {
+			gridPoints = readCSVFile(gridCSVFile, ",", -1, 0, 1);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		CoordinateTransformation ct = TransformationFactory.getCoordinateTransformation(this.noiseParams.getReceiverPointsCSVFileCoordinateSystem(), this.scenario.getConfig().global().getCoordinateSystem());
+		
+		for (Id<ReceiverPoint> id : gridPoints.keySet()) {
+			
+			Coord coord = gridPoints.get(id);
+			Coord transformedCoord = ct.transform(coord);
+			
+			ReceiverPoint rp = new ReceiverPoint(id, transformedCoord);			
+			receiverPoints.put(id, rp);
+								
+			Tuple<Integer,Integer> zoneTuple = getZoneTuple(gridPoints.get(id));
+			List<Id<ReceiverPoint>> listOfReceiverPointIDs = new ArrayList<Id<ReceiverPoint>>();
+			if (zoneTuple2listOfReceiverPointIds.containsKey(zoneTuple)) {
+				listOfReceiverPointIDs = zoneTuple2listOfReceiverPointIds.get(zoneTuple);
+			}
+			listOfReceiverPointIDs.add(id);
+			zoneTuple2listOfReceiverPointIds.put(zoneTuple, listOfReceiverPointIDs);
+		}
+		
+		log.info("Total number of receiver points: " + receiverPoints.size());
+	}
+
+	
 	private void createGrid() {
 		
 		if (this.noiseParams.getReceiverPointsGridMinX() == 0. && this.noiseParams.getReceiverPointsGridMinY() == 0. && this.noiseParams.getReceiverPointsGridMaxX() == 0. && this.noiseParams.getReceiverPointsGridMaxY() == 0.) {
@@ -168,9 +215,7 @@ public class Grid {
 			yCoordMin = this.noiseParams.getReceiverPointsGridMinY();
 			yCoordMax = this.noiseParams.getReceiverPointsGridMaxY();
 			
-			log.info("Creating receiver points for the area between the coordinates (" + xCoordMin + "/" + yCoordMin + ") and (" + xCoordMax + "/" + yCoordMax + ").");
-			
-			createReceiverPoints();
+			log.info("Creating receiver points for the area between the coordinates (" + xCoordMin + "/" + yCoordMin + ") and (" + xCoordMax + "/" + yCoordMax + ").");			
 		}
 		
 		createReceiverPoints();		
@@ -233,6 +278,64 @@ public class Grid {
 		
 		Tuple<Integer, Integer> zoneDefinition = new Tuple<Integer, Integer>(xDirection, yDirection);
 		return zoneDefinition;
+	}
+	
+	private Map<Id<ReceiverPoint>, Coord> readCSVFile(String file, String separator, int idColumn, int xCoordColumn, int yCoordColumn) throws IOException {
+		
+		Map<Id<ReceiverPoint>, Coord> id2Coord = new HashMap<>();
+		
+		BufferedReader br = IOUtils.getBufferedReader(file);
+		String line = null;
+		try {
+			line = br.readLine();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		String[] headers = line.split(separator);
+		if (idColumn >= 0) log.info("id: " + headers[idColumn]);
+		log.info("xCoord: " + headers[xCoordColumn]);
+		log.info("yCoord: " + headers[yCoordColumn]);
+		
+		int lineCounter = 0;
+
+		while( (line = br.readLine()) != null) {
+
+			if (lineCounter % 1000000 == 0.) {
+				log.info("# " + lineCounter);
+			}
+
+			String[] columns = line.split(separator);
+			if (line.isEmpty() || line.equals("") || columns.length != headers.length) {
+				log.warn("Skipping line " + lineCounter + ". Line is empty or the columns are inconsistent with the headers: [" + line.toString() + "]");
+			
+			} else {
+				String id = null;
+				double x = 0;
+				double y = 0;
+
+				for (int column = 0; column < columns.length; column++){					
+					if (column == idColumn) {
+						id = columns[column];
+					} else if (column == xCoordColumn) {
+						x = Double.valueOf(columns[column]);
+					} else if (column == yCoordColumn) {
+						y = Double.valueOf(columns[column]);
+					}
+				}
+				if (idColumn >= 0) {
+					id2Coord.put(Id.create(id, ReceiverPoint.class), new Coord(x,y));
+				} else {
+					id2Coord.put(Id.create(String.valueOf(lineCounter), ReceiverPoint.class), new Coord(x,y));
+				}
+				
+				lineCounter++;
+			}			
+		}
+		
+		log.info("Done. Number of read lines: " + lineCounter);
+		
+		return id2Coord;
 	}
 	
 	private Id<ReceiverPoint> identifyNearestReceiverPoint (Coord coord) {
