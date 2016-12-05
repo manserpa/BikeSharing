@@ -320,17 +320,22 @@
 	<module name="FreeFloating" >
 		<param name="areasFreefloating" value="&INBASE;freefloating_areas.xml" />
 		<param name="useFreeFloating" value="true" />
+		<param name="travelingFreeFloating" value="-0.1" />
+		<param name="constantFreeFloating" value="-0.0" />
 	</module>
 
 	<module name="OneWayCarsharing" >
 		<param name="vehiclelocationsOneWayCarsharing" value="&INBASE;Stations.txt" />
         <param name="useOneWayCarsharing" value="false" />
+        <param name="travelingOneWayCarsharing" value="-10.0" />
+		<param name="constantOneWayCarsharing" value="-0.4" />
 	</module>
 
 	<module name="TwoWayCarsharing" >
 		<param name="vehiclelocationsTwoWayCarsharing" value="&INBASE;CarsharingStations.xml" />
         <param name="useTwoWayCarsharing" value="false" />
-
+        <param name="travelingTwoWayCarsharing" value="-6.0" />
+		<param name="constantTwoWayCarsharing" value="-0.4" />
 	</module>
   	
 
