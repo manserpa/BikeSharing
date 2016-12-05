@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE population SYSTEM "http://www.matsim.org/files/dtd/population_v5.dtd">
+
+<population>
+
+<!-- ====================================================================== -->
+
+	<person id="10001_1" sex="m" age="50" car_avail="always" employed="yes">
+
+
+		<plan score="19.707120194709695" selected="yes">
+			<act type="home" link="109283506_1" facility="5821_18" x="686463.2969000004" y="4824239.2903" end_time="08:29:03" />
+			<leg mode="transit_walk" trav_time="00:06:06">
+				<route type="generic" start_link="109283506_1" end_link="238011046_5" trav_time="00:06:06" distance="305.3978776181277"></route>
+			</leg>
+			<act type="pt interaction" link="238011046_5" x="686266.040968" y="4824111.70432" max_dur="00:00:00" />
+			<leg mode="pt" trav_time="00:06:17">
+				<route type="experimentalPt1" start_link="238011046_5" end_link="238011045_1" trav_time="00:06:17" distance="967.7174319999999">PT1===238011046_5_27===Line4===Line4===238011045_1_30</route>
+			</leg>
+			<act type="pt interaction" link="238011045_1" x="685305.954439" y="4824076.41682" max_dur="00:00:00" />
+			<leg mode="transit_walk" trav_time="00:02:10">
+				<route type="generic" start_link="238011045_1" end_link="238011045_2" trav_time="00:02:10" distance="109.1367216130606"></route>
+			</leg>
+			<act type="work" link="238011045_2" facility="7567_16" x="685227.0347999996" y="4824105.044" start_time="07:43:47" end_time="16:32:59" />
+			<leg mode="transit_walk" trav_time="00:02:21">
+				<route type="generic" start_link="238011045_2" end_link="238011045_1_r" trav_time="00:02:21" distance="117.83601282070532"></route>
+			</leg>
+			<act type="pt interaction" link="238011045_1_r" x="685315.686641" y="4824086.14902" max_dur="00:00:00" />
+			<leg mode="pt" trav_time="00:05:45">
+				<route type="experimentalPt1" start_link="238011045_1_r" end_link="178745915_0" trav_time="00:05:45" distance="687.845567">PT1===238011045_1_r_30===Line4_r===Line4_r===178745915_0_27</route>
+			</leg>
+			<act type="pt interaction" link="178745915_0" x="686278.444722" y="4824107.84264" max_dur="00:00:00" />
+			<leg mode="transit_walk" trav_time="00:05:53">
+				<route type="generic" start_link="178745915_0" end_link="109283506_1" trav_time="00:05:53" distance="294.87030607090605"></route>
+			</leg>
+			<act type="home" link="109283506_1" facility="5821_18" x="686463.2969000004" y="4824239.2903" />
+		</plan>
+
+	</person>
+
+<!-- ====================================================================== -->
+
+	<person id="10002_1" sex="f" age="34" car_avail="always" employed="no">
+
+
+		<plan score="25.18561646038779" selected="yes">
+			<act type="home" link="42145829_4" facility="5808_18" x="686346.1102999998" y="4824405.8913" end_time="18:08:50" />
+			<leg mode="transit_walk" trav_time="00:07:55">
+				<route type="generic" start_link="42145829_4" end_link="238011046_5" trav_time="00:07:55" distance="396.3552199072598"></route>
+			</leg>
+			<act type="pt interaction" link="238011046_5" x="686266.040968" y="4824111.70432" max_dur="00:00:00" />
+			<leg mode="pt" trav_time="00:08:14">
+				<route type="experimentalPt1" start_link="238011046_5" end_link="9907866_2" trav_time="00:08:14" distance="1877.73553">PT1===238011046_5_27===Line4===Line4===9907866_2_31</route>
+			</leg>
+			<act type="pt interaction" link="9907866_2" x="684864.12008" y="4824496.7168" max_dur="00:00:00" />
+			<leg mode="transit_walk" trav_time="00:06:40">
+				<route type="generic" start_link="9907866_2" end_link="86865647_4" trav_time="00:06:40" distance="333.57302214000646"></route>
+			</leg>
+			<act type="secondary" link="86865647_4" facility="7801_16" x="684695.2248" y="4824303.545399999" start_time="19:53:26" end_time="19:57:28" />
+			<leg mode="transit_walk" trav_time="00:07:43">
+				<route type="generic" start_link="86865647_4" end_link="238014166_0_r" trav_time="00:07:43" distance="386.3364768087011"></route>
+			</leg>
+			<act type="pt interaction" link="238014166_0_r" x="684883.488336" y="4824073.60209" max_dur="00:00:00" />
+			<leg mode="pt" trav_time="00:03:48">
+				<route type="experimentalPt1" start_link="238014166_0_r" end_link="178745915_0" trav_time="00:03:48" distance="1289.2236219999998">PT1===238014166_0_r_29===Line4_r===Line4_r===178745915_0_27</route>
+			</leg>
+			<act type="pt interaction" link="178745915_0" x="686278.444722" y="4824107.84264" max_dur="00:00:00" />
+			<leg mode="transit_walk" trav_time="00:07:56">
+				<route type="generic" start_link="178745915_0" end_link="42145829_4" trav_time="00:07:56" distance="397.3231200844518"></route>
+			</leg>
+			<act type="home" link="42145829_4" facility="5808_18" x="686346.1102999998" y="4824405.8913" />
+		</plan>
+
+
+
+
+	</person>
+</population>
