@@ -29,13 +29,17 @@ import java.util.Map.Entry;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.events.Event;
 import org.matsim.api.core.v01.events.PersonStuckEvent;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Leg;
+import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.core.events.BikeshareDebug;
 import org.matsim.core.mobsim.framework.AgentSource;
 import org.matsim.core.mobsim.framework.MobsimAgent;
 import org.matsim.core.mobsim.qsim.InternalInterface;
 import org.matsim.core.mobsim.qsim.QSim;
+import org.matsim.core.mobsim.qsim.TeleportationEngine;
 import org.matsim.core.mobsim.qsim.interfaces.DepartureHandler;
 import org.matsim.core.mobsim.qsim.interfaces.MobsimEngine;
 import org.matsim.pt.ReconstructingUmlaufBuilder;
@@ -185,11 +189,16 @@ public class TransitQSimEngine implements  DepartureHandler, MobsimEngine, Agent
 
 	@Override
 	public boolean handleDeparture(double now, MobsimAgent agent, Id<Link> linkId) {
-		String requestedMode = agent.getMode();
+		// is this a bikeshare leg?
+		EventsManager EM = qSim.getEventsManager();
+		EM.processEvent(new BikeshareDebug(qSim.getSimTimer().getTimeOfDay(), "try to teleport"));
+
+//		String requestedMode = agent.getMode();
+		/*return false;
 		if (qSim.getScenario().getConfig().transit().getTransitModes().contains(requestedMode)) {
 			handleAgentPTDeparture(agent, linkId);
 			return true ;
-		}
+		}*/
 		return false ;
 	}
 
