@@ -186,7 +186,7 @@ public class TransitRouterImpl implements TransitRouter {
 					ExperimentalTransitRoute ptRoute = new ExperimentalTransitRoute(accessStop, line, route, egressStop);
 						
 					
-					
+					// code added by Patrick
 					// influences the traveltime of bikesharing in the planning of the agent, but not in the events
 					if(route.getTransportMode() == "bikeshare")	{
 						
@@ -300,6 +300,7 @@ public class TransitRouterImpl implements TransitRouter {
 			
 			
 			// I am not sure what this is doing
+			// TODO: zu prüfen, was das wirklich tut
 			if(route.getTransportMode() == "bikeshare")	{
 				
 				double bikeshareTime = ptRoute.getDistance() / 1.2;

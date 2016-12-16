@@ -147,6 +147,7 @@ public class TransitRouterNetworkTravelTimeAndDisutility implements TravelTime, 
 			// (agent stays on the same route, so use transit line travel time)
 			double time2;
 			
+			// code added by Patrick
 			// influences the traveltime of bikesharing in the dijkstra -> in the routing of the pt-trip
 			// the departure time of the bike does no longer influence the travel time
 			if(wrapped.route.getTransportMode() == "bikeshare")	{
