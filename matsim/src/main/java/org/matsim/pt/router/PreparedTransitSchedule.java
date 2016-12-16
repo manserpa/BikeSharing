@@ -67,6 +67,11 @@ public class PreparedTransitSchedule {
 	}
 	
 	public double getNextDepartureTime(final TransitRoute route, final TransitRouteStop stop, final double depTime) {
+		
+		if ( route.getTransportMode() == "bikeshare"){
+			// TODO if this person is not a member of bike share, drop this link, or set very high travel time (or next dep time far in future)
+			return depTime; // no need to wait for bikes! (TODO: should this include the access time?)
+		}
 	
 		double earliestDepartureTimeAtTerminus = depTime - stop.getDepartureOffset();
 		// This shifts my time back to the terminus.
