@@ -145,16 +145,26 @@ public class TransitRouterNetworkTravelTimeAndDisutility implements TravelTime, 
 		TransitRouteStop toStop = wrapped.toNode.stop;
 		if (wrapped.route != null) {
 			// (agent stays on the same route, so use transit line travel time)
+			double time2;
 			
-			// get the next departure time:
-			double bestDepartureTime = preparedTransitSchedule.getNextDepartureTime(wrapped.route, fromStop, time);
-
-			// the travel time on the link is 
-			//   the time until the departure (``dpTime - now'')
-			//   + the travel time on the link (there.arrivalTime - here.departureTime)
-			// But quite often, we only have the departure time at the next stop.  Then we use that:
-			double arrivalOffset = (toStop.getArrivalOffset() != Time.UNDEFINED_TIME) ? toStop.getArrivalOffset() : toStop.getDepartureOffset();
-			double time2 = (bestDepartureTime - time) + (arrivalOffset - fromStop.getDepartureOffset());
+			// influences the traveltime of bikesharing in the dijkstra -> in the routing of the pt-trip
+			// the departure time of the bike does no longer influence the travel time
+			if(wrapped.route.getTransportMode() == "bikeshare")	{
+				time2 = link.getLength() / 1.2;
+			}
+			
+			else	{
+				// get the next departure time:
+				double bestDepartureTime = preparedTransitSchedule.getNextDepartureTime(wrapped.route, fromStop, time);
+	
+				// the travel time on the link is 
+				//   the time until the departure (``dpTime - now'')
+				//   + the travel time on the link (there.arrivalTime - here.departureTime)
+				// But quite often, we only have the departure time at the next stop.  Then we use that:
+				double arrivalOffset = (toStop.getArrivalOffset() != Time.UNDEFINED_TIME) ? toStop.getArrivalOffset() : toStop.getDepartureOffset();
+				time2 = (bestDepartureTime - time) + (arrivalOffset - fromStop.getDepartureOffset());
+			}
+			
 			if (time2 < 0) {
 				// ( this can only happen, I think, when ``bestDepartureTime'' is after midnight but ``time'' was before )
 				time2 += MIDNIGHT;
