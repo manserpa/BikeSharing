@@ -182,14 +182,15 @@ public class TransitRouterImpl implements TransitRouter {
 				TransitStopFacility egressStop = link.fromNode.stop.getStopFacility();
 				if (route != null) {
 					
-					leg = PopulationUtils.createLeg(TransportMode.pt);
-					ExperimentalTransitRoute ptRoute = new ExperimentalTransitRoute(accessStop, line, route, egressStop);
+				
 						
 					
 					// code added by Patrick
 					// influences the traveltime of bikesharing in the planning of the agent, but not in the events
 					if(route.getTransportMode() == "bikeshare")	{
 						
+						leg = PopulationUtils.createLeg(TransportMode.bikeshare);
+						ExperimentalTransitRoute ptRoute = new ExperimentalTransitRoute(accessStop, line, route, egressStop);
 						double bikeshareTime = 1980.0 / 1.2;
 						
 						ptRoute.setTravelTime( bikeshareTime );
@@ -206,7 +207,9 @@ public class TransitRouterImpl implements TransitRouter {
 					
 					}
 					else	{
-					
+						leg = PopulationUtils.createLeg(TransportMode.pt);
+						ExperimentalTransitRoute ptRoute = new ExperimentalTransitRoute(accessStop, line, route, egressStop);
+						
 						double arrivalOffset = (link.getFromNode().stop.getArrivalOffset() != Time.UNDEFINED_TIME) ? link.fromNode.stop.getArrivalOffset() : link.fromNode.stop.getDepartureOffset();
 						double arrivalTime = this.preparedTransitSchedule.getNextDepartureTime(route, transitRouteStart, time) + (arrivalOffset - transitRouteStart.getDepartureOffset());
 						ptRoute.setTravelTime(arrivalTime - time);

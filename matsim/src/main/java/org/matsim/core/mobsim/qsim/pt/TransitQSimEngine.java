@@ -42,8 +42,10 @@ import org.matsim.core.mobsim.qsim.QSim;
 import org.matsim.core.mobsim.qsim.TeleportationEngine;
 import org.matsim.core.mobsim.qsim.interfaces.DepartureHandler;
 import org.matsim.core.mobsim.qsim.interfaces.MobsimEngine;
+import org.matsim.core.mobsim.qsim.interfaces.MobsimVehicle;
 import org.matsim.pt.ReconstructingUmlaufBuilder;
 import org.matsim.pt.Umlauf;
+import org.matsim.pt.router.TransitRouterNetwork.TransitRouterNetworkLink;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.matsim.vehicles.Vehicle;
@@ -190,15 +192,22 @@ public class TransitQSimEngine implements  DepartureHandler, MobsimEngine, Agent
 	@Override
 	public boolean handleDeparture(double now, MobsimAgent agent, Id<Link> linkId) {
 		// is this a bikeshare leg?
+		
+		String requestedMode = agent.getMode();
+		
+		if (requestedMode == "bikeshare")	{
 		EventsManager EM = qSim.getEventsManager();
 		EM.processEvent(new BikeshareDebug(qSim.getSimTimer().getTimeOfDay(), "try to teleport"));
-
+		EM.processEvent(new BikeshareDebug(qSim.getSimTimer().getTimeOfDay(), "123"));
+		return false;
+		}
+		else if (requestedMode == "pt")	{
 //		String requestedMode = agent.getMode();
-		/*return false;
-		if (qSim.getScenario().getConfig().transit().getTransitModes().contains(requestedMode)) {
+//		return false;
+//		if (qSim.getScenario().getConfig().transit().getTransitModes().contains(requestedMode)) {
 			handleAgentPTDeparture(agent, linkId);
 			return true ;
-		}*/
+		}
 		return false ;
 	}
 
