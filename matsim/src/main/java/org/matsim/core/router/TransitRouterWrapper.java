@@ -26,6 +26,7 @@ import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
 import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Route;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.population.routes.RouteUtils;
@@ -126,7 +127,12 @@ public class TransitRouterWrapper implements RoutingModule {
 			    if (leg.getRoute() instanceof ExperimentalTransitRoute) {
 				    ExperimentalTransitRoute tRoute = (ExperimentalTransitRoute) leg.getRoute();
 				    tRoute.setTravelTime(leg.getTravelTime());
-				    tRoute.setDistance(RouteUtils.calcDistance(tRoute, transitSchedule, network));
+				    if(leg.getMode() != "sharebike") {
+				    	tRoute.setDistance(RouteUtils.calcDistance(tRoute, transitSchedule, network));
+				    }
+				    else	{
+				    	tRoute.setDistance(tRoute.getDistance());
+				    }
 				    Activity act =
 						    PopulationUtils.createActivityFromCoordAndLinkId(PtConstants.TRANSIT_ACTIVITY_TYPE, this.transitSchedule.getFacilities().get(tRoute.getAccessStopId()).getCoord(), tRoute.getStartLinkId());
 				    act.setMaximumDuration(0.0);

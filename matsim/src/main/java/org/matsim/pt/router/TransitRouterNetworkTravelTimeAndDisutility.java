@@ -24,6 +24,7 @@ package org.matsim.pt.router;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.core.network.NetworkUtils;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.misc.Time;
@@ -151,8 +152,12 @@ public class TransitRouterNetworkTravelTimeAndDisutility implements TravelTime, 
 			// influences the traveltime of bikesharing in the dijkstra -> in the routing of the pt-trip
 			// the departure time of the bike does no longer influence the travel time
 			if(wrapped.route.getTransportMode() == "bikeshare")	{
-				time2 = link.getLength() / 1.2;
+				// TODO the travel time should not be dependent on the link length but on the time matrix 
+				//wrapped.route.getRoute().getDistance()
+				double distance = wrapped.getLength();
+				time2 = distance / 1.2;
 			}
+			
 			
 			else	{
 				// get the next departure time:

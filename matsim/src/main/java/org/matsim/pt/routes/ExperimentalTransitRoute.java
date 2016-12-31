@@ -107,12 +107,18 @@ public class ExperimentalTransitRoute extends AbstractRoute {
 
 	@Override
 	public String getRouteDescription() {
+		String str;
 		if (this.accessStopId == null) {
 //			return super.getRouteDescription();
 			return this.routeDescription ;
 		}
-		String str = IDENTIFIER_1 + this.accessStopId.toString() + SEPARATOR + this.lineId.toString() + SEPARATOR +
+		if(this.lineId == null && this.routeId == null)	{
+			str = IDENTIFIER_1 + this.accessStopId.toString() + SEPARATOR + this.egressStopId.toString();
+		}
+		else	{
+			str = IDENTIFIER_1 + this.accessStopId.toString() + SEPARATOR + this.lineId.toString() + SEPARATOR +
 				this.routeId.toString() + SEPARATOR + this.egressStopId.toString();
+		}
 		if (this.description != null) {
 			str = str + SEPARATOR + this.description;
 		}

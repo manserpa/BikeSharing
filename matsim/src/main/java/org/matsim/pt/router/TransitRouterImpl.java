@@ -180,6 +180,7 @@ public class TransitRouterImpl implements TransitRouter {
 			if (link.line == null) {
 				// (it must be one of the "transfer" links.) finish the pt leg, if there was one before...
 				TransitStopFacility egressStop = link.fromNode.stop.getStopFacility();
+				
 				if (route != null) {
 					
 				
@@ -187,18 +188,41 @@ public class TransitRouterImpl implements TransitRouter {
 					
 					// code added by Patrick
 					// influences the traveltime of bikesharing in the planning of the agent, but not in the events
+					// TODO: make the traveltime depent from the traveltime matrix
 					if(route.getTransportMode() == "bikeshare")	{
 						
-						leg = PopulationUtils.createLeg(TransportMode.bikeshare);
-						ExperimentalTransitRoute ptRoute = new ExperimentalTransitRoute(accessStop, line, route, egressStop);
-						double bikeshareTime = 1980.0 / 1.2;
+						leg = PopulationUtils.createLeg(TransportMode.sharebike);
 						
-						ptRoute.setTravelTime( bikeshareTime );
+						/*// TODO: bikeshareTime depent from traveltime matrix
+						double bikeshareTime = 1990/1.2;
+						Route bikeshareRoute = new GenericRouteImpl(accessStop.getLinkId(), egressStop.getLinkId());
+						
+						
+						bikeshareRoute.setTravelTime(bikeshareTime);
+						// TODO: distance factor in the config 
+						bikeshareRoute.setDistance(NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord()));
+						
+						
+						leg.setRoute(bikeshareRoute);
+						leg.setTravelTime(bikeshareTime);
+						
+						time += bikeshareTime;
+						legs.add(leg);
+						transitLegCnt++;
+						accessStop = egressStop;*/
+						
+						
+						ExperimentalTransitRoute bikeshareRoute = new ExperimentalTransitRoute(accessStop, null, null, egressStop);
+						//Route bikeshareRoute = new GenericRouteImpl(accessStop.getLinkId(), egressStop.getLinkId());
+						
+						double bikeshareTime = NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord()) / 1.2;
+						
+						bikeshareRoute.setTravelTime( bikeshareTime );
 						//	ptRoute.setDistance( currentDistance );
-						ptRoute.setDistance( link.getLength() );
+						bikeshareRoute.setDistance(NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord()));
 						// (see MATSIM-556)
 
-						leg.setRoute( ptRoute );
+						leg.setRoute( bikeshareRoute );
 						leg.setTravelTime( bikeshareTime );
 						time += bikeshareTime;
 						legs.add(leg);
@@ -293,26 +317,24 @@ public class TransitRouterImpl implements TransitRouter {
 		
 		if (route != null) {
 			// the last part of the path was with a transit route, so add the pt-leg and final walk-leg
-			leg = PopulationUtils.createLeg(TransportMode.pt);
 			TransitStopFacility egressStop = prevLink.toNode.stop.getStopFacility();
-			ExperimentalTransitRoute ptRoute = new ExperimentalTransitRoute(accessStop, line, route, egressStop);
-//			ptRoute.setDistance( currentDistance );
-			ptRoute.setDistance( trConfig.getBeelineDistanceFactor() * NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord() ) );
-		
-		
 			
 			
 			// I am not sure what this is doing
 			// TODO: zu prüfen, was das wirklich tut
 			if(route.getTransportMode() == "bikeshare")	{
+				leg = PopulationUtils.createLeg(TransportMode.sharebike);
 				
-				double bikeshareTime = ptRoute.getDistance() / 1.2;
+				ExperimentalTransitRoute bikeshareRoute = new ExperimentalTransitRoute(accessStop, null, null, egressStop);
+				//Route bikeshareRoute = new GenericRouteImpl(accessStop.getLinkId(), egressStop.getLinkId());
 				
-				ptRoute.setTravelTime(bikeshareTime);
-//				ptRoute.setDistance( currentDistance );
-				// (see MATSIM-556)
+				bikeshareRoute.setDistance( NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord() ) );
+				
+				double bikeshareTime = NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord() ) / 1.2;
+				
+				bikeshareRoute.setTravelTime(bikeshareTime);
 
-				leg.setRoute(ptRoute);
+				leg.setRoute(bikeshareRoute);
 				leg.setTravelTime(bikeshareTime);
 				time += bikeshareTime;
 				legs.add(leg);
@@ -321,19 +343,22 @@ public class TransitRouterImpl implements TransitRouter {
 			
 			}
 			else	{
-			
-			
-			leg.setRoute(ptRoute);
-			// (see MATSIM-556
-			double arrivalOffset = ((prevLink).toNode.stop.getArrivalOffset() != Time.UNDEFINED_TIME) ?
-					(prevLink).toNode.stop.getArrivalOffset()
-					: (prevLink).toNode.stop.getDepartureOffset();
-					double arrivalTime = this.preparedTransitSchedule.getNextDepartureTime(route, transitRouteStart, time) + (arrivalOffset - transitRouteStart.getDepartureOffset());
-					leg.setTravelTime(arrivalTime - time);
-					ptRoute.setTravelTime( arrivalTime - time );
-					legs.add(leg);
-					transitLegCnt++;
-					accessStop = egressStop;
+				ExperimentalTransitRoute ptRoute = new ExperimentalTransitRoute(accessStop, line, route, egressStop);
+//				ptRoute.setDistance( currentDistance );
+				ptRoute.setDistance( trConfig.getBeelineDistanceFactor() * NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord() ) );
+				
+				leg = PopulationUtils.createLeg(TransportMode.pt);
+				leg.setRoute(ptRoute);
+				// (see MATSIM-556)
+				double arrivalOffset = ((prevLink).toNode.stop.getArrivalOffset() != Time.UNDEFINED_TIME) ?
+						(prevLink).toNode.stop.getArrivalOffset()
+						: (prevLink).toNode.stop.getDepartureOffset();
+						double arrivalTime = this.preparedTransitSchedule.getNextDepartureTime(route, transitRouteStart, time) + (arrivalOffset - transitRouteStart.getDepartureOffset());
+						leg.setTravelTime(arrivalTime - time);
+						ptRoute.setTravelTime( arrivalTime - time );
+						legs.add(leg);
+						transitLegCnt++;
+						accessStop = egressStop;
 			}
 		}
 		if (prevLink != null) {
