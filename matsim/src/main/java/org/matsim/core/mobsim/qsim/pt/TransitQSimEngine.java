@@ -49,6 +49,7 @@ import org.matsim.pt.router.TransitRouterNetwork.TransitRouterNetworkLink;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.matsim.vehicles.Vehicle;
+import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.Vehicles;
 
 import javax.inject.Inject;
@@ -131,9 +132,14 @@ public class TransitQSimEngine implements  DepartureHandler, MobsimEngine, Agent
 
 		for (Umlauf umlauf : umlaufCache.getUmlaeufe()) {
 			Vehicle basicVehicle = vehicles.getVehicles().get(umlauf.getVehicleId());
-			if (!umlauf.getUmlaufStuecke().isEmpty()) {
+			
+			// code added by Patrick: only do an Umlauf if the vehicle is not a bike
+			// TODO nicht abhängig von getLength but von vehicletype
+			if (!umlauf.getUmlaufStuecke().isEmpty() && basicVehicle.getType().getLength() != 2) {
+				
 				MobsimAgent driver = createAndScheduleVehicleAndDriver(umlauf, basicVehicle);
 				drivers.add(driver);
+				
 			}
 		}
 		return drivers;
@@ -156,6 +162,7 @@ public class TransitQSimEngine implements  DepartureHandler, MobsimEngine, Agent
 
 	private AbstractTransitDriverAgent createAndScheduleVehicleAndDriver(Umlauf umlauf, Vehicle vehicle) {
 		TransitQVehicle veh = new TransitQVehicle(vehicle);
+		
 		AbstractTransitDriverAgent driver = this.transitDriverFactory.createTransitDriver(umlauf);
 		veh.setDriver(driver);
 		veh.setStopHandler(this.stopHandlerFactory.createTransitStopHandler(veh.getVehicle()));
@@ -195,13 +202,13 @@ public class TransitQSimEngine implements  DepartureHandler, MobsimEngine, Agent
 		
 		String requestedMode = agent.getMode();
 		
-		if (requestedMode == "bikeshare")	{
-		EventsManager EM = qSim.getEventsManager();
-		EM.processEvent(new BikeshareDebug(qSim.getSimTimer().getTimeOfDay(), "try to teleport"));
-		EM.processEvent(new BikeshareDebug(qSim.getSimTimer().getTimeOfDay(), "123"));
-		return false;
+		if (requestedMode == "sharebike")	{
+			EventsManager EM = qSim.getEventsManager();
+			EM.processEvent(new BikeshareDebug(qSim.getSimTimer().getTimeOfDay(), "try to teleport"));
+			EM.processEvent(new BikeshareDebug(qSim.getSimTimer().getTimeOfDay(), "123"));
+			return false;
 		}
-		else if (requestedMode == "pt")	{
+		else if (qSim.getScenario().getConfig().transit().getTransitModes().contains(requestedMode))	{
 //		String requestedMode = agent.getMode();
 //		return false;
 //		if (qSim.getScenario().getConfig().transit().getTransitModes().contains(requestedMode)) {
