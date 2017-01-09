@@ -24,6 +24,19 @@ import org.jdom.input.SAXBuilder;
 import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
+/*
+ * purpose: create bikeshare routes based on a list of stations
+ * input file = xml file with stations (copy-paste from transit schedule possible)
+ * output file = xml file with routes (has to be pasted in the transit line section in the transit schedule file)
+ * 
+ * different settings can be used to consider different types of bicycles (adjust speed and effect on speed of slopes) as well as different types of systems (access and egress time)
+ * 
+ * possible improvements:
+ * - base "slope effects" on real world observations 
+ * - use actual real world elevation
+ * - base distances on a bike routing instead of beeline distance (benefits: better distance, consider actual slopes instead of difference between start and stop)
+ */
+
 // import org.matsim.contrib.matsim4urbansim.utils.network;
 // utils for calculating distances http://www.matsim.org/apidocs/matsim4urbansim/0.7.0/org/matsim/contrib/matsim4urbansim/utils/network/NetworkUtil.html
 
@@ -38,9 +51,8 @@ public class CreateBSSRoutes {
 	static final double accessTime = 40; // access time in seconds
 	static final double egressTime = 20; // egress time in seconds
 
-	static final String coordType = "metres"; // use the coord system as stated in config file? then set "coord". other possibility: use coords directly as metres. then set "metres"
+	static final String coordType = "metres"; // use the coord system as stated in config file? then set "coord". other possibility: use coords directly as metres. then set "metres" (currently only "metres" works)
 
-	
 	public static void main(String[] args)  throws FileNotFoundException {
 		
 		List<Element> stations = new ArrayList<>(); 
@@ -173,9 +185,6 @@ public class CreateBSSRoutes {
 
 			output.close() ;
 			
-			
-			
-			
 		
 		} catch (IOException io) {
 			System.out.println(io.getMessage());
@@ -188,157 +197,6 @@ public class CreateBSSRoutes {
 	}
 
 }
-
-
-/*
-
-	
-	public static void buildCSMembershipFile(){
-		
-
-		try {
-			
-
-			// get all persons
-			Document document = (Document) builder.build(xmlFile);
-			Element rootNode = document.getRootElement();
-			List list = rootNode.getChildren("person");
-
-			for (int i = 0; i < list.size(); i++) {
-				Element node = (Element) list.get(i);
-				persons.add(node.getAttributeValue("id"));
-			}
-			
-			
-			// create new document for cs membership of these persons
-			Element rootNodeNew = new Element("memberships");
-			
-			Iterator<String> it = persons.iterator();
-			while(it.hasNext()){
-				String personid = it.next();
-				
-				Element person = new Element("person");
-				person.setAttribute("id", personid);
-				
-				Element company = new Element("company");
-				company.setAttribute("id", "Mobility");
-				
-				Element mTw = new Element("carsharing");
-				mTw.setAttribute("name", "twoway");
-				company.addContent(mTw);
-				
-				Element mOw = new Element("carsharing");
-				mOw.setAttribute("name", "oneway");
-				company.addContent(mOw);
-
-				Element mFf = new Element("carsharing");
-				mFf.setAttribute("name", "freefloating");
-				company.addContent(mFf);
-				
-				person.addContent(company);
-				
-				rootNodeNew.addContent(person);
-
-			}
-			
-			PrintWriter output = new PrintWriter ("C:\\Users\\Gabriel\\git\\matsimproject\\contribs\\carsharing\\test\\input\\org\\matsim\\contrib\\carsharing\\casebikesharing\\siouxfalls\\csmembership_new.xml") ;
-			
-			
-			Document doc = new Document(rootNodeNew);
-			try {
-				XMLOutputter serializer = new XMLOutputter();
-		        serializer.setFormat( Format.getPrettyFormat().setIndent( "  " ) );
-				serializer.output(doc, output);
-			}
-			catch (IOException e) {
-				System.err.println(e);
-			}
-
-			output.close() ;
-
-		} catch (IOException io) {
-			System.out.println(io.getMessage());
-		} catch (JDOMException jdomex) {
-			System.out.println(jdomex.getMessage());
-		}
-		
-	}
-	
-	public static void getDimensions(){
-		List<Float> xCoords = new ArrayList<>(); 
-		List<Float> yCoords = new ArrayList<>(); 
-		
-		SAXBuilder builder = new SAXBuilder();
-		File xmlFile = new File("C:\\Users\\Gabriel\\git\\matsimproject\\contribs\\carsharing\\test\\input\\org\\matsim\\contrib\\carsharing\\casebikesharing\\siouxfalls\\network.xml");
-
-		try {
-			
-			Document document = (Document) builder.build(xmlFile);
-			Element rootNode = document.getRootElement();
-			List list = rootNode.getChild("nodes").getChildren("node");
-
-			for (int i = 0; i < list.size(); i++) {
-				Element node = (Element) list.get(i);
-				xCoords.add(Float.parseFloat(node.getAttributeValue("x")));
-				yCoords.add(Float.parseFloat(node.getAttributeValue("y")));
-			}
-			
-			float minX=0;
-			float maxX=0;
-			float minY=0;
-			float maxY=0;
-			Iterator<Float> it = xCoords.iterator();
-			while ( it.hasNext()){
-				Float thisNode = it.next();
-				if ( thisNode > maxX) maxX = thisNode;
-				if ( thisNode < minX || minX == 0.0) minX = thisNode;
-			}
-			Iterator<Float> it2 = yCoords.iterator();
-			while ( it2.hasNext()){
-				Float thisNode = it2.next();
-				if ( thisNode > maxY) maxY = thisNode;
-				if ( thisNode < minY || minY == 0.0) minY = thisNode;
-			}
-			
-			System.out.println("maxX: " + maxX);
-			System.out.println("minX: " + minX);
-			System.out.println("maxY: " + maxY);
-			System.out.println("minY: " + minY);
-			
-		} catch (IOException io) {
-			System.out.println(io.getMessage());
-		} catch (JDOMException jdomex) {
-			System.out.println(jdomex.getMessage());
-		}
-		
-		
-	}
-
-	public static void generateFfCars() throws FileNotFoundException{
-		
-		int numberOfCars = 200;
-		String idPrefix = "FF_";
-		int boundaries[] = {678126, 687482, 4818750, 4832294}; // min X, max X, min Y, max Y
-		HashMap<String, HashMap> cars = new HashMap<>();
-		
-		
-		// generate cars
-		
-		for ( int i = 0; i < numberOfCars; i++){
-			HashMap<String, Integer> coords = new HashMap<>();
-			coords.put("x", ThreadLocalRandom.current().nextInt(boundaries[0], boundaries[1] + 1));
-			coords.put("y", ThreadLocalRandom.current().nextInt(boundaries[2], boundaries[3] + 1));
-			cars.put(idPrefix + i, coords);
-		}
-		
-		
-		// generate XML
-		
-		
-		
-		
-	}
-*/
 
 
 
