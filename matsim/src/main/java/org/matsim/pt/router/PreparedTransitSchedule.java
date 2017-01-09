@@ -70,7 +70,7 @@ public class PreparedTransitSchedule {
 		
 		if ( route.getTransportMode() == "bikeshare"){
 			// TODO if this person is not a member of bike share, drop this link, or set very high travel time (or next dep time far in future)
-			return depTime; // no need to wait for bikes! (TODO: should this include the access time?)
+			return depTime; // no need to wait for bikes (access time is already included in travel time in schedule file)
 		}
 	
 		double earliestDepartureTimeAtTerminus = depTime - stop.getDepartureOffset();

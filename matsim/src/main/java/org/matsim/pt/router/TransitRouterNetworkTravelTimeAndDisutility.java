@@ -154,8 +154,9 @@ public class TransitRouterNetworkTravelTimeAndDisutility implements TravelTime, 
 			if(wrapped.route.getTransportMode() == "bikeshare")	{
 				// TODO the travel time should not be dependent on the link length but on the time matrix 
 				//wrapped.route.getRoute().getDistance()
-				double distance = wrapped.getLength();
-				time2 = distance / 1.2;
+				//double distance = wrapped.getLength();
+				//time2 = distance / 1.2;
+				time2 = toStop.getArrivalOffset(); // 000
 			}
 			
 			
