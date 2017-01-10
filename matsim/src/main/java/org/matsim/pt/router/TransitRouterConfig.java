@@ -84,10 +84,14 @@ public class TransitRouterConfig implements MatsimParameters {
 	private double marginalUtilityOfTravelTimeTransit_utl_s;
 
 	private double marginalUtilityOfWaitingPt_utl_s;
+	
+	private double marginalUtilityOfTravelTimeBSS_utl_s;
 
 	private double marginalUtilityOfTravelDistanceWalk_utl_m;
 	
 	private double marginalUtilityOfTravelDistanceTransit_utl_m;
+	
+	private double marginalUtilityOfTravelDistanceBSS_utl_m;
 
 	private double utilityOfLineSwitch_utl;
 
@@ -122,6 +126,11 @@ public class TransitRouterConfig implements MatsimParameters {
 		this.marginalUtilityOfWaitingPt_utl_s = pcsConfig.getMarginalUtlOfWaitingPt_utils_hr() / 3600.0 - pcsConfig.getPerforming_utils_hr()/3600. ;
 
 		this.utilityOfLineSwitch_utl = pcsConfig.getUtilityOfLineSwitch();
+		
+		// bss:
+		this.marginalUtilityOfTravelTimeBSS_utl_s = pcsConfig.getModes().get(TransportMode.bss).getMarginalUtilityOfTraveling() /3600.0 - pcsConfig.getPerforming_utils_hr()/3600. ;
+
+		this.marginalUtilityOfTravelDistanceBSS_utl_m = pcsConfig.getMarginalUtilityOfMoney() * pcsConfig.getModes().get(TransportMode.bss).getMonetaryDistanceRate();
 
 		// router:
 		this.setSearchRadius(trConfig.getSearchRadius());
@@ -180,6 +189,17 @@ public class TransitRouterConfig implements MatsimParameters {
 	}
 
 	/**
+	 * @return the marginal utility of travel time by bss.
+	 */
+	public double getMarginalUtilityOfTravelTimeBSS_utl_s() {
+		return this.marginalUtilityOfTravelTimeBSS_utl_s;
+	}
+
+	public void setMarginalUtilityOfTravelDistanceBSS_utl_m(final double marginalUtilityOfTravelDistanceBSS_utl_m) {
+		this.marginalUtilityOfTravelDistanceBSS_utl_m = marginalUtilityOfTravelDistanceBSS_utl_m;
+	}
+	
+	/**
 	 * in the config, this is distanceCostRate * margUtlOfMoney.  For the router, the conversion to
 	 * utils seems ok.  kai, feb'11
 	 */
@@ -187,6 +207,10 @@ public class TransitRouterConfig implements MatsimParameters {
 		return this.marginalUtilityOfTravelDistanceTransit_utl_m;
 	}
 
+	public double getMarginalUtilityOfTravelDistanceBSS_utl_m() {
+		return this.marginalUtilityOfTravelDistanceBSS_utl_m;
+	}
+	
 	public double getMarginalUtilityOfTravelDistanceWalk_utl_m() {
 		return this.marginalUtilityOfTravelDistanceWalk_utl_m;
 	}

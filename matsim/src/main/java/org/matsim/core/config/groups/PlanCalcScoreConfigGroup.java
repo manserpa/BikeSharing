@@ -73,6 +73,7 @@ public final class PlanCalcScoreConfigGroup extends ConfigGroup {
 
 		this.addParameterSet( new ModeParams( TransportMode.car ) );
 		this.addParameterSet( new ModeParams( TransportMode.pt ) );
+		this.addParameterSet( new ModeParams( TransportMode.bss ) );
 		this.addParameterSet( new ModeParams( TransportMode.walk ) );
 		this.addParameterSet( new ModeParams( TransportMode.bike ) );
 		this.addParameterSet( new ModeParams( TransportMode.other ) );
@@ -201,6 +202,10 @@ public final class PlanCalcScoreConfigGroup extends ConfigGroup {
 			ModeParams modeParams = getOrCreateModeParams( TransportMode.pt ) ;
 			modeParams.setMonetaryDistanceRate(Double.parseDouble(value));
 		}
+		else if ( "monetaryDistanceRateBSS".equals(key) ){
+			ModeParams modeParams = getOrCreateModeParams( TransportMode.bss ) ;
+			modeParams.setMonetaryDistanceRate(Double.parseDouble(value));
+		}
 		else if (key.startsWith("constant_")) {
 			ModeParams modeParams = getOrCreateModeParams(key.substring("constant_".length()));
 			modeParams.setConstant(Double.parseDouble(value));
@@ -212,6 +217,9 @@ public final class PlanCalcScoreConfigGroup extends ConfigGroup {
 		}
 		else if ("travelingPt".equals(key)) {
 			this.getModes().get(TransportMode.pt).setMarginalUtilityOfTraveling(Double.parseDouble(value));
+		}
+		else if ("travelingBSS".equals(key)) {
+			this.getModes().get(TransportMode.bss).setMarginalUtilityOfTraveling(Double.parseDouble(value));
 		}
 		else if ("travelingWalk".equals(key)) {
 			this.getModes().get(TransportMode.walk).setMarginalUtilityOfTraveling(Double.parseDouble(value));
@@ -229,6 +237,9 @@ public final class PlanCalcScoreConfigGroup extends ConfigGroup {
 		}
 		else if ("marginalUtlOfDistancePt".equals(key)){
 			this.getModes().get(TransportMode.pt).setMarginalUtilityOfDistance(Double.parseDouble(value));
+		}
+		else if ("marginalUtlOfDistanceBSS".equals(key)){
+			this.getModes().get(TransportMode.bss).setMarginalUtilityOfDistance(Double.parseDouble(value));
 		}
 		else if ("marginalUtlOfDistanceWalk".equals(key)){
 			this.getModes().get(TransportMode.walk).setMarginalUtilityOfDistance(Double.parseDouble(value));
@@ -249,6 +260,9 @@ public final class PlanCalcScoreConfigGroup extends ConfigGroup {
 		}
 		else if ( "constantPt".equals(key)) {
 			getModes().get(TransportMode.pt).setConstant(Double.parseDouble(value));
+		}
+		else if ( "constantBSS".equals(key)) {
+			getModes().get(TransportMode.bss).setConstant(Double.parseDouble(value));
 		}
 		else if ( "constantBike".equals(key)) {
 			getModes().get(TransportMode.bike).setConstant(Double.parseDouble(value));

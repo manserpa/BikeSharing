@@ -78,7 +78,9 @@ public class CharyparNagelLegScoring implements org.matsim.core.scoring.SumScori
 		if (modeParams == null) {
 			if (leg.getMode().equals(TransportMode.transit_walk)) {
 				modeParams = this.params.modeParams.get(TransportMode.walk);
-			} else {
+			} else if(leg.getMode().equals(TransportMode.bss))	{
+				modeParams = this.params.modeParams.get(TransportMode.bss);
+			} else 	{
 				modeParams = this.params.modeParams.get(TransportMode.other);
 			}
 		}
@@ -98,6 +100,7 @@ public class CharyparNagelLegScoring implements org.matsim.core.scoring.SumScori
 					}
 				}
 			}
+			
 			tmpScore += modeParams.marginalUtilityOfDistance_m * dist;
 			tmpScore += modeParams.monetaryDistanceCostRate * this.params.marginalUtilityOfMoney * dist;
 		}
