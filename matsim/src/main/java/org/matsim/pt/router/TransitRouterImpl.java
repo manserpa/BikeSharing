@@ -183,53 +183,43 @@ public class TransitRouterImpl implements TransitRouter {
 				
 				if (route != null) {
 					
-
-					// *** BSS new code *******************
+					double arrivalTime;
+					
 					// remember: here we create the legs out of the already computed path, still in the replanning phase
+					// one might combine the two cases below. transport mode bss exists mainly to speed up analysis, but actually bss could/should be combined with pt
 					if(route.getTransportMode().equals("bikeshare"))	{
-						
 						leg = PopulationUtils.createLeg(TransportMode.bss);
-						
 						ExperimentalTransitRoute bikeshareRoute = new ExperimentalTransitRoute(accessStop, line, null, egressStop);
-						//Route bikeshareRoute = new GenericRouteImpl(accessStop.getLinkId(), egressStop.getLinkId());
 						
-						
-						//double bikeshareTime = NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord()) / 1.2;
-						double bikeshareTime = link.fromNode.stop.getArrivalOffset(); // unfortunately, this does not work correctly in all cases: it uses the arrival offset of s. th. else
-						
-						// continue to work here ...
-						// we should try to access the route profile here
-						// are we sure that we do have that information here? 
-						
-						bikeshareRoute.setTravelTime( bikeshareTime );
+						double bikeshareTraveltime = link.fromNode.stop.getArrivalOffset(); // get travel time directly from transit schedule (actually, it seems that below nothing different happens, so this could probably be combined = moved outside of the if)
+						bikeshareRoute.setTravelTime( bikeshareTraveltime );
 						bikeshareRoute.setDistance(NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord()));
 
 						leg.setRoute( bikeshareRoute );
-						leg.setTravelTime( bikeshareTime );
-						time += bikeshareTime;
-						legs.add(leg);
-						transitLegCnt++;
-						accessStop = egressStop;
-					
-					} else {
+						
+						arrivalTime = bikeshareTraveltime + time;
+					}
+					else
+					{
 						leg = PopulationUtils.createLeg(TransportMode.pt);
 						ExperimentalTransitRoute ptRoute = new ExperimentalTransitRoute(accessStop, line, route, egressStop);
-						
+
 						double arrivalOffset = (link.getFromNode().stop.getArrivalOffset() != Time.UNDEFINED_TIME) ? link.fromNode.stop.getArrivalOffset() : link.fromNode.stop.getDepartureOffset();
-						double arrivalTime = this.preparedTransitSchedule.getNextDepartureTime(route, transitRouteStart, time) + (arrivalOffset - transitRouteStart.getDepartureOffset());
+						arrivalTime = this.preparedTransitSchedule.getNextDepartureTime(route, transitRouteStart, time) + (arrivalOffset - transitRouteStart.getDepartureOffset());
 						ptRoute.setTravelTime(arrivalTime - time);
-	
+
 						// ptRoute.setDistance( currentDistance );
 						ptRoute.setDistance( link.getLength() );
 						// (see MATSIM-556)
-	
+
 						leg.setRoute(ptRoute);
-						leg.setTravelTime(arrivalTime - time);
-						time = arrivalTime;
-						legs.add(leg);
-						transitLegCnt++;
-						accessStop = egressStop;
 					}
+						
+					leg.setTravelTime(arrivalTime - time);
+					time = arrivalTime;
+					legs.add(leg);
+					transitLegCnt++;
+					accessStop = egressStop;
 				}
 				line = null;
 				route = null;
@@ -300,31 +290,23 @@ public class TransitRouterImpl implements TransitRouter {
 			// the last part of the path was with a transit route, so add the pt-leg and final walk-leg
 			TransitStopFacility egressStop = prevLink.toNode.stop.getStopFacility();
 			
+			double arrivalTime;
 			
 			// I am not sure what this is doing
-			// TODO: zu prüfen, was das wirklich tut
+			// gw: in comparison to the statements above: the toNode is needed to get the travel time until the next stop (above: fromNode)
 			if(route.getTransportMode().equals("bikeshare"))	{
-				leg = PopulationUtils.createLeg(TransportMode.bss);
-				
 				ExperimentalTransitRoute bikeshareRoute = new ExperimentalTransitRoute(accessStop, line, null, egressStop);
-				//Route bikeshareRoute = new GenericRouteImpl(accessStop.getLinkId(), egressStop.getLinkId());
+				bikeshareRoute.setDistance(NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord()));
 				
-				
-				bikeshareRoute.setDistance( NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord() ) );
-				
-				//double bikeshareTime = NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord() ) / 1.2;
-				double bikeshareTime = prevLink.toNode.stop.getArrivalOffset(); // didn't check yet if that really works
-				
-				bikeshareRoute.setTravelTime(bikeshareTime);
+				leg = PopulationUtils.createLeg(TransportMode.bss);
+				leg.setRoute( bikeshareRoute );
+				double bikeshareTraveltime = prevLink.toNode.stop.getArrivalOffset(); // see comment above (with fromNode it doesn't work, it seems that there is no arrivalOffset set) 
 
-				leg.setRoute(bikeshareRoute);
-				leg.setTravelTime(bikeshareTime);
-				time += bikeshareTime;
-				legs.add(leg);
-				transitLegCnt++;
-				accessStop = egressStop;
-			
+				bikeshareRoute.setTravelTime( bikeshareTraveltime );
+				arrivalTime = bikeshareTraveltime + time;
+				
 			} else {
+				
 				ExperimentalTransitRoute ptRoute = new ExperimentalTransitRoute(accessStop, line, route, egressStop);
 //				ptRoute.setDistance( currentDistance );
 				ptRoute.setDistance( trConfig.getBeelineDistanceFactor() * NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord() ) );
@@ -335,13 +317,14 @@ public class TransitRouterImpl implements TransitRouter {
 				double arrivalOffset = ((prevLink).toNode.stop.getArrivalOffset() != Time.UNDEFINED_TIME) ?
 						(prevLink).toNode.stop.getArrivalOffset()
 						: (prevLink).toNode.stop.getDepartureOffset();
-						double arrivalTime = this.preparedTransitSchedule.getNextDepartureTime(route, transitRouteStart, time) + (arrivalOffset - transitRouteStart.getDepartureOffset());
-						leg.setTravelTime(arrivalTime - time);
-						ptRoute.setTravelTime( arrivalTime - time );
-						legs.add(leg);
-						transitLegCnt++;
-						accessStop = egressStop;
+				arrivalTime = this.preparedTransitSchedule.getNextDepartureTime(route, transitRouteStart, time) + (arrivalOffset - transitRouteStart.getDepartureOffset());
+				
+				ptRoute.setTravelTime( arrivalTime - time );
 			}
+			leg.setTravelTime(arrivalTime - time);
+			legs.add(leg);
+			transitLegCnt++;
+			accessStop = egressStop;
 		}
 		if (prevLink != null) {
 			leg = PopulationUtils.createLeg(TransportMode.transit_walk);
