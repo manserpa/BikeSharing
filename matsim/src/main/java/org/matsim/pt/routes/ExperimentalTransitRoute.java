@@ -113,7 +113,7 @@ public class ExperimentalTransitRoute extends AbstractRoute {
 			return this.routeDescription ;
 		}
 		if(this.lineId == null && this.routeId == null)	{
-			str = IDENTIFIER_1 + this.accessStopId.toString() + SEPARATOR + this.egressStopId.toString();
+			str = IDENTIFIER_1 + this.accessStopId.toString() + SEPARATOR + "Bikesharing" +  SEPARATOR + this.egressStopId.toString();
 		}
 		else	{
 			str = IDENTIFIER_1 + this.accessStopId.toString() + SEPARATOR + this.lineId.toString() + SEPARATOR +

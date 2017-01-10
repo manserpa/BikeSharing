@@ -188,14 +188,15 @@ public class TransitRouterImpl implements TransitRouter {
 					// remember: here we create the legs out of the already computed path, still in the replanning phase
 					if(route.getTransportMode() == "bikeshare")	{
 						
-						leg = PopulationUtils.createLeg(TransportMode.bikeshare);
+						leg = PopulationUtils.createLeg(TransportMode.sharebike);
 						
 						ExperimentalTransitRoute bikeshareRoute = new ExperimentalTransitRoute(accessStop, null, null, egressStop);
 						//Route bikeshareRoute = new GenericRouteImpl(accessStop.getLinkId(), egressStop.getLinkId());
 						
+						
 						//double bikeshareTime = NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord()) / 1.2;
-						double bikeshareTime = link.toNode.stop.getArrivalOffset(); // unfortunately, this does not work correctly in all cases: it uses the arrival offset of s. th. else
-
+						double bikeshareTime = link.fromNode.stop.getArrivalOffset(); // unfortunately, this does not work correctly in all cases: it uses the arrival offset of s. th. else
+						
 						// continue to work here ...
 						// we should try to access the route profile here
 						// are we sure that we do have that information here? 
@@ -303,15 +304,16 @@ public class TransitRouterImpl implements TransitRouter {
 			// I am not sure what this is doing
 			// TODO: zu prüfen, was das wirklich tut
 			if(route.getTransportMode() == "bikeshare")	{
-				leg = PopulationUtils.createLeg(TransportMode.bikeshare);
+				leg = PopulationUtils.createLeg(TransportMode.sharebike);
 				
 				ExperimentalTransitRoute bikeshareRoute = new ExperimentalTransitRoute(accessStop, null, null, egressStop);
 				//Route bikeshareRoute = new GenericRouteImpl(accessStop.getLinkId(), egressStop.getLinkId());
 				
+				
 				bikeshareRoute.setDistance( NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord() ) );
 				
 				//double bikeshareTime = NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord() ) / 1.2;
-				double bikeshareTime = (prevLink).toNode.stop.getArrivalOffset(); // didn't check yet if that really works
+				double bikeshareTime = prevLink.toNode.stop.getArrivalOffset(); // didn't check yet if that really works
 				
 				bikeshareRoute.setTravelTime(bikeshareTime);
 
