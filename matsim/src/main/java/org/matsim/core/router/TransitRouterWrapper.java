@@ -127,12 +127,9 @@ public class TransitRouterWrapper implements RoutingModule {
 			    if (leg.getRoute() instanceof ExperimentalTransitRoute) {
 				    ExperimentalTransitRoute tRoute = (ExperimentalTransitRoute) leg.getRoute();
 				    tRoute.setTravelTime(leg.getTravelTime());
-				    if(leg.getMode() != "sharebike") {
-				    	tRoute.setDistance(RouteUtils.calcDistance(tRoute, transitSchedule, network));
-				    }
-				    else	{
-				    	tRoute.setDistance(tRoute.getDistance());
-				    }
+	
+				    tRoute.setDistance(tRoute.getDistance());
+				    
 				    Activity act =
 						    PopulationUtils.createActivityFromCoordAndLinkId(PtConstants.TRANSIT_ACTIVITY_TYPE, this.transitSchedule.getFacilities().get(tRoute.getAccessStopId()).getCoord(), tRoute.getStartLinkId());
 				    act.setMaximumDuration(0.0);

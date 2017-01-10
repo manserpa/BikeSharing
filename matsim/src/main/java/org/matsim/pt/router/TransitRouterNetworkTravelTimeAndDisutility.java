@@ -151,7 +151,7 @@ public class TransitRouterNetworkTravelTimeAndDisutility implements TravelTime, 
 			// code added by Patrick
 			// influences the traveltime of bikesharing in the dijkstra -> in the routing of the pt-trip
 			// the departure time of the bike does no longer influence the travel time
-			if(wrapped.route.getTransportMode() == "bikeshare")	{
+			if(wrapped.route.getTransportMode().equals("bikeshare"))	{
 				// TODO the travel time should not be dependent on the link length but on the time matrix 
 				//wrapped.route.getRoute().getDistance()
 				//double distance = wrapped.getLength();

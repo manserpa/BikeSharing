@@ -133,13 +133,10 @@ public class TransitQSimEngine implements  DepartureHandler, MobsimEngine, Agent
 		for (Umlauf umlauf : umlaufCache.getUmlaeufe()) {
 			Vehicle basicVehicle = vehicles.getVehicles().get(umlauf.getVehicleId());
 			
-			// code added by Patrick: only do an Umlauf if the vehicle is not a bike
-			// TODO nicht abhängig von getLength but von vehicletype
-			if (!umlauf.getUmlaufStuecke().isEmpty() && basicVehicle.getType().getLength() != 2) {
-				
+
+			if (!umlauf.getUmlaufStuecke().isEmpty()) {
 				MobsimAgent driver = createAndScheduleVehicleAndDriver(umlauf, basicVehicle);
 				drivers.add(driver);
-				
 			}
 		}
 		return drivers;
@@ -202,7 +199,7 @@ public class TransitQSimEngine implements  DepartureHandler, MobsimEngine, Agent
 		
 		String requestedMode = agent.getMode();
 		
-		if (requestedMode == "sharebike")	{
+		if (requestedMode.equals("bss"))	{
 			EventsManager EM = qSim.getEventsManager();
 			EM.processEvent(new BikeshareDebug(qSim.getSimTimer().getTimeOfDay(), "try to teleport"));
 			EM.processEvent(new BikeshareDebug(qSim.getSimTimer().getTimeOfDay(), "123"));

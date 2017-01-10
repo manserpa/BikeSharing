@@ -186,11 +186,11 @@ public class TransitRouterImpl implements TransitRouter {
 
 					// *** BSS new code *******************
 					// remember: here we create the legs out of the already computed path, still in the replanning phase
-					if(route.getTransportMode() == "bikeshare")	{
+					if(route.getTransportMode().equals("bikeshare"))	{
 						
-						leg = PopulationUtils.createLeg(TransportMode.sharebike);
+						leg = PopulationUtils.createLeg(TransportMode.bss);
 						
-						ExperimentalTransitRoute bikeshareRoute = new ExperimentalTransitRoute(accessStop, null, null, egressStop);
+						ExperimentalTransitRoute bikeshareRoute = new ExperimentalTransitRoute(accessStop, line, null, egressStop);
 						//Route bikeshareRoute = new GenericRouteImpl(accessStop.getLinkId(), egressStop.getLinkId());
 						
 						
@@ -303,10 +303,10 @@ public class TransitRouterImpl implements TransitRouter {
 			
 			// I am not sure what this is doing
 			// TODO: zu prüfen, was das wirklich tut
-			if(route.getTransportMode() == "bikeshare")	{
-				leg = PopulationUtils.createLeg(TransportMode.sharebike);
+			if(route.getTransportMode().equals("bikeshare"))	{
+				leg = PopulationUtils.createLeg(TransportMode.bss);
 				
-				ExperimentalTransitRoute bikeshareRoute = new ExperimentalTransitRoute(accessStop, null, null, egressStop);
+				ExperimentalTransitRoute bikeshareRoute = new ExperimentalTransitRoute(accessStop, line, null, egressStop);
 				//Route bikeshareRoute = new GenericRouteImpl(accessStop.getLinkId(), egressStop.getLinkId());
 				
 				

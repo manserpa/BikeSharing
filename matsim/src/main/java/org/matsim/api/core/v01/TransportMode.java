@@ -34,8 +34,8 @@ public final class TransportMode {
 	public static final String ride = "ride";
 	public static final String bike = "bike";
 	public static final String pt = "pt";
+	public static final String bss = "bss";
 	public static final String walk = "walk";
-	public static final String sharebike = "sharebike";
 	public static final String transit_walk = "transit_walk";
 	
 	public static final String access_walk = "access_walk" ; // "bushwhacking" from facility to network
