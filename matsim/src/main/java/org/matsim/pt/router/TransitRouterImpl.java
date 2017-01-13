@@ -193,7 +193,7 @@ public class TransitRouterImpl implements TransitRouter {
 						
 						double bikeshareTraveltime = link.fromNode.stop.getArrivalOffset(); // get travel time directly from transit schedule (actually, it seems that below nothing different happens, so this could probably be combined = moved outside of the if)
 						bikeshareRoute.setTravelTime( bikeshareTraveltime );
-						bikeshareRoute.setDistance(NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord()));
+						bikeshareRoute.setDistance(1.3 * NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord()));
 
 						leg.setRoute( bikeshareRoute );
 						
@@ -296,7 +296,7 @@ public class TransitRouterImpl implements TransitRouter {
 			// gw: in comparison to the statements above: the toNode is needed to get the travel time until the next stop (above: fromNode)
 			if(route.getTransportMode().equals("bikeshare"))	{
 				ExperimentalTransitRoute bikeshareRoute = new ExperimentalTransitRoute(accessStop, line, null, egressStop);
-				bikeshareRoute.setDistance(NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord()));
+				bikeshareRoute.setDistance(1.3 * NetworkUtils.getEuclideanDistance(accessStop.getCoord(), egressStop.getCoord()));
 				
 				leg = PopulationUtils.createLeg(TransportMode.bss);
 				leg.setRoute( bikeshareRoute );
