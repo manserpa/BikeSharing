@@ -82,15 +82,6 @@ public class TransitRouterNetworkTravelTimeAndDisutility implements TravelTime, 
 			cost = 	- this.config.getConstantBSS()
 					- inVehTime        * this.config.getMarginalUtilityOfTravelTimeBSS_utl_s() 
 			        - 1.3 * link.getLength() * this.config.getMarginalUtilityOfTravelDistanceBSS_utl_m();
-			
-			System.out.println("");
-			System.out.println("");
-			System.out.println(link.getLength());
-			System.out.println(cost);
-			System.out.println("");
-			System.out.println("");
-			
-			
 		} else {
 			double offVehWaitTime = offVehicleWaitTime(link, time);		
 			double inVehTime = getLinkTravelTime(link,time, person, vehicle) - offVehWaitTime;		
