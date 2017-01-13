@@ -79,8 +79,17 @@ public class TransitRouterNetworkTravelTimeAndDisutility implements TravelTime, 
 		else if(((TransitRouterNetworkLink)link).getRoute().getTransportMode().equals("bikeshare")) {
 			
 			double inVehTime = ((TransitRouterNetworkLink)link).toNode.stop.getArrivalOffset();		
-			cost = 	- inVehTime        * this.config.getMarginalUtilityOfTravelTimeBSS_utl_s() 
-			        - link.getLength() * this.config.getMarginalUtilityOfTravelDistanceBSS_utl_m();
+			cost = 	- this.config.getConstantBSS()
+					- inVehTime        * this.config.getMarginalUtilityOfTravelTimeBSS_utl_s() 
+			        - 1.3 * link.getLength() * this.config.getMarginalUtilityOfTravelDistanceBSS_utl_m();
+			
+			System.out.println("");
+			System.out.println("");
+			System.out.println(link.getLength());
+			System.out.println(cost);
+			System.out.println("");
+			System.out.println("");
+			
 			
 		} else {
 			double offVehWaitTime = offVehicleWaitTime(link, time);		

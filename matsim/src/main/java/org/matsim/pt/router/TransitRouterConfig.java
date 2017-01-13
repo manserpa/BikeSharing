@@ -92,6 +92,8 @@ public class TransitRouterConfig implements MatsimParameters {
 	private double marginalUtilityOfTravelDistanceTransit_utl_m;
 	
 	private double marginalUtilityOfTravelDistanceBSS_utl_m;
+	
+	private double constantBSS;
 
 	private double utilityOfLineSwitch_utl;
 
@@ -132,6 +134,8 @@ public class TransitRouterConfig implements MatsimParameters {
 
 		this.marginalUtilityOfTravelDistanceBSS_utl_m = pcsConfig.getMarginalUtilityOfMoney() * pcsConfig.getModes().get(TransportMode.bss).getMonetaryDistanceRate();
 
+		this.constantBSS = pcsConfig.getModes().get(TransportMode.bss).getConstant();
+		
 		// router:
 		this.setSearchRadius(trConfig.getSearchRadius());
 		this.setExtensionRadius(trConfig.getExtensionRadius());
@@ -217,6 +221,10 @@ public class TransitRouterConfig implements MatsimParameters {
 	
 	public void setBeelineWalkSpeed(final double beelineWalkSpeed) {
 		this.beelineWalkSpeed = beelineWalkSpeed;
+	}
+	
+	public double getConstantBSS() {
+		return this.constantBSS;
 	}
 
 	/**
