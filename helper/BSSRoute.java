@@ -1,5 +1,3 @@
-package bikeshare;
-
 public class BSSRoute {
 	String startid;
 	String endid;
