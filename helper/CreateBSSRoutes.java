@@ -32,9 +32,6 @@ import org.matsim.core.utils.geometry.transformations.TransformationFactory;
 
 import org.opengis.referencing.operation.TransformException;
 
-
-
-
 /*
  * purpose: create bikeshare routes based on a list of stations
  * input file = xml file with stations (copy-paste from transit schedule possible)
@@ -48,21 +45,30 @@ import org.opengis.referencing.operation.TransformException;
  * - base distances on a bike routing instead of beeline distance (benefits: better distance, consider actual slopes instead of difference between start and stop)
  */
 
-// import org.matsim.contrib.matsim4urbansim.utils.network;
-// utils for calculating distances http://www.matsim.org/apidocs/matsim4urbansim/0.7.0/org/matsim/contrib/matsim4urbansim/utils/network/NetworkUtil.html
-
-
 public class CreateBSSRoutes {
-	
+/*
+	// parameter set regular 	
 	static final String setName = "regular"; // e. g. regular, e-bike (used for file name)
 	
-	static final double speed = 15; // unit: km/h, could be differentiated by distance (large distance - assume high speed tracks - higher average speed)
+	static final double speed = 14.4; // unit: km/h
 	static final double deviationFactor = 1.3; // beeline distance gets multiplied by that. should probably better be regressive (i. e. nearly one at high distances, high at low distances)
 	static final double accessTime = 40; // access time in seconds
 	static final double egressTime = 20; // egress time in seconds
-	static final double ascendingSlopeEffect = 10; // controls the effect of ascending slope sections (10 = 1 height metre adds 10 metres) (not used, because elevation is not implemented)
-	static final double descendingSlopeEffect = 2; // controls the effect of descending slope sections (2 = 1 height metre lowers distance by 2 metres) (not used, because elevation is not implemented)
+	static final double ascendingSlopeEffect = 5.0; // controls the effect of ascending slope sections (10 = 1 height metre adds 10 metres) (not used, because elevation is not implemented)
+	static final double descendingSlopeEffect = 2.9; // controls the effect of descending slope sections (2 = 1 height metre lowers distance by 2 metres) (not used, because elevation is not implemented)
+*/
 	
+	// parameter set ebike
+	static final String setName = "ebike"; // e. g. regular, e-bike (used for file name)
+	
+	static final double speed = 19.1; // unit: km/h
+	static final double deviationFactor = 1.3; // beeline distance gets multiplied by that. should probably better be regressive (i. e. nearly one at high distances, high at low distances)
+	static final double accessTime = 40; // access time in seconds
+	static final double egressTime = 20; // egress time in seconds
+	static final double ascendingSlopeEffect = 3.2; // controls the effect of ascending slope sections (10 = 1 height metre adds 10 metres) (not used, because elevation is not implemented)
+	static final double descendingSlopeEffect = 2.6; // controls the effect of descending slope sections (2 = 1 height metre lowers distance by 2 metres) (not used, because elevation is not implemented)
+
+
 	static final String geotiffPath = "C:\\matsim\\dem\\GDAL_ADF_2_GeoTIFF.tif";
 	static final String trafficCRS = "EPSG:26914"; // = CRS of the stops 
 	static final String geodataCRS = "EPSG:4269";  // = CRS of the geotiff
