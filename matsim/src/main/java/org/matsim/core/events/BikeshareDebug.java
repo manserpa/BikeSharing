@@ -9,16 +9,22 @@ import org.matsim.api.core.v01.network.Link;
 
 public class BikeshareDebug extends Event{
 
-	public static final String EVENT_TYPE = "bikeshare debug";
+	public static final String EVENT_TYPE = "bss_leg";
 	
 //	private final Id<Link> linkId;
 	
-	private final String message;
+	private final String fromStationId;
+	private final String toStationId;
+	private final double bssTime;
+	private final double bssDistance;
 	
-	public BikeshareDebug(double time, String message) {
+	public BikeshareDebug(double time, String fromStationId, String toStationId, double bssTime, double bssDistance) {
 		super(time);
 //		this.linkId = linkId;
-		this.message = message;
+		this.fromStationId = fromStationId;
+		this.toStationId = toStationId;
+		this.bssDistance = bssDistance;
+		this.bssTime = bssTime;
 	}
 
 	@Override
@@ -30,8 +36,20 @@ public class BikeshareDebug extends Event{
 		return this.linkId;
 	}
 	*/
-	public String getMessage() {
-		return this.message;
+	public String getFromStationId() {
+		return this.fromStationId;
+	}
+	
+	public String getToStationId() {
+		return this.toStationId;
+	}
+	
+	public double getBSSTime() {
+		return this.bssTime;
+	}
+	
+	public double getBSSDistance() {
+		return this.bssDistance;
 	}
 	
 	@Override
@@ -39,7 +57,10 @@ public class BikeshareDebug extends Event{
 		Map<String, String> attr = new LinkedHashMap<String, String>();
 		attr.put(ATTRIBUTE_TIME, Double.toString(super.getTime()));
 		attr.put(ATTRIBUTE_TYPE, getEventType());
-		attr.put("message",  this.message);
+		attr.put("fromStation",  this.fromStationId);
+		attr.put("toStation",  this.toStationId);
+		attr.put("bssDistance",  Double.toString(this.bssDistance));
+		attr.put("bssTime",  Double.toString(this.bssTime));
 		return attr;
 	}
 

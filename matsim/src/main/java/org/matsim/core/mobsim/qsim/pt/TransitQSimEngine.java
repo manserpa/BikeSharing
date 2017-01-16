@@ -201,8 +201,10 @@ public class TransitQSimEngine implements  DepartureHandler, MobsimEngine, Agent
 		
 		if (requestedMode.equals("bss"))	{
 			EventsManager EM = qSim.getEventsManager();
-			EM.processEvent(new BikeshareDebug(qSim.getSimTimer().getTimeOfDay(), "try to teleport"));
-			EM.processEvent(new BikeshareDebug(qSim.getSimTimer().getTimeOfDay(), "123"));
+			EM.processEvent(new BikeshareDebug(qSim.getSimTimer().getTimeOfDay(), 
+					((PTPassengerAgent) agent).getDesiredAccessStopId().toString(),
+					((PTPassengerAgent) agent).getDesiredDestinationStopId().toString(),
+					agent.getExpectedTravelTime(), agent.getExpectedTravelDistance()));
 			return false;
 		}
 		else if (qSim.getScenario().getConfig().transit().getTransitModes().contains(requestedMode))	{
