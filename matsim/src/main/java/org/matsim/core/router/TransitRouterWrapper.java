@@ -128,7 +128,7 @@ public class TransitRouterWrapper implements RoutingModule {
 				    ExperimentalTransitRoute tRoute = (ExperimentalTransitRoute) leg.getRoute();
 				    tRoute.setTravelTime(leg.getTravelTime());
 	
-				    tRoute.setDistance(tRoute.getDistance());
+				    tRoute.setDistance(RouteUtils.calcDistance(tRoute, transitSchedule, network));
 				    
 				    Activity act =
 						    PopulationUtils.createActivityFromCoordAndLinkId(PtConstants.TRANSIT_ACTIVITY_TYPE, this.transitSchedule.getFacilities().get(tRoute.getAccessStopId()).getCoord(), tRoute.getStartLinkId());
