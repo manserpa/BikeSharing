@@ -127,8 +127,16 @@ public class TransitRouterWrapper implements RoutingModule {
 			    if (leg.getRoute() instanceof ExperimentalTransitRoute) {
 				    ExperimentalTransitRoute tRoute = (ExperimentalTransitRoute) leg.getRoute();
 				    tRoute.setTravelTime(leg.getTravelTime());
-	
-				    tRoute.setDistance(RouteUtils.calcDistance(tRoute, transitSchedule, network));
+				    
+				    if(leg.getMode().equals("bss"))	{
+				    	Facility fromBSSStop = this.transitSchedule.getFacilities().get(tRoute.getAccessStopId());
+					    Facility toBSSStop = this.transitSchedule.getFacilities().get(tRoute.getEgressStopId());
+				    	
+				    	tRoute.setDistance(1.3 * NetworkUtils.getEuclideanDistance(fromBSSStop.getCoord(), toBSSStop.getCoord()));
+				    }
+				    else	{
+				    	tRoute.setDistance(RouteUtils.calcDistance(tRoute, transitSchedule, network));
+				    }
 				    
 				    Activity act =
 						    PopulationUtils.createActivityFromCoordAndLinkId(PtConstants.TRANSIT_ACTIVITY_TYPE, this.transitSchedule.getFacilities().get(tRoute.getAccessStopId()).getCoord(), tRoute.getStartLinkId());
