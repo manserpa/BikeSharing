@@ -22,8 +22,10 @@ import com.google.inject.Key;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.matsim.contrib.socnetsim.framework.SocialNetworkConfigGroup;
+import org.matsim.contrib.socnetsim.framework.replanning.removers.LexicographicForCompositionExtraPlanRemover;
 import org.matsim.contrib.socnetsim.framework.replanning.selectors.coalitionselector.CoalitionSelector;
 import org.matsim.contrib.socnetsim.framework.replanning.selectors.coalitionselector.ProportionBasedConflictSolver;
+import org.matsim.contrib.socnetsim.usage.replanning.GroupReplanningConfigGroup;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Injector;
@@ -53,10 +55,13 @@ public class RunOfflineLocationCoalition {
 						new SocialNetworkConfigGroup(),
 						new LocationAlternativesConfigGroup(),
 						new NegotiatorConfigGroup(),
-						new OfflineCoalitionConfigGroup() );
+						new OfflineCoalitionConfigGroup(),
+						new GroupReplanningConfigGroup() );
 
 		Logger.getLogger( CoalitionSelector.class ).setLevel( Level.TRACE );
 		//Logger.getLogger( ProportionBasedConflictSolver.class ).setLevel( Level.TRACE );
+		//Logger.getLogger( LocationAlternativesGenerator.class ).setLevel( Level.TRACE );
+		// Logger.getLogger( LexicographicForCompositionExtraPlanRemover.class ).setLevel( Level.TRACE );
 
 		try ( AutoCloseable out = MoreIOUtils.initOut( config ) ;
 			  AutoCloseable monitor = MonitoringUtils.monitorAndLogOnClose();

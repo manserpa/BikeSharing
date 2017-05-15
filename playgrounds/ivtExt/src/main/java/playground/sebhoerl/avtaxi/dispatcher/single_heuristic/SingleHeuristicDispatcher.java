@@ -62,9 +62,10 @@ public class SingleHeuristicDispatcher implements AVDispatcher {
     }
 
     @Override
-    public void onNextTaskStarted(AVTask task) {
+    public void onNextTaskStarted(AVVehicle vehicle) {
+    	AVTask task = (AVTask)vehicle.getSchedule().getCurrentTask();
         if (task.getAVTaskType() == AVTask.AVTaskType.STAY) {
-            addVehicle((AVVehicle) task.getSchedule().getVehicle(), ((AVStayTask) task).getLink());
+            addVehicle(vehicle, ((AVStayTask) task).getLink());
         }
     }
 
@@ -141,10 +142,16 @@ public class SingleHeuristicDispatcher implements AVDispatcher {
         reoptimize = true;
     }
 
-    private void removeVehicle(AVVehicle vehicle) {
+    @Override
+    public void removeVehicle(AVVehicle vehicle) {
         availableVehicles.remove(vehicle);
         Coord coord = vehicleLinks.remove(vehicle).getCoord();
         availableVehiclesTree.remove(coord.getX(), coord.getY(), vehicle);
+    }
+
+    @Override
+    public boolean hasVehicle(AVVehicle vehicle) {
+        return availableVehicles.contains(vehicle);
     }
 
     private void removeRequest(AVRequest request) {

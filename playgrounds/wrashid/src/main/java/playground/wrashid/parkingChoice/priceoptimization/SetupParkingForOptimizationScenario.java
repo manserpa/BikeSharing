@@ -18,12 +18,14 @@
  * *********************************************************************** */
 package playground.wrashid.parkingChoice.priceoptimization;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.network.Link;
@@ -36,10 +38,10 @@ import org.matsim.contrib.parking.parkingchoice.PC2.scoring.ParkingBetas;
 import org.matsim.contrib.parking.parkingchoice.PC2.scoring.ParkingCostModel;
 import org.matsim.contrib.parking.parkingchoice.PC2.scoring.ParkingScoreManager;
 import org.matsim.contrib.parking.parkingchoice.PC2.scoring.RandomErrorTermManager;
-import org.matsim.contrib.parking.parkingchoice.PC2.simulation.ParkingInfrastructureManager;
 import org.matsim.contrib.parking.parkingchoice.lib.obj.DoubleValueHashMap;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.groups.PlansCalcRouteConfigGroup;
+import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.io.IOUtils;
@@ -52,6 +54,7 @@ import playground.wrashid.parkingChoice.infrastructure.PrivateParking;
 import playground.wrashid.parkingChoice.infrastructure.api.PParking;
 import playground.wrashid.parkingChoice.priceoptimization.infrastracture.OptimizableParking;
 import playground.wrashid.parkingChoice.priceoptimization.scoring.FreeFloatingParkingScoringFunctionFactory;
+import playground.wrashid.parkingChoice.priceoptimization.simulation.ParkingInfrastructureManager;
 import playground.wrashid.parkingSearch.ppSim.jdepSim.zurich.ParkingLoader;
 import playground.wrashid.parkingSearch.withindayFW.zhCity.CityZone;
 import playground.wrashid.parkingSearch.withindayFW.zhCity.CityZones;
@@ -60,7 +63,7 @@ import playground.wrashid.parkingSearch.withindayFW.zhCity.HighStreetTariffZones
 public class SetupParkingForOptimizationScenario {
 
 
-	public static void prepare(OptimizationParkingModuleZH parkingModule, MatsimServices controler){
+	public static void prepare(OptimizationParkingModuleZH parkingModule, Controler controler) throws IOException{
 		
 
 		Config config = controler.getConfig();
@@ -69,16 +72,15 @@ public class SetupParkingForOptimizationScenario {
 		
 		LinkedList<PParking> parkings = getParking(config, baseDir);
 	
-		ParkingScoreManager parkingScoreManager = prepareParkingScoreManager(parkingModule, parkings);
+		ParkingScoreManager parkingScoreManager = prepareParkingScoreManager(parkingModule, parkings, controler);
 		
-//		EventsManager events = EventsUtils.createEventsManager();
-//		EventWriterXML eventsWriter = new EventWriterXML("c:\\tmp\\events.xml.gz");
-//		events.addHandler(eventsWriter);
-//		
-//		events.resetHandlers(0);
-//		eventsWriter.init("c:\\tmp\\events.xml.gz");
 		
-		ParkingInfrastructureManager pim=new ParkingInfrastructureManager(parkingScoreManager,null);
+		//TODO: input permits from a file
+		
+		String permitsFilePath = "C:\\permits.xml"; 		
+		Map<Id<Person>, Set<String>> permitsPerPerson = readPermits(permitsFilePath);
+		ParkingInfrastructureManager pim = new ParkingInfrastructureManager(parkingScoreManager, null,
+				permitsPerPerson);
 		
 		String cityZonesFilePath = config.getParam("parkingChoice.ZH", "cityZonesFile");
 		CityZones cityZones = new CityZones(cityZonesFilePath);
@@ -147,7 +149,28 @@ public class SetupParkingForOptimizationScenario {
 		
 		parkingModule.setParkingInfrastructurManager(pim);
 		parkingModule.setParkingScoreManager(parkingScoreManager);
-		appendScoringFactory(parkingModule);
+		appendScoringFactory(parkingModule, controler);
+	}
+
+	private static Map<Id<Person>, Set<String>> readPermits(String permitsFilePath) throws IOException {
+
+		Map<Id<Person>, Set<String>> permits = new HashMap<>();
+		
+		final BufferedReader readerPermits = IOUtils.getBufferedReader(permitsFilePath);
+		
+		String s = readerPermits.readLine();
+		
+		while (s != null) {
+			Set<String> allPermits = new HashSet<String>();	
+			String[] arr = s.split(";");
+			for (String p : arr[1].split(","))
+				allPermits.add(p);			
+			
+			permits.put(Id.createPersonId(arr[0]), allPermits);
+			
+			
+		}
+		return permits;
 	}
 
 	private static LinkedList<PParking> getParking(Config config, String baseDir) {
@@ -161,17 +184,16 @@ public class SetupParkingForOptimizationScenario {
 		return parkings;
 	}
 	
-	public static void appendScoringFactory(OptimizationParkingModuleZH parkingModule){
+	public static void appendScoringFactory(OptimizationParkingModuleZH parkingModule, Controler controler){
 
-		parkingModule.getControler().setScoringFunctionFactory(new FreeFloatingParkingScoringFunctionFactory (parkingModule.getControler().getScenario() ,parkingModule.getParkingScoreManager()));
+		controler.setScoringFunctionFactory(new FreeFloatingParkingScoringFunctionFactory (controler.getScenario() ,parkingModule.getParkingScoreManager()));
 	}
 	
-	public static ParkingScoreManager prepareParkingScoreManager(OptimizationParkingModuleZH parkingModule, LinkedList<PParking> parkings) {
-		MatsimServices controler=parkingModule.getControler();
-		ParkingScoreManager parkingScoreManager = new ParkingScoreManager(getWalkTravelTime(parkingModule.getControler()), controler.getScenario() );
+	public static ParkingScoreManager prepareParkingScoreManager(OptimizationParkingModuleZH parkingModule, LinkedList<PParking> parkings, Controler controler) {
+		ParkingScoreManager parkingScoreManager = new ParkingScoreManager(getWalkTravelTime(controler), controler.getScenario() );
 
 
-        ParkingBetas parkingBetas=new ParkingBetas(getHouseHoldIncomeCantonZH(parkingModule.getControler().getScenario().getPopulation()));
+        ParkingBetas parkingBetas=new ParkingBetas(getHouseHoldIncomeCantonZH(controler.getScenario().getPopulation()));
 		parkingBetas.setParkingWalkBeta(controler.getConfig().getParam("parkingChoice.ZH", "parkingWalkBeta"));
 		parkingBetas.setParkingCostBeta(controler.getConfig().getParam("parkingChoice.ZH", "parkingCostBeta"));
 		parkingScoreManager.setParkingBetas(parkingBetas);
@@ -190,7 +212,7 @@ public class SetupParkingForOptimizationScenario {
 			
 			int seed=Integer.parseInt(controler.getConfig().findParam("parkingChoice.ZH", "randomErrorTerm.seed"));
 
-            parkingScoreManager.setRandomErrorTermManger(new RandomErrorTermManager(epsilonDistribution, parkingIds, parkingModule.getControler().getScenario().getPopulation().getPersons().values(),seed));
+            parkingScoreManager.setRandomErrorTermManger(new RandomErrorTermManager(epsilonDistribution, parkingIds, controler.getScenario().getPopulation().getPersons().values(),seed));
 		}
 		
 		return parkingScoreManager;

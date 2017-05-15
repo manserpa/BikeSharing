@@ -9,11 +9,13 @@ import java.util.*;
 
 public class DataFrame {
     @JsonIgnore final public List<String> modes = Arrays.asList("car", "pt", "walk", "av");
+    @JsonIgnore final public List<String> avStates = Arrays.asList("AVStay", "AVRecharge", "AVPickup", "AVDropoff");
     @JsonIgnore final public BinCalculator binCalculator;
 
     final public Map<String, List<Integer>> departureCount;
     final public Map<String, List<Integer>> arrivalCount;
     final public Map<String, List<Double>> travellerCount;
+    final public Map<String, List<Double>> avStateCount;
 
     final public List<Double> waitingCount;
     final public List<List<Double>> waitingTimes;
@@ -31,10 +33,19 @@ public class DataFrame {
     final public Map<Integer, List<Double>> occupancy;
 
     final public List<Double> avDistances;
+    final public Map<String, Long> chainCounts;
+
+    final public String relevantOperator;
 
     public DataFrame(BinCalculator binCalculator) {
+        this(binCalculator, null);
+    }
+
+    public DataFrame(BinCalculator binCalculator, String relevantOperator) {
+        this.relevantOperator = relevantOperator;
         this.binCalculator = binCalculator;
 
+        avStateCount = initialize(avStates, 0.0);
         departureCount = initialize(modes, 0);
         arrivalCount = initialize(modes, 0);
         travellerCount = initialize(modes, 0.0);
@@ -48,12 +59,21 @@ public class DataFrame {
         occupancy = initialize(Arrays.asList(0, 1, 2, 3, 4), 0.0);
 
         avDistances = initialize(0.0);
+        chainCounts = new HashMap<>();
     }
 
     public boolean isOrdinaryPerson(Id<Person> id) {
         if (id.toString().startsWith("av_")) return false;
         if (id.toString().startsWith("pt_")) return false;
         return true;
+    }
+
+    public boolean isAV(String id) {
+        return id.startsWith("av_");
+    }
+
+    public boolean isRelevantOperator(String id) {
+        return id.startsWith("av_") && (relevantOperator == null || id.contains(relevantOperator));
     }
 
     private <T extends Number> List<List<T>> initialize() {

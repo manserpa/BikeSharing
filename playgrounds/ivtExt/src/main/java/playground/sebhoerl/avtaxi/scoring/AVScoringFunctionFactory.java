@@ -11,8 +11,8 @@ import org.matsim.core.scoring.ScoringFunction;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.core.scoring.SumScoringFunction;
 import org.matsim.core.scoring.functions.CharyparNagelScoringFunctionFactory;
-//import org.matsim.core.scoring.functions.ScoringParametersForPerson;
-//import org.matsim.core.scoring.functions.SubpopulationScoringParameters;
+import org.matsim.core.scoring.functions.ScoringParametersForPerson;
+import org.matsim.core.scoring.functions.SubpopulationScoringParameters;
 import playground.sebhoerl.avtaxi.config.AVConfig;
 import playground.sebhoerl.avtaxi.data.AVOperator;
 import playground.sebhoerl.avtaxi.framework.AVModule;
@@ -27,13 +27,13 @@ public class AVScoringFunctionFactory implements ScoringFunctionFactory {
 	final private AVConfig config;
 
 	final private ScoringFunctionFactory standardFactory;
-	//final private ScoringParametersForPerson params;
+	final private ScoringParametersForPerson params;
 
     public AVScoringFunctionFactory(ScoringFunctionFactory standardFactory, Scenario scenario, AVConfig config) {
 		this.config = config;
 		this.standardFactory = standardFactory;
 
-        //params = new SubpopulationScoringParameters(scenario);
+        params = new SubpopulationScoringParameters(scenario);
     }
     
 	@Override

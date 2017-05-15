@@ -1,5 +1,6 @@
 package playground.dziemke.analysis;
 
+import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Leg;
 import org.matsim.api.core.v01.population.Person;
@@ -22,63 +23,85 @@ import java.util.Map;
  * NOTE: Only yields useful results if agents cannot add activities to their plans over the course of the simulation
  */
 public class SelectedPlansAnalyzer {
+
+	public static final Logger log = Logger.getLogger(SelectedPlansAnalyzer.class);
+
 	// Parameters
-	private static final  String runId = "be_118"; // <----------
-	private static final  int numberOfIterations = 300; // <----------
-	private static final  int plansFileInterval = 300; // <----------
-	private static final  boolean useInterimPlans = false;
-	private static final  boolean useOutputPlans = true;
+	private static String runId = "be_122"; // <----------
+	private static int numberOfIterations = 300; // <----------
+	private static int plansFileInterval = 300; // <----------
+	private static boolean useInterimPlans = false;
+	private static boolean useOutputPlans = true;
 	
 	// Input/output
 //	private static final  String directoryRoot = "../../../runs-svn/cemdapMatsimCadyts/" + runId;
-	private static final  String directoryRoot = "../../../runs-svn/berlin_scenario_2016/" + runId;
+	private static String directoryRoot = "../../../runs-svn/berlin_scenario_2016/" + runId;
+
+	private static String alternativeOutputDir = null;
 
 	private static final  Map<Integer, Integer> stayHomePlansMap = new HashMap<>();
 	private static final  Map<Integer, Integer> otherPlansMap = new HashMap<>();
 	private static final  Map<Integer, Integer> carPlansMap = new HashMap<>();
 	private static final  Map<Integer, Integer> ptPlansMap = new HashMap<>();
+	private static final  Map<Integer, Integer> slowPtPlansMap = new HashMap<>();
 	private static final  Map<Integer, Integer> walkPlansMap = new HashMap<>();
 	
 	
 	public static void main(String[] args) {
+		if (args.length != 0) {
+			directoryRoot = args[0];
+			runId = args[1];
+			numberOfIterations = Integer.valueOf(args[2]);
+			plansFileInterval = Integer.valueOf(args[3]);
+			useInterimPlans = Boolean.valueOf(args[4]);
+			useOutputPlans = Boolean.valueOf(args[5]);
+			if (args.length == 7) {
+                alternativeOutputDir = args[6];
+                log.info("AlternativeOutputDir: " + alternativeOutputDir);
+            }
+        }
+        run();
+	}
+
+	public static void run() {
 		if (useInterimPlans) {
 			for (int i = 1; i<= numberOfIterations/plansFileInterval; i++) {
 				//String plansFile = "D:/Workspace/data/cemdapMatsimCadyts/output/" + runId + "/ITERS/it." + i * plansFileInterval
 				String plansFile = directoryRoot + "/ITERS/it." + i * plansFileInterval
 						+ "/" + runId + "." + i * plansFileInterval + ".plans.xml.gz";
-				
+
 				Config config = ConfigUtils.createConfig();
 				Scenario scenario = ScenarioUtils.createScenario(config);
 				PopulationReader reader = new PopulationReader(scenario);
 				reader.readFile(plansFile);
 				Population population = scenario.getPopulation();
-	
+
 				countSelectedPlanTypes(population, i * plansFileInterval);
 			}
 		}
-		
+
 		if (useOutputPlans) {
 			String plansFileOutput = directoryRoot + "/" + runId + ".output_plans.xml.gz";
 			//String plansFileOutput = "D:/Workspace/data/cemdapMatsimCadyts/output/" + runId + "/" + runId + ".output_plans.xml.gz";
-			
+
 			Config config = ConfigUtils.createConfig();
 			Scenario scenario = ScenarioUtils.createScenario(config);
 			PopulationReader reader = new PopulationReader(scenario);
 			reader.readFile(plansFileOutput);
 			Population population = scenario.getPopulation();
-	
+
 			countSelectedPlanTypes (population, 99999);
 		}
-		
+
 		writeFile();
 	}
-	
 	
 	private static void countSelectedPlanTypes (Population population, int iteration) {
 		int counterStayHomePlans = 0;
 		int counterOtherPlans = 0;
 		int counterCarPlans = 0;
 		int counterPtPlans = 0;
+		int counterSlowPtPlans = 0;
 		int counterWalkPlans = 0;
 		String mode;
 		
@@ -107,6 +130,9 @@ public class SelectedPlansAnalyzer {
 							case "pt":
 								counterPtPlans++;
 								break;
+							case "slowPt":
+								counterSlowPtPlans++;
+								break;
 							case "walk":
 								counterWalkPlans++;
 								break;
@@ -131,12 +157,23 @@ public class SelectedPlansAnalyzer {
 		otherPlansMap.put(iteration, counterOtherPlans);
 		carPlansMap.put(iteration, counterCarPlans);
 		ptPlansMap.put(iteration, counterPtPlans);
+		slowPtPlansMap.put(iteration, counterSlowPtPlans);
 		walkPlansMap.put(iteration, counterWalkPlans);
 	}
 
 	
 	private static void writeFile() {
-		new File(directoryRoot + "/analysis").mkdir();
+
+		String path = directoryRoot + "/analysis";
+		if (alternativeOutputDir != null)
+			path = alternativeOutputDir + "/analysis";
+
+		if (new File(path).mkdir()) {
+			log.info(path + " was created");
+		} else {
+			log.warn(path + " was not created");
+		}
+
 		BufferedWriter bufferedWriter = null;
 			
 		try {
@@ -146,12 +183,13 @@ public class SelectedPlansAnalyzer {
 			
 			// Header
 			bufferedWriter.write("It." + "\t" + "stayHomePlans" + "\t" + "otherPlans" + "\t" 
-					+ "carPlans" + "\t" + "ptPlans" + "\t" + "walkPlans");
+					+ "carPlans" + "\t" + "ptPlans" + "\t" + "slowPtPlans" + "\t" + "walkPlans");
 			bufferedWriter.newLine();
 			
 			for (int iteration : stayHomePlansMap.keySet()) {
     			bufferedWriter.write(iteration + "\t" + stayHomePlansMap.get(iteration) + "\t" + otherPlansMap.get(iteration) + "\t" 
-    					+ carPlansMap.get(iteration) + "\t" + ptPlansMap.get(iteration) + "\t" + walkPlansMap.get(iteration));
+    					+ carPlansMap.get(iteration) + "\t" + ptPlansMap.get(iteration) + "\t" + slowPtPlansMap.get(iteration) + "\t"
+    					+ walkPlansMap.get(iteration));
     			bufferedWriter.newLine();
     		}    		
 	    } catch (IOException ex) {

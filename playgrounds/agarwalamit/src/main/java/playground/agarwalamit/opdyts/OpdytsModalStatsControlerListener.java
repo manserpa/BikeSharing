@@ -20,6 +20,7 @@
 package playground.agarwalamit.opdyts;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -120,7 +121,8 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Itera
         realCounts.entrySet().forEach(entry -> simCounts.put(entry.getKey(), new double[entry.getValue().length]));
 
         SortedMap<String, SortedMap<Double, Integer>> simCountsHandler = this.beelineDistanceDistributionHandler.getMode2DistanceClass2LegCounts();
-        for (Map.Entry<String, SortedMap<Double, Integer>> e : simCountsHandler.entrySet() ) {
+        for (Map.Entry<String, SortedMap<Double, Integer>> e : simCountsHandler.entrySet()  ) {
+            if (! realCounts.containsKey(e.getKey())) continue;
             double [] counts = new double [realCounts.get(e.getKey()).length];
             int index = 0;
             for (Integer count : simCountsHandler.get(e.getKey()).values()) {
@@ -165,7 +167,9 @@ public class OpdytsModalStatsControlerListener implements StartupListener, Itera
         }
 
         // dist-distribution file
-        String outFile = event.getServices().getConfig().controler().getOutputDirectory() + "/ITERS/it."+event.getIteration()+"/"+event.getIteration()+".distanceDistri.txt";
+        String distriDir = event.getServices().getConfig().controler().getOutputDirectory()+"/distanceDistri/";
+        new File(distriDir).mkdir();
+        String outFile = distriDir + "/"+event.getIteration()+".distanceDistri.txt";
         writeDistanceDistribution(outFile);
     }
 

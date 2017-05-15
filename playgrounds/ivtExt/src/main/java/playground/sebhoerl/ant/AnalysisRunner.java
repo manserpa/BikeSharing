@@ -16,7 +16,7 @@ public class AnalysisRunner implements Runnable {
     final private String eventsPath;
     final private String outputPath;
 
-    final private DataFrame dataFrame;
+    final public DataFrame dataFrame;
 
     public AnalysisRunner(BinCalculator binCalculator, Network network, String eventsPath, String outputPath) {
         this.binCalculator = binCalculator;
@@ -37,6 +37,7 @@ public class AnalysisRunner implements Runnable {
         events.addHandler(new IdleHandler(dataFrame));
         events.addHandler(new OccupancyHandler(dataFrame));
         events.addHandler(new TimeHandler(dataFrame));
+        events.addHandler(new AVStateHandler(dataFrame));
 
         reader.readFile(eventsPath);
         events.resetHandlers(0);

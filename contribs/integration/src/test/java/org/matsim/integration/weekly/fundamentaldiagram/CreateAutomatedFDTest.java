@@ -288,7 +288,7 @@ public class CreateAutomatedFDTest {
 		String fileName = linkDynamics+"_"+trafficDynamics+".png";
 
 		String outFile ;
-		//ZZ_TODO : what if, there exists some different directory (or files with old filename) => changing method name will keep collecting the old data.
+		//TODO : what if, there exists some different directory (or files with old filename) => changing method name will keep collecting the old data.
 		if(!new File(outDir).exists() || new File(outDir+fileName).exists()){
 			outFile = helper.getOutputDirectory()+fileName;
 		} else {

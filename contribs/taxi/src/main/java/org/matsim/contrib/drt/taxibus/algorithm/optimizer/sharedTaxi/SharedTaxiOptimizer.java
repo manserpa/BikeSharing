@@ -78,8 +78,7 @@ public class SharedTaxiOptimizer extends AbstractTaxibusOptimizer {
 				// Logger.getLogger(getClass()).info(veh.getId() + " "+ type);
 				if (type.equals(DrtTaskType.DRIVE_EMPTY)) {
 
-					Set<DrtRequest> currentRequests = getOptimContext().scheduler
-							.getCurrentlyPlannedRequests(schedule);
+					Set<DrtRequest> currentRequests = getOptimContext().scheduler.getCurrentlyPlannedRequests(schedule);
 					if (currentRequests.size() < 2) {
 						busyVehicles.add(veh);
 					}
@@ -102,7 +101,6 @@ public class SharedTaxiOptimizer extends AbstractTaxibusOptimizer {
 
 				for (DrtRequest all : bestPath.requests) {
 					all.setDropoffTask(null);
-					all.getDriveWithPassengerTask().clear();
 				}
 			}
 		}

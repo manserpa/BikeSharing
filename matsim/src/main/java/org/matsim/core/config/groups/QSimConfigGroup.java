@@ -53,7 +53,7 @@ public final class QSimConfigGroup extends ReflectiveConfigGroup {
 	private static final String SIM_ENDTIME_INTERPRETATION = "simEndtimeInterpretation";
 	
 	public static enum TrafficDynamics { queue, withHoles,
-		KWM //  MATSim-630; previously, the switch was InflowConstraint.maxflowFromFdiag. Amit Jan 2017.
+		kinematicWaves //  MATSim-630; previously, the switch was InflowConstraint.maxflowFromFdiag. Amit Jan 2017.
 	} ;
 	
 	public static enum StarttimeInterpretation { maxOfStarttimeAndEarliestActivityEnd, onlyUseStarttime } ;
@@ -98,7 +98,8 @@ public final class QSimConfigGroup extends ReflectiveConfigGroup {
 	private VehicleBehavior vehicleBehavior = VehicleBehavior.teleport ;
 	// ---
 	private static final String SNAPSHOT_STYLE = "snapshotStyle";
-	public static enum SnapshotStyle { equiDist, queue, withHoles, withHolesAndShowHoles } ;
+	public static enum SnapshotStyle { equiDist, queue, withHoles, withHolesAndShowHoles,
+		kinematicWaves /*kinematicWaves and withHoles produce same snapshots Amit Mar'17*/ } ;
 	private SnapshotStyle snapshotStyle = SnapshotStyle.equiDist ;
 
 	// ---

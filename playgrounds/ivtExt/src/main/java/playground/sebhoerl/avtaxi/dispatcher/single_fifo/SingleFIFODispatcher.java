@@ -47,9 +47,10 @@ public class SingleFIFODispatcher implements AVDispatcher {
     }
 
     @Override
-    public void onNextTaskStarted(AVTask task) {
+    public void onNextTaskStarted(AVVehicle vehicle) {
+    	AVTask task = (AVTask)vehicle.getSchedule().getCurrentTask();
         if (task.getAVTaskType() == AVTask.AVTaskType.STAY) {
-            availableVehicles.add((AVVehicle) task.getSchedule().getVehicle());
+            availableVehicles.add(vehicle);
         }
     }
 
@@ -57,6 +58,16 @@ public class SingleFIFODispatcher implements AVDispatcher {
     public void addVehicle(AVVehicle vehicle) {
         availableVehicles.add(vehicle);
         eventsManager.processEvent(new AVVehicleAssignmentEvent(vehicle, 0));
+    }
+
+    @Override
+    public void removeVehicle(AVVehicle vehicle) {
+        availableVehicles.remove(vehicle);
+    }
+
+    @Override
+    public boolean hasVehicle(AVVehicle vehicle) {
+        return availableVehicles.contains(vehicle);
     }
 
     private void reoptimize(double now) {

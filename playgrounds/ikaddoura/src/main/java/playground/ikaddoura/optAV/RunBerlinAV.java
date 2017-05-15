@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.contrib.av.robotaxi.scoring.TaxiFareConfigGroup;
-import org.matsim.contrib.av.robotaxi.scoring.TaxiFareHandler;
 import org.matsim.contrib.dvrp.data.FleetImpl;
 import org.matsim.contrib.dvrp.data.file.VehicleReader;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
@@ -90,7 +89,7 @@ public class RunBerlinAV {
 			
 		} else {
 			configFile = "/Users/ihab/Documents/workspace/runs-svn/optAV/input/config_be_10pct_test.xml";
-			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/baseCase_test_2taxiTrips/";
+			outputDirectory = "/Users/ihab/Documents/workspace/runs-svn/optAV/output/baseCase_test_2taxiTrips_monetDistanceRate0.0002/";
 			analyzeNoise = false;
 			agentBasedActivityScheduling = false;
 			otfvis = false;
@@ -154,12 +153,6 @@ public class RunBerlinAV {
 		FleetImpl fleet = new FleetImpl();
 		new VehicleReader(scenario.getNetwork(), fleet).readFile(taxiCfg.getTaxisFileUrl(config.getContext()).getFile());
 		
-		controler.addOverridingModule(new AbstractModule() {
-			@Override
-			public void install() {
-				addEventHandlerBinding().to(TaxiFareHandler.class).asEagerSingleton();
-			}
-		});
 		controler.addOverridingModule(new TaxiOutputModule());
 		controler.addOverridingModule(TaxiOptimizerModules.createDefaultModule(fleet));
         
@@ -176,8 +169,6 @@ public class RunBerlinAV {
 				public void install() {
 													
 					addTravelDisutilityFactoryBinding(DefaultTaxiOptimizerProvider.TAXI_OPTIMIZER).toInstance(dvrpTravelDisutilityFactory);
-
-//					this.bind(AgentFilter.class).to(AVAgentFilter.class);
 
 					this.bind(MoneyEventAnalysis.class).asEagerSingleton();
 					this.addControlerListenerBinding().to(MoneyEventAnalysis.class);

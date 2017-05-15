@@ -20,8 +20,8 @@
 package org.matsim.contrib.drt;
 
 import org.matsim.contrib.drt.tasks.*;
+import org.matsim.contrib.dvrp.data.Vehicle;
 import org.matsim.contrib.dvrp.passenger.*;
-import org.matsim.contrib.dvrp.schedule.*;
 import org.matsim.contrib.dvrp.vrpagent.*;
 import org.matsim.contrib.dynagent.*;
 
@@ -40,22 +40,21 @@ public class DrtActionCreator implements VrpAgentLogic.DynActionCreator {
 	}
 
 	@Override
-	public DynAction createAction(DynAgent dynAgent, final Task task, double now) {
-		DrtTask tt = (DrtTask)task;
-
-		switch (tt.getDrtTaskType()) {
+	public DynAction createAction(DynAgent dynAgent, Vehicle vehicle, double now) {
+		DrtTask task = (DrtTask)vehicle.getSchedule().getCurrentTask();;
+		switch (task.getDrtTaskType()) {
 			case DRIVE_EMPTY:
-			case DRIVE_WITH_PASSENGER:
-				return legCreator.createLeg((DriveTask)task);
+			case DRIVE_WITH_PASSENGERS:
+				return legCreator.createLeg(vehicle);
 
 			case PICKUP:
 				final DrtPickupTask pst = (DrtPickupTask)task;
-				return new SinglePassengerPickupActivity(passengerEngine, dynAgent, pst, pst.getRequest(),
+				return new MultiPassengerPickupActivity(passengerEngine, dynAgent, pst, pst.getRequests(),
 						pickupDuration, TAXIBUS_PICKUP_NAME);
 
 			case DROPOFF:
 				final DrtDropoffTask dst = (DrtDropoffTask)task;
-				return new SinglePassengerDropoffActivity(passengerEngine, dynAgent, dst, dst.getRequest(),
+				return new MultiPassengerDropoffActivity(passengerEngine, dynAgent, dst, dst.getRequests(),
 						TAXIBUS_DROPOFF_NAME);
 
 			case STAY:

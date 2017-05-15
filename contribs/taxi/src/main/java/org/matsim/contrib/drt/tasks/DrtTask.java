@@ -22,11 +22,11 @@ package org.matsim.contrib.drt.tasks;
 import org.matsim.contrib.dvrp.schedule.Task;
 
 public interface DrtTask extends Task {
-	static enum DrtTaskType {
+	public static enum DrtTaskType {
 		DRIVE_EMPTY, // drive empty might be needed later.
 		STAY, // not directly related to any customer (although may be related to serving a customer; e.g. a pickup
 				// drive)
-		PICKUP, DRIVE_WITH_PASSENGER, DROPOFF;// serving n customers (TaxibusTaskWithRequests)
+		PICKUP, DRIVE_WITH_PASSENGERS, DROPOFF;// serving n customers (DrtTaskWithRequests)
 	}
 
 	DrtTaskType getDrtTaskType();

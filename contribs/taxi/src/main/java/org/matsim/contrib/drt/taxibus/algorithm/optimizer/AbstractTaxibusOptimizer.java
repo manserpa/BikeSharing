@@ -21,6 +21,7 @@ package org.matsim.contrib.drt.taxibus.algorithm.optimizer;
 
 import java.util.*;
 
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.contrib.drt.DrtRequest;
 import org.matsim.contrib.drt.tasks.DrtTask;
 import org.matsim.contrib.drt.tasks.DrtTask.DrtTaskType;
@@ -94,12 +95,12 @@ public abstract class AbstractTaxibusOptimizer implements TaxibusOptimizer {
 	}
 
 	protected boolean doReoptimizeAfterNextTask(DrtTask newCurrentTask) {
-		return !destinationKnown && newCurrentTask.getDrtTaskType() == DrtTaskType.DRIVE_WITH_PASSENGER;
+		return !destinationKnown && newCurrentTask.getDrtTaskType() == DrtTaskType.DRIVE_WITH_PASSENGERS;
 	}
 
 	@Override
-	public void nextLinkEntered(DriveTask driveTask) {
-		optimContext.scheduler.updateTimeline(driveTask.getSchedule());
+	public void vehicleEnteredNextLink(Vehicle vehicle, Link nextLink) {
+		optimContext.scheduler.updateTimeline(vehicle.getSchedule());
 
 		// TODO we may here possibly decide whether or not to reoptimize
 		// if (delays/speedups encountered) {requiresReoptimization = true;}

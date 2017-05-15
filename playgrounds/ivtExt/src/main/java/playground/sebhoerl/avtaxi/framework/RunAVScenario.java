@@ -10,6 +10,8 @@ import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
+import playground.sebhoerl.avtaxi.routing.AVRoute;
+import playground.sebhoerl.avtaxi.routing.AVRouteFactory;
 
 public class RunAVScenario {
 	public static void main(String[] args) throws MalformedURLException {
@@ -19,7 +21,10 @@ public class RunAVScenario {
 		dvrpConfigGroup.setTravelTimeEstimationAlpha(0.05);
 		
 		Config config = ConfigUtils.loadConfig(configFile, new AVConfigGroup(), dvrpConfigGroup);
-		Scenario scenario = ScenarioUtils.loadScenario(config);
+
+		Scenario scenario = ScenarioUtils.createScenario(config);
+		scenario.getPopulation().getFactory().getRouteFactories().setRouteFactory(AVRoute.class, new AVRouteFactory());
+		ScenarioUtils.loadScenario(scenario);
 
 		Controler controler = new Controler(scenario);
 		controler.addOverridingModule(VrpTravelTimeModules.createTravelTimeEstimatorModule());
