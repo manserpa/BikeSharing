@@ -5,7 +5,6 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.dvrp.trafficmonitoring.VrpTravelTimeModules;
 import org.matsim.core.config.Config;
@@ -17,7 +16,6 @@ import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.TravelTime;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 
-import org.matsim.core.scoring.functions.CharyparNagelScoringFunctionFactory;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleUtils;
 import org.opengis.filter.capability.Operator;
@@ -34,7 +32,6 @@ import playground.sebhoerl.avtaxi.routing.AVParallelRouterFactory;
 import playground.sebhoerl.avtaxi.routing.AVRoute;
 import playground.sebhoerl.avtaxi.routing.AVRouteFactory;
 import playground.sebhoerl.avtaxi.routing.AVRoutingModule;
-import playground.sebhoerl.avtaxi.scoring.AVScoringFunction;
 import playground.sebhoerl.avtaxi.scoring.AVScoringFunctionFactory;
 import playground.sebhoerl.plcpc.ParallelLeastCostPathCalculator;
 import playground.sebhoerl.plcpc.ParallelLeastCostPathCalculatorFactory;
@@ -53,7 +50,7 @@ public class AVModule extends AbstractModule {
 	@Override
 	public void install() {
         addRoutingModuleBinding(AV_MODE).to(AVRoutingModule.class);
-        bind(ScoringFunctionFactory.class).to(AVScoringFunctionFactory.class);
+        bind(ScoringFunctionFactory.class).to(AVScoringFunctionFactory.class).asEagerSingleton();
         addControlerListenerBinding().to(AVLoader.class);
 
         bind(AVOperatorChoiceStrategy.class);
@@ -184,10 +181,5 @@ public class AVModule extends AbstractModule {
         }
 
         return vehicles;
-    }
-
-    @Provides @Singleton
-    public AVScoringFunctionFactory provideAVScoringFunctionFactory(Scenario scenario, AVConfig config) {
-        return new AVScoringFunctionFactory(new CharyparNagelScoringFunctionFactory(scenario), scenario, config);
     }
 }

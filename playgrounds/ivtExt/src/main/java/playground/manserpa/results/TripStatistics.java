@@ -69,8 +69,10 @@ public final class TripStatistics {
 	}
 	
 	private void run(String networkFile, String transitScheduleFile, String eventFile) throws IOException	{
-	
+		
+		List<String> transitRoutesInScenario = new ArrayList<>();
 		HashMap<String, Double> linkLength = new HashMap<String, Double>();
+		HashSet<String> transitVehicles	= new HashSet<String>();
 		
 		HashMap<String, String> person2trip = new HashMap<String, String>();
 		HashSet<String> person2firstAct = new HashSet<String>();
@@ -109,6 +111,78 @@ public final class TripStatistics {
 				}
 			};
 			
+			DefaultHandler handler2 = new DefaultHandler()	{
+				
+				String transitRoute;
+				boolean isInScenario = true;
+				boolean getMode = false;
+				String transitMode;
+				boolean crossesScenario = false;
+				boolean isParatransit = false;
+				
+				public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException	{
+					
+					if(qName.equalsIgnoreCase("transitRoute"))	{
+						transitRoute = attributes.getValue("id");
+						isInScenario = true;
+						crossesScenario = false;
+						if (!transitRoute.contains("para"))
+							isParatransit = false;
+						else
+							isParatransit = true;
+					}
+					
+					if(qName.equalsIgnoreCase("transportMode"))	{
+						if(isParatransit)	{
+							getMode = false;
+							transitMode = "bus";
+						}
+						else	{
+							getMode = true; 
+						}
+					}	
+					
+					if(qName.equalsIgnoreCase("link"))	{
+						if(linkList.contains(attributes.getValue("refId")))	{
+							crossesScenario = true;
+						}
+						
+						if(linkList.contains(attributes.getValue("refId")) && isInScenario)	{
+							isInScenario = true;
+						}
+						else	{
+							isInScenario = false;
+						}	
+					}			
+					
+					if(qName.equals("departure") && crossesScenario && !transitMode.equals("pt")) {
+			        	transitVehicles.add(attributes.getValue("vehicleRefId"));
+			        }
+				}
+				
+				public void endElement(String uri, String localName, String qName)
+			            throws SAXException {
+					
+			        if(qName.equals("transportMode")) {
+			        	getMode = false;
+			        }
+					
+			        if(qName.equals("transitRoute")) {
+			        	if(crossesScenario && !transitMode.equals("pt"))	{
+			        		// ArrayList containing all the IDs
+			        		transitRoutesInScenario.add(transitRoute);
+			        		//System.out.println("Line: " + transitLine + "; Route: " + transitRoute + "; Mode: " + transitMode);	
+			        	}
+			        }
+			    }
+				
+				 public void characters(char[] ch, int start, int length) throws SAXException {
+				        if (getMode) {
+				            transitMode = new String(ch, start, length);
+				        }
+				 }
+			};
+			
 			DefaultHandler handler3 = new DefaultHandler()	{
 				
 				
@@ -117,20 +191,20 @@ public final class TripStatistics {
 					if(qName.equalsIgnoreCase("event"))	{
 						
 						if(attributes.getValue("type").equals("actstart"))	{
-							if(!attributes.getValue("actType").equals("pt interaction") && person2firstAct.contains(attributes.getValue("person")) &&
-									person2trip.containsKey(attributes.getValue("person")))	{
+							if(!attributes.getValue("actType").equals("pt interaction") && person2trip.containsKey(attributes.getValue("person")))	{
 								// this must be the second activity -> trip finished!
 								
-								if (person2PT.contains(attributes.getValue("person")) && linkList.contains(attributes.getValue("link")))	{
+								//if (person2PT.contains(attributes.getValue("person")) && linkList.contains(attributes.getValue("link")))	{
+								if (person2PT.contains(attributes.getValue("person")))	{
 									person2trip.put(attributes.getValue("person"), person2trip.get(attributes.getValue("person")) + 
 											"===PersonArrives" + attributes.getValue("actType") + "===" + attributes.getValue("time"));
+									System.out.println(person2trip.get(attributes.getValue("person")));
 									person2PTTrip.put(attributes.getValue("person"), person2trip.get(attributes.getValue("person")));
 									// process the trip
 								}
 								
 								person2PT.remove(attributes.getValue("person"));
 								person2trip.remove(attributes.getValue("person"));
-								person2firstAct.remove(attributes.getValue("person"));
 							}
 						}
 						
@@ -138,41 +212,52 @@ public final class TripStatistics {
 						if(attributes.getValue("type").equals("actend"))	{
 							
 							// this must be an agent in the set not using pt -> remove it!
-							if(person2trip.containsKey(attributes.getValue("person")) && person2firstAct.contains(attributes.getValue("person")))	{
-								
+							if(person2trip.containsKey(attributes.getValue("person")))	{
+								/*
 								if(!attributes.getValue("actType").equals("pt interaction"))	{
 									person2trip.remove(attributes.getValue("person"));
 								}
-								
+								*/
 								// the person is on a PT trip
-								if(attributes.getValue("actType").equals("pt interaction"))	{
-									person2PT.add(attributes.getValue("person"));
-								}
+								//if(attributes.getValue("actType").equals("pt interaction"))	{
+								//	person2PT.add(attributes.getValue("person"));
+								//}
 								
-								if(linkList.contains(attributes.getValue("link")) && attributes.getValue("actType").equals("pt interaction"))	{
+								//if(linkList.contains(attributes.getValue("link")) && attributes.getValue("actType").equals("pt interaction"))	{
+								if(attributes.getValue("actType").equals("pt interaction"))	{
 									person2trip.put(attributes.getValue("person"), person2trip.get(attributes.getValue("person")) + 
 											"===PT_InteractionEnds===" + attributes.getValue("time"));
+									person2PT.add(attributes.getValue("person"));
+								}
+								else	{
+									person2trip.remove(attributes.getValue("person"));
 								}
 								
 								// pt interaction is not in the service area
-								if(!linkList.contains(attributes.getValue("link")) && attributes.getValue("actType").equals("pt interaction"))	{
-									person2trip.remove(attributes.getValue("person"));
-								}
+								//if(!linkList.contains(attributes.getValue("link")) && attributes.getValue("actType").equals("pt interaction"))	{
+								//	person2trip.remove(attributes.getValue("person"));
+								//}
 							}	
 							
 							
 							// this must be the first activity -> trip started!
-							if(linkList.contains(attributes.getValue("link")) && !attributes.getValue("actType").equals("pt interaction")
-									&& !person2firstAct.contains(attributes.getValue("person")))	{
-								
+							//if(linkList.contains(attributes.getValue("link")) && !attributes.getValue("actType").equals("pt interaction")
+							//		&& !person2firstAct.contains(attributes.getValue("person")))	{
+							if(!attributes.getValue("actType").equals("pt interaction") && !person2trip.containsKey(attributes.getValue("person")))	{	
 								person2trip.put(attributes.getValue("person"), "PersonLeaves" + attributes.getValue("actType") + "===" + attributes.getValue("time"));
-								person2firstAct.add(attributes.getValue("person"));
+								person2PT.remove(attributes.getValue("person"));
 							}
 						}
 						
 						if(attributes.getValue("type").equals("PersonEntersVehicle") && person2trip.containsKey(attributes.getValue("person")))	{
-							person2trip.put(attributes.getValue("person"), person2trip.get(attributes.getValue("person")) + 
-									"===PersonEntersVehicle" + attributes.getValue("vehicle") + "===" + attributes.getValue("time"));
+							if (transitVehicles.contains(attributes.getValue("vehicle")))	{
+								// prüfen, ob das Vehicle in der Liste ist -> sonst Person removen
+								person2trip.put(attributes.getValue("person"), person2trip.get(attributes.getValue("person")) + 
+										"===PersonEntersVehicle" + attributes.getValue("vehicle") + "===" + attributes.getValue("time"));
+							}
+							else	{
+								person2trip.remove(attributes.getValue("person"));
+							}
 						}
 					}		
 				}
@@ -184,7 +269,7 @@ public final class TripStatistics {
 			};
 			
 			saxParser.parse(networkFile, handler);
-			
+			saxParser.parse(transitScheduleFile, handler2);
 			saxParser.parse(eventFile, handler3);
 			
 			List<Double> accessTime = new ArrayList<>();
@@ -264,13 +349,13 @@ public final class TripStatistics {
 			String csvFile = "TripStats.csv";
 		    FileWriter writer = new FileWriter(csvFile);
 		    
-		    CSVUtils.writeLine(writer, Arrays.asList("NumberOfTrips", "AccessWalk", "EgressWalk", "InVehicleTime", "Transfers", "FirstWaitingTime",
+		    CSVUtils.writeLine(writer, Arrays.asList("NumberOfTrips", "AccessWalk [m]", "EgressWalk [m]", "InVehicleTime", "Transfers", "FirstWaitingTime",
 		    		"TransferWaitingTime", "TripTime"), ';');
 			
 			try {
-				CSVUtils.writeLine(writer, Arrays.asList(Integer.toString(person2trip.size()), Double.toString(meanAccessTime), 
-						Double.toString(meanEgressTime), Double.toString(meanInVehicleTime), Double.toString(meanNumberOfTransfers),
-						Double.toString(meanFirstWaitingTime), Double.toString(meanTransferWaitingTime), Double.toString(meanTotalTripTime)), ';');
+				CSVUtils.writeLine(writer, Arrays.asList(Integer.toString(person2trip.size()), Double.toString(meanAccessTime * 1.3111111111111111), 
+						Double.toString(meanEgressTime * 1.3111111111111111), Double.toString(meanInVehicleTime / 60), Double.toString(meanNumberOfTransfers),
+						Double.toString(meanFirstWaitingTime / 60), Double.toString(meanTransferWaitingTime / 60), Double.toString(meanTotalTripTime / 60)), ';');
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

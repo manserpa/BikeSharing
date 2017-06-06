@@ -19,12 +19,15 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
 import org.matsim.contrib.dvrp.trafficmonitoring.VrpTravelTimeModules;
 import org.matsim.contrib.dynagent.run.DynQSimModule;
+import org.matsim.contrib.minibus.PConfigGroup;
+import org.matsim.contrib.minibus.hook.PModule;
 import org.matsim.contrib.zone.io.ZoneShpReader;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
+import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.router.StageActivityTypesImpl;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunction;
@@ -46,11 +49,14 @@ import playground.zurich_av.replanning.ZurichPlanStrategyProvider;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.*;
 import java.util.stream.Collector;
@@ -65,15 +71,19 @@ public class RunZurichWithAV {
         DvrpConfigGroup dvrpConfigGroup = new DvrpConfigGroup();
         dvrpConfigGroup.setTravelTimeEstimationAlpha(0.05);
 
-        Config config = ConfigUtils.loadConfig(configFile, new AVConfigGroup(), dvrpConfigGroup, new BlackListedTimeAllocationMutatorConfigGroup());
+        Config config = ConfigUtils.loadConfig(configFile, new PConfigGroup(), new AVConfigGroup(), dvrpConfigGroup, new BlackListedTimeAllocationMutatorConfigGroup());
         Scenario scenario = ScenarioUtils.loadScenario(config);
 
         // 2. Basic controller setup
 
         Controler controler = new Controler(scenario);
+        controler.getConfig().controler().setCreateGraphs(false);
+        ConfigUtils.addOrGetModule(controler.getConfig(), PConfigGroup.class ).setUseAVContrib(true);
         controler.addOverridingModule(VrpTravelTimeModules.createTravelTimeEstimatorModule());
         controler.addOverridingModule(new DynQSimModule<>(AVQSimProvider.class));
         controler.addOverridingModule(new AVModule());
+        
+        controler.addOverridingModule(new PModule()) ;
 
         // 3. IVT-specifics
 
@@ -90,6 +100,21 @@ public class RunZurichWithAV {
                         scenario, config);
             }
         });
+        
+        String line = "";
+        String agentsToDeleteFile = "AgentsToDelete.csv";
+        
+        if(agentsToDeleteFile != null)	{
+	        try (BufferedReader br = new BufferedReader(new FileReader(agentsToDeleteFile))) {
+	
+	            while ((line = br.readLine()) != null) {
+	            	scenario.getPopulation().removePerson(Id.create(line, Person.class));
+	            }
+	
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+        }
 
         // 4. Set up permissible AV links
 
@@ -112,7 +137,7 @@ public class RunZurichWithAV {
             @Override
             public void install() {
                 bind(new TypeLiteral<Collection<Link>>() {}).annotatedWith(Names.named("zurich")).toInstance(filteredPermissibleLinks);
-                //AVUtils.registerDispatcherFactory(binder(), "ZurichDispatcher", ZurichDispatcher.ZurichDispatcherFactory.class);
+                AVUtils.registerDispatcherFactory(binder(), "ZurichDispatcher", ZurichDispatcher.ZurichDispatcherFactory.class);
                 AVUtils.registerGeneratorFactory(binder(), "ZurichGenerator", ZurichGenerator.ZurichGeneratorFactory.class);
 
                 addPlanStrategyBinding("ZurichModeChoice").toProvider(ZurichPlanStrategyProvider.class);
@@ -121,6 +146,18 @@ public class RunZurichWithAV {
 
         // 5. Run
 
-        controler.run();
+      //note a single Random object is reused here
+        Random randomGenerator = new Random();
+        int randomInt = randomGenerator.nextInt(1500) + 1000;
+        
+        long randomSeed = (long) (randomInt);
+        	
+	    config.global().setRandomSeed(randomSeed);
+	    String outputdir = config.controler().getOutputDirectory();
+	    config.controler().setOutputDirectory(outputdir + "Seed" + randomSeed);
+	        
+	    config.controler().setOverwriteFileSetting(OverwriteFileSetting.failIfDirectoryExists);
+	    
+	    controler.run();
     }
 }

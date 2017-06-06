@@ -25,26 +25,25 @@ import java.util.Queue;
 @Singleton
 public class AVScoringFunctionFactory implements ScoringFunctionFactory {
 	final private AVConfig config;
-
 	final private ScoringFunctionFactory standardFactory;
 	final private ScoringParametersForPerson params;
 
+	@Inject
     public AVScoringFunctionFactory(ScoringFunctionFactory standardFactory, Scenario scenario, AVConfig config) {
 		this.config = config;
-		this.standardFactory = standardFactory;
-
         params = new SubpopulationScoringParameters(scenario);
+        this.standardFactory = standardFactory;
     }
     
 	@Override
 	public ScoringFunction createNewScoringFunction(Person person) {
 		SumScoringFunction sf = (SumScoringFunction) standardFactory.createNewScoringFunction(person);
 
-		//double marginalUtilityOfMoney = params.getScoringParameters(person).marginalUtilityOfMoney;
-		//double marginalUtilityOfTraveling = params.getScoringParameters(person)
-        //        .modeParams.get(AVModule.AV_MODE).marginalUtilityOfTraveling_s;
+		double marginalUtilityOfMoney = params.getScoringParameters(person).marginalUtilityOfMoney;
+		double marginalUtilityOfTraveling = params.getScoringParameters(person)
+                .modeParams.get(AVModule.AV_MODE).marginalUtilityOfTraveling_s;
 
-        //sf.addScoringFunction(new AVScoringFunction(config, person, marginalUtilityOfMoney, marginalUtilityOfTraveling));
+        sf.addScoringFunction(new AVScoringFunction(config, person, marginalUtilityOfMoney, marginalUtilityOfTraveling));
 
 		return sf;
 	}

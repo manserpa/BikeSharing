@@ -67,8 +67,8 @@ abstract class AbstractOperator implements Operator{
 	private int numberOfIterationsForProspecting;
 	
 	double budget;
-	private double score;
-	private double scoreLastIteration;
+	double score;
+	double scoreLastIteration;
 	int numberOfVehiclesInReserve;
 	
 	PRouteProvider routeProvider;
@@ -109,42 +109,33 @@ abstract class AbstractOperator implements Operator{
 	}
 
 	@Override
-	public void score(Map<Id<Vehicle>, PScoreContainer> driverId2ScoreMap, SubsidyI subsidy) {
-		this.setScoreLastIteration(this.getScore());
-		this.setScore(0);
+	public void score(Map<Id<Vehicle>, PScoreContainer> driverId2ScoreMap) {
+		this.scoreLastIteration = this.score;
+		this.score = 0;
 		
 		// score all plans
 		for (PPlan plan : this.getAllPlans()) {
 			scorePlan(driverId2ScoreMap, plan);
-			
-			if (subsidy != null) {
-				Id<PPlan> pplanId = Id.create(plan.getLine().getId().toString() + "-" + plan.getId().toString(), PPlan.class);
-				double subsidyAmount = subsidy.getSubsidy(pplanId);
-				double newPlanScore = subsidyAmount + plan.getScore();
-				plan.setScore(newPlanScore);
-			}
-			
-			this.setScore(this.getScore() + plan.getScore());
-
+			this.score += plan.getScore();
 			for (TransitRoute route : plan.getLine().getRoutes().values()) {
-				route.setDescription(plan.toString(this.budget + this.getScore()));
+				route.setDescription(plan.toString(this.budget + this.score));
 			}
 		}
 		
 		processScore();
 	}
 	
-	void processScore() {
+	protected void processScore() {
 		// score all vehicles not associated with plans
-		setScore(getScore() - this.numberOfVehiclesInReserve * this.costPerVehicleAndDay);
+		score -= this.numberOfVehiclesInReserve * this.costPerVehicleAndDay;
 		
-		if (this.getScore() > 0.0) {
+		if (this.score > 0.0) {
 			this.operatorState = OperatorState.INBUSINESS;
 		}
 		
 		if (this.operatorState.equals(OperatorState.PROSPECTING)) {
 			if(this.numberOfIterationsForProspecting == 0){
-				if (this.getScore() < 0.0) {
+				if (this.score < 0.0) {
 					// no iterations for prospecting left and score still negative - terminate
 					this.operatorState = OperatorState.BANKRUPT;
 				}
@@ -152,7 +143,7 @@ abstract class AbstractOperator implements Operator{
 			this.numberOfIterationsForProspecting--;
 		}
 
-		this.budget += this.getScore();
+		this.budget += this.score;
 		
 		// check, if bankrupt
 		if(this.budget < 0){
@@ -280,7 +271,7 @@ abstract class AbstractOperator implements Operator{
 		}
 	}
 
-	private final static void scorePlan(Map<Id<Vehicle>, PScoreContainer> driverId2ScoreMap, PPlan plan) {
+	protected final void scorePlan(Map<Id<Vehicle>, PScoreContainer> driverId2ScoreMap, PPlan plan) {
 		double totalLineScore = 0.0;
 		int totalTripsServed = 0;
 		double totalMeterDriven = 0.0;
@@ -301,22 +292,6 @@ abstract class AbstractOperator implements Operator{
 		plan.setTotalHoursDrivenPerVehicle(totalTimeDriven / (3600 * plan.getNVehicles()));
 		plan.setPassengerKilometerPerVehicle(totalPassengerKilometer / plan.getNVehicles());
 		plan.setTotalPassengerKilometer(totalPassengerKilometer);
-	}
-
-	double getScore() {
-		return score;
-	}
-
-	void setScore(double score) {
-		this.score = score;
-	}
-
-	double getScoreLastIteration() {
-		return scoreLastIteration;
-	}
-
-	void setScoreLastIteration(double scoreLastIteration) {
-		this.scoreLastIteration = scoreLastIteration;
 	}
 	
 }

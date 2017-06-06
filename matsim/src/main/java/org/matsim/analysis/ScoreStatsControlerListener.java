@@ -22,6 +22,7 @@ package org.matsim.analysis;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -100,7 +101,7 @@ public class ScoreStatsControlerListener implements StartupListener, IterationEn
 		this.createPNG = controlerConfigGroup.isCreateGraphs();
 		this.out = IOUtils.getBufferedWriter(this.fileName + ".txt");
 		try {
-			this.out.write("ITERATION\tavg. EXECUTED\tavg. WORST\tavg. AVG\tavg. BEST\n");
+			this.out.write("ITERATION\tavg. EXECUTED\tavg. WORST\tavg. AVG\tavg. BEST\tMEDIAN\n");
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
@@ -131,6 +132,7 @@ public class ScoreStatsControlerListener implements StartupListener, IterationEn
 		int nofScoreBest = 0;
 		int nofAvgScores = 0;
 		int nofExecutedScores = 0;
+		List<Double> scoreList = new ArrayList<>();
 
 		for (Person person : this.population.getPersons().values()) {
 			Plan worstPlan = null;
@@ -139,6 +141,7 @@ public class ScoreStatsControlerListener implements StartupListener, IterationEn
 			double bestScore = Double.NEGATIVE_INFINITY;
 			double sumScores = 0.0;
 			double cntScores = 0;
+			
 			for (Plan plan : person.getPlans()) {
 
 				if (plan.getScore() == null) {
@@ -172,6 +175,7 @@ public class ScoreStatsControlerListener implements StartupListener, IterationEn
 				if (PersonUtils.isSelected(plan)) {
 					sumExecutedScores += score;
 					nofExecutedScores++;
+					scoreList.add(score);
 				}
 			}
 
@@ -188,6 +192,10 @@ public class ScoreStatsControlerListener implements StartupListener, IterationEn
 				nofAvgScores++;
 			}
 		}
+		
+		Collections.sort(scoreList);
+		int median = (int) (0.5 * scoreList.size());		
+		
 		log.info("-- avg. score of the executed plan of each agent: " + (sumExecutedScores / nofExecutedScores));
 		log.info("-- avg. score of the worst plan of each agent: " + (sumScoreWorst / nofScoreWorst));
 		log.info("-- avg. of the avg. plan score per agent: " + (sumAvgScores / nofAvgScores));
@@ -195,7 +203,8 @@ public class ScoreStatsControlerListener implements StartupListener, IterationEn
 
 		try {
 			this.out.write(event.getIteration() + "\t" + (sumExecutedScores / nofExecutedScores) + "\t" +
-					(sumScoreWorst / nofScoreWorst) + "\t" + (sumAvgScores / nofAvgScores) + "\t" + (sumScoreBest / nofScoreBest) + "\n");
+					(sumScoreWorst / nofScoreWorst) + "\t" + (sumAvgScores / nofAvgScores) + "\t" + (sumScoreBest / nofScoreBest) 
+					+ "\t" + scoreList.get(median) + "\n");
 			this.out.flush();
 		} catch (IOException e) {
 			e.printStackTrace();

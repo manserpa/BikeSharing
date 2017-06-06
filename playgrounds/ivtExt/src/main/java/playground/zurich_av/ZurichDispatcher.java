@@ -60,4 +60,15 @@ public class ZurichDispatcher implements AVDispatcher {
             return new ZurichDispatcher(dispatcherFactories.get(delegateName).createDispatcher(config), permissibleLinks);
         }
     }
+
+	@Override
+	public void removeVehicle(AVVehicle vehicle) {
+		delegate.removeVehicle(vehicle);
+		
+	}
+
+	@Override
+	public boolean hasVehicle(AVVehicle vehicle) {
+		return delegate.hasVehicle(vehicle);
+	}
 }

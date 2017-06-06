@@ -146,7 +146,29 @@ public final class ChooseVehicleType extends AbstractPStrategyModule {
 			double headwayNew =  (this.pConfig.getDriverRestTime() + route.getStops().get(route.getStops().size() - 1).getDepartureOffset()) / newPlan.getNVehicles();
 			double vehiclesPerHourNew = 3600 / headwayNew;
 			
-			double demandRatio = (2.2 * Math.log(vehiclesPerHourNew) + 1) / (2.2 * Math.log(vehiclesPerHourOld) + 1);
+			double demandRatioOld;
+			if(vehiclesPerHourOld < 1)	{
+				demandRatioOld = vehiclesPerHourOld;
+			}
+			else if	(vehiclesPerHourOld > 6)	{
+				demandRatioOld = 2.2 * Math.log10(6) + 1;
+			}
+			else	{
+				demandRatioOld = 2.2 * Math.log10(vehiclesPerHourOld) + 1;
+			}
+			
+			double demandRatioNew;
+			if(vehiclesPerHourNew < 1)	{
+				demandRatioNew = vehiclesPerHourNew;
+			}
+			else if	(vehiclesPerHourNew > 6)	{
+				demandRatioNew = 2.2 * Math.log10(6) + 1;
+			}
+			else	{
+				demandRatioNew = 2.2 * Math.log10(vehiclesPerHourNew) + 1;
+			}
+			
+ 			double demandRatio = demandRatioNew / demandRatioOld;
 			
 			// now I can calculate the expected passenger kilometers with the new Takt
 			double expectedPaxKilometer = oldPlan.getTotalPassengerKilometer() * demandRatio;

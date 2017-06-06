@@ -226,14 +226,13 @@ final class TimeAwareComplexCircleScheduleProvider implements PRouteProvider{
 			
 			if (tempStopsToBeServed.get(k).getLinkId().equals(link.getId()))	{
 				
-				// additional time lost due to braking/accelerating
-				runningTime += 3;
-				
 				// different from {@link ComplexCircleScheduleProvider}		
 				if(isSameStopSequenceAsLastIteration)	{
 					if(tempStopsToBeServed.get(k).equals(this.handler.getServedStopsInLastIteration(routeID, stops.size())))	{
-						runningTime = modifyRunningTimeAccordingToTheLastIterationIfPossible(runningTime, 
+						double runningTimeMod = modifyRunningTimeAccordingToTheLastIterationIfPossible(runningTime, 
 								this.handler.getOffsetForRouteAndStopNumber(routeID, stops.size()));
+						if (runningTimeMod > runningTime)
+							runningTime = runningTimeMod;
 					}
 					else	{
 						isSameStopSequenceAsLastIteration = false;
@@ -242,6 +241,7 @@ final class TimeAwareComplexCircleScheduleProvider implements PRouteProvider{
 				
 				routeStop = this.scheduleWithStopsOnly.getFactory().createTransitRouteStop(tempStopsToBeServed.get(k), 
 						runningTime, runningTime + getMinStopTime(capacity));
+				runningTime += getMinStopTime(capacity);
 				
 				tempStopsToBeServedNew.add(tempStopsToBeServed.get(k));
 				
@@ -261,14 +261,14 @@ final class TimeAwareComplexCircleScheduleProvider implements PRouteProvider{
 				
 				// hier muss jetzt geprüft werden, ob die Anzahl Aktivitäten überdurchschnittlich hoch sind
 				if(this.randomStopProvider.hasHighNumberOfActivitiesInGrid(gridNode))	{
-				
-					runningTime += 3;
 					
 					// different from {@link ComplexCircleScheduleProvider}
 					if(isSameStopSequenceAsLastIteration)	{
 						if(this.linkId2StopFacilityMap.get(link.getId()).equals(this.handler.getServedStopsInLastIteration(routeID, stops.size())))	{
-							runningTime = modifyRunningTimeAccordingToTheLastIterationIfPossible(runningTime, 
+							double runningTimeMod = modifyRunningTimeAccordingToTheLastIterationIfPossible(runningTime, 
 									this.handler.getOffsetForRouteAndStopNumber(routeID, stops.size()));
+							if (runningTimeMod > runningTime)
+								runningTime = runningTimeMod;
 						}
 						else	{
 							isSameStopSequenceAsLastIteration = false;
@@ -277,6 +277,7 @@ final class TimeAwareComplexCircleScheduleProvider implements PRouteProvider{
 					
 					routeStop = this.scheduleWithStopsOnly.getFactory().createTransitRouteStop(this.linkId2StopFacilityMap.get(link.getId()), 
 							runningTime, runningTime + getMinStopTime(capacity));
+					runningTime += getMinStopTime(capacity);
 					
 					tempStopsToBeServedNew.add(this.linkId2StopFacilityMap.get(link.getId()));
 					
@@ -288,16 +289,15 @@ final class TimeAwareComplexCircleScheduleProvider implements PRouteProvider{
 			}
 		}
 		
-		//TODO: überprüfen
-		//this.pOperatorPlan.setStopsToBeServed(tempStopsToBeServedNew);
-		
 		// last stop
-		runningTime += (3 + this.net.getLinks().get(tempStopsToBeServed.get(0).getLinkId()).getLength() / (Math.min(this.vehicleMaximumVelocity, this.net.getLinks().get(tempStopsToBeServed.get(0).getLinkId()).getFreespeed()) * this.planningSpeedFactor));
+		runningTime += (this.net.getLinks().get(tempStopsToBeServed.get(0).getLinkId()).getLength() / (Math.min(this.vehicleMaximumVelocity, this.net.getLinks().get(tempStopsToBeServed.get(0).getLinkId()).getFreespeed()) * this.planningSpeedFactor));
 		
 		// different from {@link ComplexCircleScheduleProvider}
 		if(isSameStopSequenceAsLastIteration)	{
 			if(tempStopsToBeServed.get(0).equals(this.handler.getServedStopsInLastIteration(routeID, stops.size())))	{
-				runningTime = modifyRunningTimeAccordingToTheLastIterationIfPossible(runningTime, this.handler.getOffsetForRouteAndStopNumber(routeID, stops.size()));
+				double runningTimeMod = modifyRunningTimeAccordingToTheLastIterationIfPossible(runningTime, this.handler.getOffsetForRouteAndStopNumber(routeID, stops.size()));
+				if (runningTimeMod > runningTime)
+					runningTime = runningTimeMod;
 			}
 		}
 		
@@ -310,7 +310,7 @@ final class TimeAwareComplexCircleScheduleProvider implements PRouteProvider{
 	}
 	
 	public int getMinStopTime(double capacity){
-		int minStopTime = (int) (0.125 * capacity + 2.5);
+		int minStopTime = (int) (0.2 * capacity + 15);
 		return minStopTime;
 	}
 

@@ -26,6 +26,9 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.contrib.minibus.operator.BasicOperator;
+import org.matsim.contrib.minibus.operator.WelfareCarefulMultiPlanOperator;
+import org.matsim.contrib.minibus.replanning.ReduceStopsToBeServedRFare;
+import org.matsim.contrib.minibus.replanning.ReduceTimeServedRFare;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.utils.misc.StringUtils;
@@ -169,7 +172,9 @@ public final class PConfigGroup extends ConfigGroup{
 	private String ptRouter = "none set";
 	private String operationMode = TransportMode.pt;
 	private String topoTypesForStops = null;
-	private String subsidyApproach = null;
+	
+	private boolean welfareMaximization = false;
+	private String initialScoresFile = null;
 
 	// Strategies
 	private final LinkedHashMap<Id<PStrategySettings>, PStrategySettings> strategies = new LinkedHashMap<>();
@@ -309,7 +314,6 @@ public final class PConfigGroup extends ConfigGroup{
 		} else if (key != null && key.startsWith(PMODULE_PARAMETER)) {
 			PStrategySettings settings = getStrategySettings(Id.create(key.substring(PMODULE_PARAMETER.length()), PStrategySettings.class), true);
 			settings.setParameters(value);
-
 			
 		} else if (key != null && key.startsWith(PVEHICLE)) {
 			PVehicleSettings pVehicleSettings = getPVehicleSettings(Id.create(key.substring(PVEHICLE.length()), PVehicleSettings.class), true);
@@ -403,7 +407,8 @@ public final class PConfigGroup extends ConfigGroup{
 		map.put(PT_ROUTER, this.ptRouter);
 		map.put(OPERATIONMODE, this.operationMode);
 		map.put(TOPOTYPESFORSTOPS, this.topoTypesForStops);
-		map.put(SUBSIDY_APPROACH, this.subsidyApproach);
+		map.put(WELFARE_MAXIMIZATION, Boolean.toString(this.welfareMaximization));
+		map.put(INITIAL_SCORES_FILE, this.initialScoresFile);
 		
 		for (Entry<Id<PStrategySettings>, PStrategySettings> entry : this.strategies.entrySet()) {
 			map.put(PMODULE + entry.getKey().toString(), entry.getValue().getModuleName());
@@ -479,7 +484,8 @@ public final class PConfigGroup extends ConfigGroup{
 		map.put(PT_ROUTER, "Uses a experimental connection scan algorithm for routing if set to 'raptor'. Defaults to MATSim standard router.");
 		map.put(OPERATIONMODE, "the mode of transport in which the paratransit operates");
 		map.put(TOPOTYPESFORSTOPS, "comma separated integer-values, as used in NetworkCalcTopoTypes");
-		map.put(SUBSIDY_APPROACH, "Optional: add a subsidy to the operators' scores. Currently implemented: 'null': no subsidy; 'perPassenger': a subsidy of 100000 monetary units per passenger");
+		map.put(WELFARE_MAXIMIZATION, "computes operator revenues based on the change in welfare. EXPERIMENTAL!");
+		map.put(INITIAL_SCORES_FILE, "plan scores of a base case scenario. Needed to compare changes in user benefits during welfare maximization. EXPERIMENTAL!");
 		
 		for (Entry<Id<PStrategySettings>, PStrategySettings>  entry : this.strategies.entrySet()) {
 			map.put(PMODULE + entry.getKey().toString(), "name of strategy");
@@ -714,8 +720,11 @@ public final class PConfigGroup extends ConfigGroup{
 	public boolean getWelfareMaximization() {
 		return this.welfareMaximization;
 	}
-	public String getSubsidyApproach() {
-		return this.subsidyApproach;
+	
+	public String getInitialScoresFile(){
+		
+		return this.initialScoresFile;
+		
 	}
 
 	public List<Integer> getTopoTypesForStops() {
@@ -918,6 +927,7 @@ public final class PConfigGroup extends ConfigGroup{
 	
 	@Override
 	protected void checkConsistency( Config config ) {
+		double marginalUtilityOfMoney = config.planCalcScore().getMarginalUtilityOfMoney() ;
 		
 		if (this.mergeTransitLine) {
 			log.info("All routes of a minibus transit line with the same stop sequence will be merged into one single transit route. Note that the transit schedules written to the output directory do not contain all minibus routes anymore.");
@@ -926,6 +936,63 @@ public final class PConfigGroup extends ConfigGroup{
 				log.warn("Transit lines will be merged. Activate the operator logger to retrieve more detailed information on particular routes.");
 			}
 		}
+		
+		if(this.welfareMaximization ){
+			
+			if(!this.operatorType.equals(WelfareCarefulMultiPlanOperator.OPERATOR_NAME)){
+				
+				log.error("Welfare maximization is enabled, " + WelfareCarefulMultiPlanOperator.OPERATOR_NAME + " should be used as operator type. Aborting...");
+				throw new RuntimeException();
+				
+			}
+			
+			if(marginalUtilityOfMoney == 0.){
+				
+				log.error("Welfare maximization is enabled but marginal utility of money equals 0! This would produce benefits of-Infinity! Aborting...");
+				throw new RuntimeException();
+				
+			}
+			
+			if(this.earningsPerBoardingPassenger != 0 || this.earningsPerKilometerAndPassenger != 0){
+				
+				log.error("Welfare maximization is enabled, no fares should be collected here. Aborting...");
+				throw new RuntimeException();
+				
+			}
+			
+			if(this.initialScoresFile == null){
+				
+				log.error("Welfare maximization is enabled, but no initial scores file given. Aborting...");
+				throw new RuntimeException();
+				
+			}
+			
+			for(Entry<Id<PStrategySettings>, PStrategySettings> strategyEntry : this.strategies.entrySet()){
+				
+				if(strategyEntry.getValue().getModuleName().equals(ReduceTimeServedRFare.STRATEGY_NAME)){
+					
+					if(Boolean.parseBoolean(strategyEntry.getValue().getParametersAsArrayList().get(2))){
+						
+						log.error("Welfare maximization is enabled, parameter of strategy " + ReduceTimeServedRFare.STRATEGY_NAME + " to use the collected fare as weight will not work since no fares are collected! Aborting...");
+						throw new RuntimeException();
+						
+					}
+					
+				} else if(strategyEntry.getValue().getModuleName().equals(ReduceStopsToBeServedRFare.STRATEGY_NAME)){
+					
+					if(Boolean.parseBoolean(strategyEntry.getValue().getParametersAsArrayList().get(1))){
+						
+						log.error("Welfare maximization is enabled, parameter of strategy " + ReduceStopsToBeServedRFare.STRATEGY_NAME + " to use the collected fare as weight will not work since no fares are collected! Aborting...");
+						throw new RuntimeException();
+						
+					}
+					
+				}
+				
+			}
+			
+		}
+		
 	}
 
 }
