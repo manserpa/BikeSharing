@@ -80,7 +80,7 @@ public final class VehKmAndHReference {
 		HashMap<String, Integer> person2vehicle = new HashMap<String, Integer>();
 		HashMap<String, Double> vehicle2personKm = new HashMap<String, Double>();
 	    
-	    String csvFileTransitLinks = "VehicleStats.csv";
+	    String csvFileTransitLinks = "VehicleStatsReference.csv";
 	    FileWriter writerTransitLinks = new FileWriter(csvFileTransitLinks );
 	    
 	    CSVUtils.writeLine(writerTransitLinks , Arrays.asList("Total Time [h]", "Total Distance [km]", "Total Number of Pax", "Total Number of PaxDistance [km]"), ';');

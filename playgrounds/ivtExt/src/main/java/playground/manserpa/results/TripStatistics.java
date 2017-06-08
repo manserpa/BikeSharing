@@ -77,7 +77,7 @@ public final class TripStatistics {
 		HashMap<String, String> person2trip = new HashMap<String, String>();
 		HashSet<String> person2firstAct = new HashSet<String>();
 		HashSet<String> person2PT = new HashSet<String>();
-		HashMap<String, String> person2PTTrip = new HashMap<String, String>();
+		ArrayList<String> person2PTTrip = new ArrayList<String>();
 	    
 		try {
 			List<String> nodeList = new ArrayList<>(); 
@@ -168,7 +168,8 @@ public final class TripStatistics {
 			        }
 					
 			        if(qName.equals("transitRoute")) {
-			        	if(crossesScenario && !transitMode.equals("pt"))	{
+			        	//if(crossesScenario && !transitMode.equals("pt"))	{
+			        	if(isParatransit)	{
 			        		// ArrayList containing all the IDs
 			        		transitRoutesInScenario.add(transitRoute);
 			        		//System.out.println("Line: " + transitLine + "; Route: " + transitRoute + "; Mode: " + transitMode);	
@@ -199,7 +200,7 @@ public final class TripStatistics {
 									person2trip.put(attributes.getValue("person"), person2trip.get(attributes.getValue("person")) + 
 											"===PersonArrives" + attributes.getValue("actType") + "===" + attributes.getValue("time"));
 									System.out.println(person2trip.get(attributes.getValue("person")));
-									person2PTTrip.put(attributes.getValue("person"), person2trip.get(attributes.getValue("person")));
+									person2PTTrip.add(person2trip.get(attributes.getValue("person")));
 									// process the trip
 								}
 								
@@ -280,7 +281,7 @@ public final class TripStatistics {
 			List<Double> totalTripTime = new ArrayList<>();
 			List<Double> inVehicleTime = new ArrayList<>();
 			
-			for(String e : person2PTTrip.values())	{
+			for(String e : person2PTTrip)	{
 				
 				String[] tripsequence = e.split("===");
 				accessTime.add(Double.parseDouble(tripsequence[3]) - Double.parseDouble(tripsequence[1]));
