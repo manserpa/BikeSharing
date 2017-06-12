@@ -72,7 +72,7 @@ public final class ServedStopsInShapeFile {
 		HashSet<String> servedStops = new HashSet<>(); 
 		HashMap<String, Coordinates> stopList = new HashMap<>();
 	
-		String csvFile = "TransitStopsZH.csv";
+		String csvFile = "ServedStops.csv";
 	    FileWriter writer = new FileWriter(csvFile);
 	    
 	    CSVUtils.writeLine(writer, Arrays.asList("id", "x", "y"), ';');

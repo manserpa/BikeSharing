@@ -103,10 +103,10 @@ public class EvolutionOfPaxOpAndRoutes {
 		            	String[] stats = line.split("\t");
 		            	if (k != 0)	{
 		            		if (Integer.parseInt(stats[0]) % 50 == 0 && Integer.parseInt(stats[0]) != 0)	{
-		            			ops.put(Integer.parseInt(stats[0]), stats[1]);
-		            			routes.put(Integer.parseInt(stats[0]), stats[3]);
-		            			pax.put(Integer.parseInt(stats[0]), stats[5]);
-		            			vehicles.put(Integer.parseInt(stats[0]), stats[7]);
+		            			ops.put(Integer.parseInt(stats[0]), stats[2]);
+		            			routes.put(Integer.parseInt(stats[0]), stats[4]);
+		            			pax.put(Integer.parseInt(stats[0]), stats[6]);
+		            			vehicles.put(Integer.parseInt(stats[0]), stats[8]);
 		            		}
 		            		
 		            		if (Integer.parseInt(stats[0]) % 2 == 0)	{

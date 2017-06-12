@@ -14,7 +14,7 @@ import playground.manserpa.spatialData.CSVUtils;
 public class EvolutionOfScores {
 	public static void main(String[] args) throws IOException {
 		
-		int numberOfRuns = 10;
+		int numberOfRuns = 4;
 		
 		HashMap<Integer, String> ops = new HashMap<Integer, String>();
 	
@@ -23,7 +23,7 @@ public class EvolutionOfScores {
 		String csvFileOps = "EvolutionOfScores.csv";
 	    FileWriter writerOps = new FileWriter(csvFileOps);
 	    
-	    CSVUtils.writeLine(writerOps, Arrays.asList("50", "100", "150","200","250","300","350","400","450","500"), ';');
+	    CSVUtils.writeLine(writerOps, Arrays.asList("50", "100", "150","200","250","300","350","400","450","500","550","600"), ';');
 	    
 	    String csvFileOpsMean = "EvolutionOfScoresMean.csv";
 	    FileWriter writerOpsMean = new FileWriter(csvFileOpsMean);
@@ -57,7 +57,7 @@ public class EvolutionOfScores {
 		            opsMean.add(opsRun);
 
 					CSVUtils.writeLine(writerOps, Arrays.asList(ops.get(50), ops.get(100), ops.get(150), ops.get(200), ops.get(250),
-							ops.get(300), ops.get(350), ops.get(400), ops.get(450), ops.get(500)), ';');
+							ops.get(300), ops.get(350), ops.get(400), ops.get(450), ops.get(500), ops.get(550), ops.get(600)), ';');
 	
 				
 				} catch (IOException e) {
@@ -68,7 +68,7 @@ public class EvolutionOfScores {
 	        }
         }
         
-        for (int p = 0; p <= 250; p++)	{
+        for (int p = 0; p <= 300; p++)	{
         	List<Double> getMeanOps = new ArrayList<Double>();
         	
         	for(int i = 0; i < numberOfRuns; i++)	{

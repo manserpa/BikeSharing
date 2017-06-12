@@ -21,9 +21,9 @@ public class Occupancy {
 		HashMap<String, Double> capacity = new HashMap<String, Double>();
 		HashMap<String, Double> volume = new HashMap<String, Double>();
 		HashMap<String, Double> occupancy = new HashMap<String, Double>();
-	      
+	    
 		
-	    String csvFileOccupancy = "OccupancyRun6.csv";
+	    String csvFileOccupancy = "Occupancy.csv";
 	    FileWriter writerOccupancy = new FileWriter(csvFileOccupancy);
 	    
 	    CSVUtils.writeLine(writerOccupancy, Arrays.asList("LinkId", "MeanCapacity"), ';');

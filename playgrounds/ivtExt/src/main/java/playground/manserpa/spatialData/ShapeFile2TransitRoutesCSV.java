@@ -133,6 +133,7 @@ public final class ShapeFile2TransitRoutesCSV {
 				
 				String transitLine;
 				String transitMode;
+				String transitRoute;
 				boolean isTransitRoute = true;
 				
 				public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException	{
@@ -141,11 +142,17 @@ public final class ShapeFile2TransitRoutesCSV {
 						transitLine = attributes.getValue("id");
 					}
 					
+					if(qName.equalsIgnoreCase("transitRoute"))	{
+						transitRoute = attributes.getValue("id");
+					}
+					
 					if(qName.equalsIgnoreCase("transportMode"))	{
 						isTransitRoute = true; 
 					}	
 					
 					if(qName.equalsIgnoreCase("link"))	{
+						//if(linkList.contains(attributes.getValue("refId")) && transitLine.contains("para") && 
+						//		transitRoute.equals("para_292_220-417_42"))	{
 						if(linkList.contains(attributes.getValue("refId")) && transitLine.contains("para"))	{
 						//if(linkList.contains(attributes.getValue("refId")) && !transitMode.equals("pt"))	{
 							

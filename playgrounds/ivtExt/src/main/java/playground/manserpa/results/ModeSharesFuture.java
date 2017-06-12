@@ -17,30 +17,36 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-public final class ModeShares {
+public final class ModeSharesFuture {
 	private Geometry include;
 	private Geometry exclude;
 	private final GeometryFactory factory;
 	
 	
 	public static void main(String[] args) throws IOException	{
-		ModeShares cs = new ModeShares(args[0]);
+		ModeSharesFuture cs = new ModeSharesFuture(args[0]);
 		
-		String csvFileTransitLinks = "ModeShares.csv";
+		String csvFileTransitLinks = "ModeSharesFuture.csv";
 	    FileWriter writerTransitLinks = new FileWriter(csvFileTransitLinks );
 	    
-	    CSVUtils.writeLine(writerTransitLinks , Arrays.asList("PT", "Car","Walk","Bike"), ';');
+	    CSVUtils.writeLine(writerTransitLinks , Arrays.asList("PT", "Car","Av","Walk","Bike"), ';');
 		
-		cs.run(args[1], writerTransitLinks);
-		
-		System.out.println("Handled Iteration xy");
+	    int i = 0;
+	    
+	    while(i <= 600)	{
+	    	cs.run("1000AVs/Run3/it."+i+"/run."+i+".plans.xml", writerTransitLinks);
+	    	
+	    	System.out.println("Handled Iteration " + i);
+	    	
+	    	i += 50;
+	    }
 
         writerTransitLinks.flush();
         writerTransitLinks.close();
 		
 	}
 	
-	private ModeShares(String shpFile)	{
+	private ModeSharesFuture(String shpFile)	{
 		this.factory = new GeometryFactory();
 		
 		readShapeFile(shpFile);
@@ -176,17 +182,21 @@ public final class ModeShares {
 			}
 			
 			for(String k : modeCounter.keySet())	{
-				System.out.println("Share of mode " + k + ": " + ((double) modeCounter.get(k)) / ((double) totalTrips) * 100);
+				System.out.println("Share of mode " + k + ": " + ((double) modeCounter.get(k)) / ((double) totalTrips));
 			}
 			
 			double sharePT = ((double) modeCounter.get("pt")) / ((double) totalTrips);
 			double shareCar = ((double) modeCounter.get("car")) / ((double) totalTrips);
 			double shareWalk = ((double) modeCounter.get("walk")) / ((double) totalTrips);
 			double shareBike = ((double) modeCounter.get("bike")) / ((double) totalTrips);
-			//double shareAV = ((double) modeCounter.get("av")) / ((double) totalTrips);
+			double shareAV = 0;
+			
+			if( modeCounter.containsKey("av") )	{
+				shareAV = ((double) modeCounter.get("av")) / ((double) totalTrips);
+			}
 			
 			try {
-				CSVUtils.writeLine(writerTransitLinks, Arrays.asList(Double.toString(sharePT),Double.toString(shareCar),
+				CSVUtils.writeLine(writerTransitLinks, Arrays.asList(Double.toString(sharePT),Double.toString(shareCar),Double.toString(shareAV),
 						Double.toString(shareWalk),Double.toString(shareBike)), ';');
 			} catch (IOException e) {
 				e.printStackTrace();

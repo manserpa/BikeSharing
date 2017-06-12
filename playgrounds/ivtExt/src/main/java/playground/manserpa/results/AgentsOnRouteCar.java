@@ -79,7 +79,7 @@ public final class AgentsOnRouteCar {
 	    String csvFilewriter = "AgentsOnRouteCar.csv";
 	    FileWriter writer = new FileWriter(csvFilewriter );
 	    
-	    CSVUtils.writeLine(writer , Arrays.asList("TimeSlice","AgentsOnRoute"), ';');
+	    CSVUtils.writeLine(writer , Arrays.asList("TimeSlice","Cars"), ';');
 	    
 		try {
 			List<String> nodeList = new ArrayList<>(); 
@@ -142,6 +142,7 @@ public final class AgentsOnRouteCar {
 									int thisSlice =  (int) (Double.parseDouble(attributes.getValue("time"))) / sliceSize;
 									agentsInAVehicle --;
 									agentsOnRoute.put(thisSlice, agentsInAVehicle);
+									agent2OnRoute.remove(attributes.getValue("person"));
 							}
 						}
 					}		

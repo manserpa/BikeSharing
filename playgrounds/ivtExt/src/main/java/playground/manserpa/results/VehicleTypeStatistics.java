@@ -124,21 +124,26 @@ public class VehicleTypeStatistics {
 	    int totalVehicles = 0;
 	    int totalPax = 0;
 	    
-	    for ( String e : vehicleType2Number.keySet())	{
-	    	CSVUtils.writeLine(writerOccupancy, Arrays.asList("Number of vehicles " + e + " []", Integer.toString(vehicleType2Number.get(e))), ';');
-	    	System.out.println(e + ": " + vehicleType2Number.get(e) + " vehicles");
-	    	totalVehicles += vehicleType2Number.get(e);
-	    }
+	    CSVUtils.writeLine(writerOccupancy, Arrays.asList("Number of vehicles " + "Minibus" + " []", Integer.toString(vehicleType2Number.getOrDefault("Minibus", 0))), ';');
+	    totalVehicles += vehicleType2Number.getOrDefault("Minibus", 0);
 	    
-	    System.out.println("In total: " + totalVehicles + " vehicles");
+	    CSVUtils.writeLine(writerOccupancy, Arrays.asList("Number of vehicles " + "Standardbus" + " []", Integer.toString(vehicleType2Number.getOrDefault("Standardbus", 0))), ';');
+	    totalVehicles += vehicleType2Number.getOrDefault("Standardbus", 0);
+	    
+	    CSVUtils.writeLine(writerOccupancy, Arrays.asList("Number of vehicles " + "Gelenkbus" + " []", Integer.toString(vehicleType2Number.getOrDefault("Gelenkbus", 0))), ';');
+	    totalVehicles += vehicleType2Number.getOrDefault("Gelenkbus", 0);
+	    
 	    CSVUtils.writeLine(writerOccupancy, Arrays.asList("Total number of vehicles []", Integer.toString(totalVehicles)), ';');
 	    CSVUtils.writeLine(writerOccupancy, Arrays.asList(" ", " "), ';');
 	    
-	    for ( String e : vehicleType2Pax.keySet())	{
-	    	CSVUtils.writeLine(writerOccupancy, Arrays.asList("Number of Passengers " + e + " []", Integer.toString(vehicleType2Pax.get(e))), ';');
-	    	System.out.println(e + ": " + vehicleType2Pax.get(e) + " pax");
-	    	totalPax += vehicleType2Pax.get(e);
-	    }
+	    CSVUtils.writeLine(writerOccupancy, Arrays.asList("Number of Passengers " + "Minibus" + " []", Integer.toString(vehicleType2Pax.getOrDefault("Minibus", 0))), ';');
+	    totalPax += vehicleType2Pax.getOrDefault("Minibus", 0);
+	    
+	    CSVUtils.writeLine(writerOccupancy, Arrays.asList("Number of Passengers " + "Standardbus" + " []", Integer.toString(vehicleType2Pax.getOrDefault("Standardbus", 0))), ';');
+	    totalPax += vehicleType2Pax.getOrDefault("Standardbus", 0);
+	    
+	    CSVUtils.writeLine(writerOccupancy, Arrays.asList("Number of Passengers " + "Gelenkbus" + " []", Integer.toString(vehicleType2Pax.getOrDefault("Gelenkbus", 0))), ';');
+	    totalPax += vehicleType2Pax.getOrDefault("Gelenkbus", 0);
 	    
 	    System.out.println("In total: " + totalPax + " Pax");
 	    CSVUtils.writeLine(writerOccupancy, Arrays.asList("Total number of PAX []", Integer.toString(totalPax)), ';');
@@ -148,19 +153,64 @@ public class VehicleTypeStatistics {
 	    int totHeadway = 0;
 	    int totRoutes = 0;
 	    
-	    for ( String e : vehicleType2Headway.keySet())	{
-	    	totalHeadway = 0;
-	    	for ( Integer i : vehicleType2Headway.get(e))	{
-	    		totalHeadway += i;	
-	    		totHeadway += i;
-	    	}
+	    totalHeadway = 0;
+	    if (vehicleType2Headway.containsKey("Minibus"))	{
+		    for ( Integer i : vehicleType2Headway.get("Minibus"))	{
+		    	totalHeadway += i;	
+		    	totHeadway += i;
+		    }
+		    
+		    totRoutes += vehicleType2Headway.get("Minibus").size();	
+		    int numberOfRoutes = vehicleType2Headway.get("Minibus").size();	
+	    	double avgHeadway = ((double) totalHeadway) / ((double) numberOfRoutes);
+	    	CSVUtils.writeLine(writerOccupancy, Arrays.asList("Avg. headway " + "Minibus" + " [s]: ", Double.toString(avgHeadway)), ';');
+	    } 
+	    else	{
+	    	totalHeadway = 0;	
+	    	totHeadway = 0;
 	    	
-	    	totRoutes += vehicleType2Headway.get(e).size();	
-	    	int numberOfRoutes = vehicleType2Headway.get(e).size();	
-    		double avgHeadway = ((double) totalHeadway) / ((double) numberOfRoutes);
-    		CSVUtils.writeLine(writerOccupancy, Arrays.asList("Avg. headway " + e + " [s]: ", Double.toString(avgHeadway)), ';');
-    		System.out.println("Avg. Headway " + e + ": " + avgHeadway + " seconds");	
+	    	CSVUtils.writeLine(writerOccupancy, Arrays.asList("Avg. headway " + "Minibus" + " [s]: ", "0"), ';');
 	    }
+		    	
+	    totalHeadway = 0;
+	    if (vehicleType2Headway.containsKey("Standardbus"))	{
+		    for ( Integer i : vehicleType2Headway.get("Standardbus"))	{
+		    	totalHeadway += i;	
+		    	totHeadway += i;
+		    }
+		    
+		    totRoutes += vehicleType2Headway.get("Standardbus").size();	
+		    int numberOfRoutes = vehicleType2Headway.get("Standardbus").size();	
+	    	double avgHeadway = ((double) totalHeadway) / ((double) numberOfRoutes);
+	    	CSVUtils.writeLine(writerOccupancy, Arrays.asList("Avg. headway " + "Standardbus" + " [s]: ", Double.toString(avgHeadway)), ';');
+	    } 
+	    else	{
+	    	totalHeadway = 0;	
+	    	totHeadway = 0;
+	    	
+	    	CSVUtils.writeLine(writerOccupancy, Arrays.asList("Avg. headway " + "Standardbus" + " [s]: ", "0"), ';');
+	    }
+	    
+	    totalHeadway = 0;
+	    if (vehicleType2Headway.containsKey("Gelenkbus"))	{
+		    for ( Integer i : vehicleType2Headway.get("Gelenkbus"))	{
+		    	totalHeadway += i;	
+		    	totHeadway += i;
+		    }
+		    
+		    totRoutes += vehicleType2Headway.get("Gelenkbus").size();	
+		    int numberOfRoutes = vehicleType2Headway.get("Gelenkbus").size();	
+	    	double avgHeadway = ((double) totalHeadway) / ((double) numberOfRoutes);
+	    	CSVUtils.writeLine(writerOccupancy, Arrays.asList("Avg. headway " + "Gelenkbus" + " [s]: ", Double.toString(avgHeadway)), ';');
+	    } 
+	    else	{
+	    	totalHeadway = 0;	
+	    	totHeadway = 0;
+	    	
+	    	CSVUtils.writeLine(writerOccupancy, Arrays.asList("Avg. headway " + "Gelenkbus" + " [s]: ", "0"), ';');
+	    }	
+    		
+    		
 	    
 	    double avgHeadway2 = ((double) totHeadway) / ((double) totRoutes);
 	    System.out.println("Avg. Headway : " + avgHeadway2 + " seconds");	

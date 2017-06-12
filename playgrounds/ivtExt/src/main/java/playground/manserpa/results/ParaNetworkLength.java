@@ -67,7 +67,7 @@ public final class ParaNetworkLength {
 	
 	private void run(String networkFile, String transitScheduleFile) throws IOException	{
 	
-		HashMap<String, Double> networkLinks = new HashMap<String, Double>();
+		HashSet<String> networkLinks = new HashSet<String>();
 		HashMap<String, Double> linkLength = new HashMap<String, Double>();
 	    
 		try {
@@ -104,6 +104,8 @@ public final class ParaNetworkLength {
 				
 				boolean isParaLine = false;
 				String transitLine;
+				String transitMode;
+				boolean getMode = false;
 				
 				public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException	{
 					
@@ -116,20 +118,40 @@ public final class ParaNetworkLength {
 							isParaLine = false;
 					}
 					
+					if(qName.equalsIgnoreCase("transportMode"))	{
+						getMode = true; 
+					}	
+					
+					//if(qName.equalsIgnoreCase("link") && !transitMode.equals("pt"))	{
 					if(qName.equalsIgnoreCase("link") && isParaLine)	{
 						if(linkLength.containsKey(attributes.getValue("refId")))	{
-							networkLinks.put(attributes.getValue("refId"), linkLength.get(attributes.getValue("refId")));
+							networkLinks.add(attributes.getValue("refId"));
 						}
 					}			
 				}
+				
+				public void endElement(String uri, String localName, String qName)
+			            throws SAXException {
+					
+			        if(qName.equals("transportMode")) {
+			        	getMode = false;
+			        }
+					
+			    }
+				
+				 public void characters(char[] ch, int start, int length) throws SAXException {
+				        if (getMode) {
+				            transitMode = new String(ch, start, length);
+				        }
+				 }
 			};
 			
 			saxParser.parse(networkFile, handler);
 			saxParser.parse(transitScheduleFile, handler2);
 
 			double totalLength = 0.0;
-			for( double i : networkLinks.values())	{
-				totalLength += i;
+			for( String i : networkLinks)	{
+				totalLength += linkLength.get(i);;
 			}
 			
 			System.out.println(totalLength / 1000);
