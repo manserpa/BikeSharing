@@ -79,7 +79,7 @@ public final class ShapeFile2TransitRoutesCSV {
 	    
 	    CSVUtils.writeLine(writerLinks , Arrays.asList("id", "from","to","length","modes","freespeed"), ';');
 	    
-	    String csvFileTransitLinks = "TransitLinksPara.csv";
+	    String csvFileTransitLinks = "TransitLinksParaFuture5000AVs5.csv";
 	    FileWriter writerTransitLinks = new FileWriter(csvFileTransitLinks );
 	    
 	    CSVUtils.writeLine(writerTransitLinks , Arrays.asList("TransitLine", "TransitMode","LinkId"), ';');

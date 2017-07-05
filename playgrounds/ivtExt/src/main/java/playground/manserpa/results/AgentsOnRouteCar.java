@@ -73,7 +73,8 @@ public final class AgentsOnRouteCar {
 		// <event time="9156.0" type="departure" person="10894369" link="422340" legMode="car"  />
 		//	<event time="16934.0" type="arrival" person="10448004" link="400522" legMode="car"  />
 
-		HashSet<String> agent2OnRoute = new HashSet<String>();
+		HashMap<String, String> agent2OnRoute = new HashMap<String,String>();
+		HashMap<String, String> agentArrived = new HashMap<String,String>();
 		HashMap<Integer,Integer> agentsOnRoute = new HashMap<Integer,Integer>();
 	    
 	    String csvFilewriter = "AgentsOnRouteCar.csv";
@@ -114,8 +115,6 @@ public final class AgentsOnRouteCar {
 			
 			DefaultHandler handler3 = new DefaultHandler()	{
 				
-				int sliceSizeMin = 10; // aggregation level (minutes)
-		        int sliceSize = sliceSizeMin * 60;
 		        int agentsInAVehicle = 0;
 				
 				public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException	{
@@ -127,10 +126,10 @@ public final class AgentsOnRouteCar {
 							if(attributes.getValue("legMode").equals("car"))	{
 								// agent is on Route if the trip started in the service area
 								if(linkList.contains(attributes.getValue("link")))	{
-									agent2OnRoute.add(attributes.getValue("person"));
-									int thisSlice = (int) (Double.parseDouble(attributes.getValue("time"))) / sliceSize;
-									agentsInAVehicle ++;
-									agentsOnRoute.put(thisSlice, agentsInAVehicle);
+									agent2OnRoute.put(attributes.getValue("person"),attributes.getValue("time")+"===true");
+								}
+								else {
+									agent2OnRoute.put(attributes.getValue("person"),attributes.getValue("time")+"===true");
 								}
 							}
 						}
@@ -138,11 +137,17 @@ public final class AgentsOnRouteCar {
 						
 						if(attributes.getValue("type").equals("arrival"))	{
 							// a person leaves a transit vehicle but it's not the driver
-							if (agent2OnRoute.contains(attributes.getValue("person")))	{		
-									int thisSlice =  (int) (Double.parseDouble(attributes.getValue("time"))) / sliceSize;
-									agentsInAVehicle --;
-									agentsOnRoute.put(thisSlice, agentsInAVehicle);
-									agent2OnRoute.remove(attributes.getValue("person"));
+							if (agent2OnRoute.containsKey(attributes.getValue("person")))	{
+								if(linkList.contains(attributes.getValue("link")))	{
+									agentArrived.put(attributes.getValue("person"), agent2OnRoute.get(attributes.getValue("person"))+"==="+
+											attributes.getValue("time")+"===true");
+								}
+								else	{
+									agentArrived.put(attributes.getValue("person"), agent2OnRoute.get(attributes.getValue("person"))+"==="+
+											attributes.getValue("time")+"===false");
+								}
+								agent2OnRoute.remove(attributes.getValue("person"));
+								
 							}
 						}
 					}		
@@ -157,7 +162,37 @@ public final class AgentsOnRouteCar {
 			saxParser.parse(networkFile, handler);
 			saxParser.parse(eventFile, handler3);
 			
-			int sliceSize = 600;
+			System.out.println(agentArrived.size());
+
+			int sliceSizeMin = 10; // aggregation level (minutes)
+	        int sliceSize = sliceSizeMin * 60;
+			
+			for(String times: agentArrived.values())	{
+				String[] tripTimes = times.split("===");
+				
+				if(tripTimes.length > 2)	{
+					if(tripTimes[1].equals("true") || tripTimes[3].equals("true"))	{
+						double startTime = Double.parseDouble(tripTimes[0]);
+						int thisSlice = (int) startTime / sliceSize;
+						agentsOnRoute.put(thisSlice, agentsOnRoute.getOrDefault(thisSlice, 0) + 1);
+						
+						double endTime = Double.parseDouble(tripTimes[2]);
+						thisSlice = (int) endTime / sliceSize;
+						agentsOnRoute.put(thisSlice, agentsOnRoute.getOrDefault(thisSlice, 0) - 1);
+					}
+				}
+			}
+			
+			for(int slice: agentsOnRoute.keySet())	{
+				if(slice > 0)	{
+					agentsOnRoute.put(slice, agentsOnRoute.getOrDefault(slice, 0) + agentsOnRoute.getOrDefault(slice - 1, 0));
+				}
+				else	{
+					agentsOnRoute.put(0, agentsOnRoute.getOrDefault(0, 0));
+				}
+			}
+			
+			
 			for ( int i = 0; i < 30 * ( 3600 / sliceSize  ); i++){
 	        	// i = 0 ... no. of slices during one day
 	            CSVUtils.writeLine(writer, Arrays.asList(String.valueOf(i), String.valueOf(agentsOnRoute.getOrDefault(i,0))), ';');

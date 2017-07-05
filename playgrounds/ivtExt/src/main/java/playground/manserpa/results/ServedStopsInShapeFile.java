@@ -124,6 +124,7 @@ public final class ServedStopsInShapeFile {
 				}
 				
 			}
+			System.out.println(servedStops.size());
 			
 			writer.flush();
 	        writer.close();

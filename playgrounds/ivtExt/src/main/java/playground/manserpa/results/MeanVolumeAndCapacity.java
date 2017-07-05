@@ -18,7 +18,7 @@ import playground.manserpa.spatialData.CSVUtils;
 public class MeanVolumeAndCapacity {
 	public static void main(String[] args) throws IOException {
 		
-		int numberOfRuns = 5;
+		int numberOfRuns = 10;
 		
 		HashMap<String, Double> capacity = new HashMap<String, Double>();
 		HashMap<String, Double> volume = new HashMap<String, Double>();
@@ -35,7 +35,6 @@ public class MeanVolumeAndCapacity {
 	    CSVUtils.writeLine(writerMeanVolume, Arrays.asList("LinkId", "MeanCapacity"), ';');
 	    
 	    
-	    // mean Occupancy not needed here
 	    String csvFileMeanOccupancy = "MeanOccupancy.csv";
 	    FileWriter writerMeanOccupancy = new FileWriter(csvFileMeanOccupancy);
 	    
@@ -61,7 +60,7 @@ public class MeanVolumeAndCapacity {
 	        }
         }
         
-        for(int i = 5; i < numberOfRuns + 5; i++)	{
+        for(int i = numberOfRuns; i < numberOfRuns + numberOfRuns; i++)	{
         	
 	        if(args[i] != null)	{
 		        try (BufferedReader br = new BufferedReader(new FileReader(args[i]))) {
@@ -82,9 +81,9 @@ public class MeanVolumeAndCapacity {
         for( String e: capacity.keySet())	{
         	if(volume.get(e) != null)	{
         		occupancy.put(e, volume.get(e) / capacity.get(e));
-        		volume.put(e, volume.get(e) / 10);
+        		volume.put(e, volume.get(e) / numberOfRuns);
         	}
-        	capacity.put(e, capacity.get(e) / 10);
+        	capacity.put(e, capacity.get(e) / numberOfRuns);
         }
         
         List<Map.Entry<String, Double>> occupancySorted =

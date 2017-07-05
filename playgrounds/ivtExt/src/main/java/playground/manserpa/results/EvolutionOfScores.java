@@ -14,7 +14,7 @@ import playground.manserpa.spatialData.CSVUtils;
 public class EvolutionOfScores {
 	public static void main(String[] args) throws IOException {
 		
-		int numberOfRuns = 4;
+		int numberOfRuns = 5;
 		
 		HashMap<Integer, String> ops = new HashMap<Integer, String>();
 	

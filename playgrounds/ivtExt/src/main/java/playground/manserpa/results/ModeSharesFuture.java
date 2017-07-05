@@ -34,7 +34,7 @@ public final class ModeSharesFuture {
 	    int i = 0;
 	    
 	    while(i <= 600)	{
-	    	cs.run("1000AVs/Run3/it."+i+"/run."+i+".plans.xml", writerTransitLinks);
+	    	cs.run("5000AVs/Run5/it."+i+"/run."+i+".plans.xml", writerTransitLinks);
 	    	
 	    	System.out.println("Handled Iteration " + i);
 	    	

@@ -28,7 +28,12 @@ public final class AccessibilityServedStops {
 	public static void main(String[] args) throws IOException	{
 		AccessibilityServedStops cs = new AccessibilityServedStops(args[0]);
 		
-		cs.run(args[1], args[2]);
+		ArrayList<String> transitSchedules = new ArrayList<String>();
+		
+		for(int i = 1; i < 11; i++){
+			transitSchedules.add("Run"+i+"/it.600/transitSchedule.xml");
+		}
+		cs.run(transitSchedules, args[2]);
 		
 	}
 	
@@ -70,7 +75,7 @@ public final class AccessibilityServedStops {
 		this.exclude = this.factory.createGeometryCollection(exclude.toArray(new Geometry[exclude.size()])).buffer(0);
 	}
 	
-	private void run(String transitSchedule, String facilities) throws IOException	{
+	private void run(ArrayList<String> transitSchedule, String facilities) throws IOException	{
 		
 		HashSet<String> servedStops = new HashSet<>(); 
 		HashMap<String, Coord> stopList = new HashMap<>();
@@ -165,7 +170,9 @@ public final class AccessibilityServedStops {
 				}
 			};
 			
-			saxParser.parse(transitSchedule, handler);
+			for(String i : transitSchedule)	{
+				saxParser.parse(i, handler);
+			}
 			saxParser.parse(facilities, handler2);
 			
 			double totalHouseholds = householdClassification.get("classA") + householdClassification.get("classB") + 

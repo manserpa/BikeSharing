@@ -122,7 +122,7 @@ public final class ParaNetworkLength {
 						getMode = true; 
 					}	
 					
-					//if(qName.equalsIgnoreCase("link") && !transitMode.equals("pt"))	{
+					//if(qName.equalsIgnoreCase("link") && !transitMode.equals("pt") && !transitMode.equals("bus"))	{
 					if(qName.equalsIgnoreCase("link") && isParaLine)	{
 						if(linkLength.containsKey(attributes.getValue("refId")))	{
 							networkLinks.add(attributes.getValue("refId"));

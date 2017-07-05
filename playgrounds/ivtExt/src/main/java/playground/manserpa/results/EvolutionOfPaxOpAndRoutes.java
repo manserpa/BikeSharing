@@ -14,7 +14,7 @@ import playground.manserpa.spatialData.CSVUtils;
 public class EvolutionOfPaxOpAndRoutes {
 	public static void main(String[] args) throws IOException {
 		
-		int numberOfRuns = 4;
+		int numberOfRuns = 10;
 		
 		HashMap<Integer, String> ops = new HashMap<Integer, String>();
 		HashMap<Integer, String> routes = new HashMap<Integer, String>();
