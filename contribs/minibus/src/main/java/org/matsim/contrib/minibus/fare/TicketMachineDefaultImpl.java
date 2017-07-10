@@ -20,6 +20,7 @@
 package org.matsim.contrib.minibus.fare;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -68,17 +69,22 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 		
 		List<String> subsidizedStops = new ArrayList<>();
         String line = "";
+        String stopsToSubsidize = "StopsToSubsidize.csv";
         
-        if(this.subsidizedStopsFile != null)	{
-	        try (BufferedReader br = new BufferedReader(new FileReader(this.subsidizedStopsFile))) {
-	
-	            while ((line = br.readLine()) != null) {
-	                subsidizedStops.add(line);
-	            }
-	
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
+        if(stopsToSubsidize != null)	{
+        	File subsidyFile = new File(stopsToSubsidize);
+        	
+        	if (subsidyFile.exists())	{
+		       try (BufferedReader br = new BufferedReader(new FileReader(subsidyFile))) {
+		
+		            while ((line = br.readLine()) != null) {
+		                subsidizedStops.add(line);
+		            }
+		
+		        } catch (IOException e) {
+		            e.printStackTrace();
+		        }
+        	}
         }
 		
         

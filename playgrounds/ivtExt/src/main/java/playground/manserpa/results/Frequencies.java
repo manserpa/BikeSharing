@@ -17,22 +17,22 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-public final class TripStatistics {
+public final class Frequencies {
 	private Geometry include;
 	private Geometry exclude;
 	private final GeometryFactory factory;
 	
 	
 	public static void main(String[] args) throws IOException	{
-		TripStatistics cs = new TripStatistics(args[0]);
+		Frequencies cs = new Frequencies(args[0]);
 		
 		for(int simulationRun = 1; simulationRun <= 1; simulationRun++)	{
-			cs.run(args[1], "AuswertungOld/stockSchedule.xml",simulationRun);
+			cs.run(args[1], args[2], simulationRun);
 		}
 		
 	}
 	
-	private TripStatistics(String shpFile)	{
+	private Frequencies(String shpFile)	{
 		this.factory = new GeometryFactory();
 		
 		readShapeFile(shpFile);

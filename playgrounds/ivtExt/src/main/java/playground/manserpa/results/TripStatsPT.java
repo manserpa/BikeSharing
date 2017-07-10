@@ -17,20 +17,20 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-public final class FrequencyAnalysis {
+public final class TripStatsPT {
 	private Geometry include;
 	private Geometry exclude;
 	private final GeometryFactory factory;
 	
 	
 	public static void main(String[] args) throws IOException	{
-		FrequencyAnalysis cs = new FrequencyAnalysis(args[0]);
+		TripStatsPT cs = new TripStatsPT(args[0]);
 		
 		cs.run(args[1], args[2], args[3]);
 		
 	}
 	
-	private FrequencyAnalysis(String shpFile)	{
+	private TripStatsPT(String shpFile)	{
 		this.factory = new GeometryFactory();
 		
 		readShapeFile(shpFile);

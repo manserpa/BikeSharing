@@ -19,7 +19,12 @@
 
 package org.matsim.contrib.minibus.hook;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -34,10 +39,12 @@ import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.contrib.minibus.PConstants.OperatorState;
 import org.matsim.contrib.minibus.fare.StageContainerCreator;
 import org.matsim.contrib.minibus.fare.TicketMachineI;
+import org.matsim.contrib.minibus.genericUtils.GridNode;
 import org.matsim.contrib.minibus.operator.Operator;
 import org.matsim.contrib.minibus.operator.OperatorInitializer;
 import org.matsim.contrib.minibus.operator.PFranchise;
 import org.matsim.contrib.minibus.operator.POperators;
+import org.matsim.contrib.minibus.operator.PPlan;
 import org.matsim.contrib.minibus.operator.PRouteOverlap;
 import org.matsim.contrib.minibus.operator.TimeProvider;
 import org.matsim.contrib.minibus.operator.WelfareAnalyzer;
@@ -51,11 +58,13 @@ import org.matsim.contrib.minibus.scoring.StageContainer2AgentMoneyEvent;
 import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.events.ScoringEvent;
 import org.matsim.core.controler.events.StartupEvent;
+import org.matsim.core.utils.io.IOUtils;
 import org.matsim.pt.transitSchedule.TransitScheduleFactoryImpl;
 import org.matsim.pt.transitSchedule.TransitScheduleWriterV1;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 import org.matsim.vehicles.Vehicle;
+
 
 /**
  * Black box for paratransit
@@ -179,10 +188,55 @@ public final class PBox implements POperators {
 		// Adapt number of operators
 		this.handleBankruptOperators(event.getIteration());
 
+		
 		// Replan all operators
 		for (Operator operator : this.operators) {
 			operator.replan(this.strategyManager, event.getIteration());
 		}
+		
+		
+		if(event.getIteration() == 2) {
+			HashSet<String> allServedStopsToGrid = new HashSet<>();
+			
+			// zuerst ein Grid aufstellen mit allen served stops
+			for (Operator operator : this.operators) {				
+				for(PPlan thisPlan: operator.getAllPlans())	{
+					for(TransitStopFacility thisFacility: thisPlan.getStopsToBeServed())	{
+						String gridNodeId = GridNode.getGridNodeIdForCoord(thisFacility.getCoord(), 300);
+						allServedStopsToGrid.add(gridNodeId);
+					}
+				}
+			}
+			
+			HashSet<String> allStopsNotInALockedCell = new HashSet<>();
+			// dann schauen, welche stops nicht in einem Grid sind
+			for(TransitStopFacility thisTransitStop: this.pStopsOnly.getFacilities().values())	{
+				if(!allServedStopsToGrid.contains(GridNode.getGridNodeIdForCoord(thisTransitStop.getCoord(), 300)))	{
+					allStopsNotInALockedCell.add(thisTransitStop.getId().toString());
+				}	
+			}
+		
+			// dann diese Stops in ein File schreiben
+			String csvFile = "StopsToSubsidize.csv";
+		    BufferedWriter writer;
+			try {
+				writer = IOUtils.getBufferedWriter(csvFile);
+		    
+				writer.write("StopId");
+				
+				// hier müssen die stops to subsidize rein
+				for(String stopsToSubs: allStopsNotInALockedCell)	{
+					writer.write(stopsToSubs);
+				}
+			    
+			    writer.flush();
+		        writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	    
+		// if iteration = 100 - save a stop subsidy file
 
 		// Collect current lines offered
 		// why is the following done twice (see notifyScoring)?
