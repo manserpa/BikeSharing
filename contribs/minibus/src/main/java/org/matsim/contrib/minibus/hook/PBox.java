@@ -228,6 +228,7 @@ public final class PBox implements POperators {
 				
 				// hier müssen die stops to subsidize rein
 				for(String stopsToSubs: allStopsNotInALockedCell)	{
+					writer.newLine();
 					writer.write(stopsToSubs);
 				}
 			    
