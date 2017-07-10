@@ -69,7 +69,7 @@ public final class PRouteOverlap {
 		
 		List<String> getRouteHashes = new ArrayList<String>();
 		if(this.stopsToBeServedHashes.containsKey(operatorId))
-			getRouteHashes = this.stopsToBeServedHashes.getOrDefault(operatorId, null);
+			getRouteHashes = this.stopsToBeServedHashes.get(operatorId);
 		
 		for(String getAllExistingRoutes: getRouteHashes)	{
 			int k = 0;

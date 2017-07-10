@@ -195,7 +195,10 @@ public final class PBox implements POperators {
 		}
 		
 		
-		if(event.getIteration() == 2) {
+		if(event.getIteration() == 3) {
+			
+			this.pConfig.setInitialSubsidyFile(event.getServices().getControlerIO().getOutputFilename("StopsToSubsidize.csv"));
+
 			HashSet<String> allServedStopsToGrid = new HashSet<>();
 			
 			// zuerst ein Grid aufstellen mit allen served stops
@@ -217,10 +220,9 @@ public final class PBox implements POperators {
 			}
 		
 			// dann diese Stops in ein File schreiben
-			String csvFile = "StopsToSubsidize.csv";
 		    BufferedWriter writer;
 			try {
-				writer = IOUtils.getBufferedWriter(csvFile);
+				writer = IOUtils.getBufferedWriter(event.getServices().getControlerIO().getOutputFilename("StopsToSubsidize.csv"));
 		    
 				writer.write("StopId");
 				

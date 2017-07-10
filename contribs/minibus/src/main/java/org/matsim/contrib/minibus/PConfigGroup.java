@@ -175,6 +175,8 @@ public final class PConfigGroup extends ConfigGroup{
 	
 	private boolean welfareMaximization = false;
 	private String initialScoresFile = null;
+	
+	private String initialSubsidyFile = null;
 
 	// Strategies
 	private final LinkedHashMap<Id<PStrategySettings>, PStrategySettings> strategies = new LinkedHashMap<>();
@@ -725,6 +727,14 @@ public final class PConfigGroup extends ConfigGroup{
 		
 		return this.initialScoresFile;
 		
+	}
+	
+	public String getInitialSubsidyFile(){
+		return this.initialSubsidyFile;
+	}
+	
+	public void setInitialSubsidyFile(String initialSubsidyFile2){
+		this.initialSubsidyFile = initialSubsidyFile2;
 	}
 
 	public List<Integer> getTopoTypesForStops() {

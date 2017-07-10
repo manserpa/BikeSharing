@@ -44,12 +44,13 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 	//private final double earningsPerMeterAndPassenger;
 	private final double subsidiesPerBoardingPassenger;
 	private final Collection<PVehicleSettings> pVehicleSettings;
-	private String subsidizedStopsFile;
+	private String subsidyFile;
 	
 	@Inject public TicketMachineDefaultImpl(PConfigGroup pConfig ) {
 		this.pVehicleSettings = pConfig.getPVehicleSettings();
-		this.subsidizedStopsFile = pConfig.getSubsidizedStops();
 		this.subsidiesPerBoardingPassenger = pConfig.getSubsidiesPerBoardingPassenger();
+		this.subsidyFile = pConfig.getInitialSubsidyFile();
+		
 		//this.earningsPerBoardingPassenger = pConfig.getEarningsPerBoardingPassenger() ;
 		//this.earningsPerMeterAndPassenger = pConfig.getEarningsPerKilometerAndPassenger()/1000. ;
 	}
@@ -69,10 +70,9 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 		
 		List<String> subsidizedStops = new ArrayList<>();
         String line = "";
-        String stopsToSubsidize = "StopsToSubsidize.csv";
         
-        if(stopsToSubsidize != null)	{
-        	File subsidyFile = new File(stopsToSubsidize);
+        if(this.subsidyFile != null)	{
+        	File subsidyFile = new File(this.subsidyFile);
         	
         	if (subsidyFile.exists())	{
 		       try (BufferedReader br = new BufferedReader(new FileReader(subsidyFile))) {
