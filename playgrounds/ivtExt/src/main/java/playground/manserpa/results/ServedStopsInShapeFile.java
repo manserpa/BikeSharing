@@ -84,6 +84,13 @@ public final class ServedStopsInShapeFile {
 			
 			DefaultHandler handler = new DefaultHandler()	{
 				
+				String transitMode;
+				String transitRoute;
+				boolean isParatransit;
+				
+				boolean getMode = false;;
+				
+				
 				public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException	{
 					
 					if(qName.equalsIgnoreCase("stopFacility"))	{
@@ -102,12 +109,45 @@ public final class ServedStopsInShapeFile {
 							
 						}
 					}
+					
+					if(qName.equalsIgnoreCase("transitRoute"))	{
+						transitRoute = attributes.getValue("id");
+						if (!transitRoute.contains("para"))
+							isParatransit = false;
+						else
+							isParatransit = true;
+					}
+					
+					if(qName.equalsIgnoreCase("transportMode"))	{
+						if(isParatransit)	{
+							getMode = false;
+							transitMode = "paratransit";
+						}
+						else	{
+							getMode = true;
+						}
+					}		
+					
 					if(qName.equalsIgnoreCase("stop"))	{
-						if (stopList.containsKey(attributes.getValue("refId")))	{
+						if (stopList.containsKey(attributes.getValue("refId")) && !transitMode.equals("pt"))	{
 							servedStops.add(attributes.getValue("refId"));
 						}
 					}
 				}
+				
+				public void endElement(String uri, String localName, String qName)
+			            throws SAXException {
+					
+			        if(qName.equals("transportMode")) {
+			        	getMode = false;
+			        }
+			    }
+				
+				 public void characters(char[] ch, int start, int length) throws SAXException {
+				        if (getMode) {
+				            transitMode = new String(ch, start, length);
+				        }
+				 }
 			};
 			
 			saxParser.parse(transitSchedule, handler);
