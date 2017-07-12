@@ -42,6 +42,7 @@ public final class RunMinibusTest {
 		controler.addOverridingModule(new PModule()) ;
 		
 		//ConfigUtils.addOrGetModule(scenario.getConfig(), PConfigGroup.class ).setUseAVContrib(true);
+	
 		
 		controler.run();
 		

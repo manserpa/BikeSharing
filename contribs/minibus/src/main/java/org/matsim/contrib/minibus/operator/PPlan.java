@@ -63,6 +63,8 @@ public final class PPlan implements Comparable<PPlan>{
 	private ArrayList<TransitStopFacility> stopsToBeServed;
 
 	private Set<Id<Vehicle>> vehicleIds;
+
+	private int subsidizedTrips;
 	
 	public PPlan(Id<PPlan> planId, String creator, Id<PPlan> parentId) {
 		this.planId = planId;
@@ -206,6 +208,14 @@ public final class PPlan implements Comparable<PPlan>{
 
 	public void setScore(double totalLineScore) {
 		this.score = totalLineScore;		
+	}
+	
+	public int getSubsidizedTrips() {
+		return this.subsidizedTrips;
+	}
+
+	public void setNumberOfSubsidizedTrips(int totalNumberOfSubsTrips) {
+		this.subsidizedTrips = totalNumberOfSubsTrips;		
 	}
 
 	public double getScorePerVehicle() {

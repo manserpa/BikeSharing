@@ -45,6 +45,7 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 	private final double subsidiesPerBoardingPassenger;
 	private final Collection<PVehicleSettings> pVehicleSettings;
 	private String subsidyFile2;
+	private boolean isSubsidized = false;
 	
 	@Inject public TicketMachineDefaultImpl(PConfigGroup pConfig ) {
 		this.pVehicleSettings = pConfig.getPVehicleSettings();
@@ -86,15 +87,21 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 		        }
         	}
         }
-		
         
 		if (subsidizedStops.contains(stageContainer.getStopEntered().toString()))	{
+			this.isSubsidized  = true;
 			return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter() + 
 					this.subsidiesPerBoardingPassenger;
 		}
 		else {
+			this.isSubsidized  = false;
 			return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter();
 		}
+	}
+	
+	@Override
+	public boolean isSubsidized(StageContainer stageContainer) {
+		return this.isSubsidized;
 	}
 	
 	@Override

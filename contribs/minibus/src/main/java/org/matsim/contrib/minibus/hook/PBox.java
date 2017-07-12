@@ -195,7 +195,7 @@ public final class PBox implements POperators {
 		}
 		
 		
-		if(event.getIteration() == 3) {
+		if(event.getIteration() == 101) {
 			
 			this.pConfig.setInitialSubsidyFile(event.getServices().getControlerIO().getOutputFilename("StopsToSubsidize.csv"));
 
@@ -205,7 +205,7 @@ public final class PBox implements POperators {
 			for (Operator operator : this.operators) {				
 				for(PPlan thisPlan: operator.getAllPlans())	{
 					for(TransitStopFacility thisFacility: thisPlan.getStopsToBeServed())	{
-						String gridNodeId = GridNode.getGridNodeIdForCoord(thisFacility.getCoord(), 300);
+						String gridNodeId = GridNode.getGridNodeIdForCoord(thisFacility.getCoord(), 500);
 						allServedStopsToGrid.add(gridNodeId);
 					}
 				}
@@ -214,7 +214,7 @@ public final class PBox implements POperators {
 			HashSet<String> allStopsNotInALockedCell = new HashSet<>();
 			// dann schauen, welche stops nicht in einem Grid sind
 			for(TransitStopFacility thisTransitStop: this.pStopsOnly.getFacilities().values())	{
-				if(!allServedStopsToGrid.contains(GridNode.getGridNodeIdForCoord(thisTransitStop.getCoord(), 300)))	{
+				if(!allServedStopsToGrid.contains(GridNode.getGridNodeIdForCoord(thisTransitStop.getCoord(), 500)))	{
 					allStopsNotInALockedCell.add(thisTransitStop.getId().toString());
 				}	
 			}

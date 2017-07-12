@@ -85,6 +85,12 @@ public final class VehKmAndHPara {
 	    
 	    CSVUtils.writeLine(writerTransitLinks , Arrays.asList("Total Time [h]", "Total Distance [km]", "Total Number of Pax", "Total Number of PaxDistance [km]"), ';');
 	    
+	    String csvFilePaxKM = "PAXkmDistributionStock.csv";
+	    FileWriter writerPaxKM = new FileWriter(csvFilePaxKM);
+	    
+	    CSVUtils.writeLine(writerPaxKM , Arrays.asList("PaxKM"), ';');
+	    
+	    
 		try {
 			List<String> nodeList = new ArrayList<>(); 
 			List<String> linkList = new ArrayList<>(); 
@@ -107,10 +113,11 @@ public final class VehKmAndHPara {
 					
 					if(qName.equalsIgnoreCase("link"))	{
 						
+						linkLength.put(attributes.getValue("id"), Double.parseDouble(attributes.getValue("length")));
+						
 						if(nodeList.contains(attributes.getValue("from")) && nodeList.contains(attributes.getValue("to")))	{
 							
 							linkList.add(attributes.getValue("id"));
-							linkLength.put(attributes.getValue("id"), Double.parseDouble(attributes.getValue("length")));
 						
 						}
 					}				
@@ -125,6 +132,7 @@ public final class VehKmAndHPara {
 				boolean getMode = false;
 				String transitMode;
 				boolean isParatransit = true;
+				boolean crossesScenario = false;
 				
 				public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException	{
 					
@@ -135,6 +143,7 @@ public final class VehKmAndHPara {
 					if(qName.equalsIgnoreCase("transitRoute"))	{
 						transitRoute = attributes.getValue("id");
 						isInScenario = true;
+						crossesScenario = false;
 						if (!transitRoute.contains("para"))
 							isParatransit = false;
 						else
@@ -146,6 +155,9 @@ public final class VehKmAndHPara {
 					}	
 					
 					if(qName.equalsIgnoreCase("link"))	{
+						if(linkList.contains(attributes.getValue("refId"))) {
+							crossesScenario = true;
+						}
 						
 						if(linkList.contains(attributes.getValue("refId")) && isInScenario)	{
 							isInScenario = true;
@@ -245,6 +257,11 @@ public final class VehKmAndHPara {
 								
 								person2vehicle.remove(attributes.getValue("vehicle"));
 								double paxDistance = vehicle2personKm.get(attributes.getValue("vehicle"));
+								try {
+									CSVUtils.writeLine(writerPaxKM, Arrays.asList(String.valueOf(paxDistance)), ';');
+								} catch (IOException e) {
+									e.printStackTrace();
+								}
 								totalNumberOfPaxKm += vehicle2personKm.get(attributes.getValue("vehicle"));
 								vehicle2personKm.remove(attributes.getValue("vehicle"));
 								
@@ -260,7 +277,7 @@ public final class VehKmAndHPara {
 						if(attributes.getValue("type").equals("left link"))	{
 							if (driver2vehicle.containsValue(attributes.getValue("vehicle")))	{
 								
-								if(linkLength.get(attributes.getValue("link")) != null)	{
+								//if(linkLength.get(attributes.getValue("link")) != null)	{
 									double distance = linkLength.get(attributes.getValue("link"));
 									
 									vehicle2distance.put(attributes.getValue("vehicle"), vehicle2distance.get(attributes.getValue("vehicle")) + distance);	
@@ -268,7 +285,7 @@ public final class VehKmAndHPara {
 									double paxKilometer = distance * person2vehicle.get(attributes.getValue("vehicle"));
 									
 									vehicle2personKm.put(attributes.getValue("vehicle"), vehicle2personKm.get(attributes.getValue("vehicle")) + paxKilometer);
-								}
+								//}
 							}
 						}
 					}		
@@ -298,6 +315,10 @@ public final class VehKmAndHPara {
 			
 	        writerTransitLinks.flush();
 	        writerTransitLinks.close();
+	        
+	        
+	        writerPaxKM.flush();
+	        writerPaxKM.close();
 			
 		} catch (Exception e)	{
 			e.printStackTrace();

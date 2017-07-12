@@ -41,6 +41,7 @@ public final class PScoreContainer {
 	private boolean isFirstTour = true;
 	
 	private int servedTrips = 0;
+	private int numberOfSubsidizedTrips = 0;
 	private double costs = 0;
 	private double earnings = 0;
 
@@ -55,6 +56,8 @@ public final class PScoreContainer {
 
 	public void handleStageContainer(StageContainer stageContainer) {
 		this.servedTrips++;
+		if(this.ticketMachine.isSubsidized(stageContainer))
+			this.numberOfSubsidizedTrips++;
 		this.passengerKilometer += this.ticketMachine.getPassengerDistanceKilometer(stageContainer);
 		this.earnings += this.ticketMachine.getFare(stageContainer);
 	}
@@ -92,6 +95,10 @@ public final class PScoreContainer {
 	
 	public double getTotalTimeDriven()	{
 		return this.totalTimeDriven;
+	}
+	
+	public int getNumberOfSubsidizedTrips()	{
+		return this.numberOfSubsidizedTrips;
 	}
 	
 	public double getTotalPassengerKilometer()	{

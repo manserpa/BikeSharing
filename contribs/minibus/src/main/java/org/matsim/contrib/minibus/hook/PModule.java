@@ -29,7 +29,9 @@ import org.matsim.contrib.minibus.operator.POperators;
 import org.matsim.contrib.minibus.stats.PStatsModule;
 import org.matsim.contrib.minibus.stats.abtractPAnalysisModules.BVGLines2PtModes;
 import org.matsim.contrib.minibus.stats.abtractPAnalysisModules.LineId2PtMode;
+import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.pt.router.TransitRouter;
 
@@ -47,12 +49,15 @@ public final class PModule extends AbstractModule {
 		// to reconstruct itself in every iteration, thus pulling new information (in this case the updated transit schedule)
 		// by itself.  Is on the "list", has not been done yet, will be done eventually, until then this remains the way it is.
 		// kai, jan'17)
-
+		
+		String outputSubsidy = ConfigUtils.addOrGetModule(getConfig(), ControlerConfigGroup.class ).getOutputDirectory() + "/run.StopsToSubsidize.csv";
+		ConfigUtils.addOrGetModule(getConfig(), PConfigGroup.class ).setInitialSubsidyFile(outputSubsidy);
+		
+		
 		bind(TicketMachineI.class).to(TicketMachineDefaultImpl.class);
 
 		bind(POperators.class).to(PBox.class).asEagerSingleton();
 		// (needs to be a singleton since it is a data container, and all clients should use the same data container. kai, jan'17)
-		
 		
 		if ( !ConfigUtils.addOrGetModule(getConfig(), PConfigGroup.class ).getUseAVContrib() ) {
 			bindMobsim().toProvider(PQSimProvider.class) ;

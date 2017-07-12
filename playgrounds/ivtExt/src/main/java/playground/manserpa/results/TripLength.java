@@ -4,6 +4,8 @@ import com.vividsolutions.jts.geom.*;
 
 import playground.manserpa.spatialData.CSVUtils;
 
+import org.matsim.api.core.v01.Coord;
+import org.matsim.core.utils.geometry.CoordUtils;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.xml.sax.Attributes;
@@ -90,7 +92,7 @@ public final class TripLength {
 	    
 		List<String> nodeList = new ArrayList<>(); 
 		List<String> linkList = new ArrayList<>(); 
-		HashMap<String, Coordes> link2Coords = new HashMap<String, Coordes>();
+		HashMap<String, Coord> link2Coords = new HashMap<String, Coord>();
 		HashMap<String, Coordes> node2Coords = new HashMap<String, Coordes>();
 		
 		try {
@@ -117,7 +119,7 @@ public final class TripLength {
 						if(nodeList.contains(attributes.getValue("from")) && nodeList.contains(attributes.getValue("to")))	{
 							linkList.add(attributes.getValue("id"));
 							
-							Coordes thisLink = new Coordes((node2Coords.get(attributes.getValue("from")).x
+							Coord thisLink = new Coord((node2Coords.get(attributes.getValue("from")).x
 									+ node2Coords.get(attributes.getValue("to")).x)/2, (node2Coords.get(attributes.getValue("from")).y
 											+ node2Coords.get(attributes.getValue("to")).y)/2);
 							link2Coords.put(attributes.getValue("id"), thisLink);
@@ -148,16 +150,18 @@ public final class TripLength {
 						}
 						
 						
-						
-						if(attributes.getValue("type").equals("actstart") && person2trip.containsKey(attributes.getValue("person")))	{
+						// schauen, dass Ende auch in Service Area
+						if(attributes.getValue("type").equals("actstart") && linkList.contains(attributes.getValue("link")) && person2trip.containsKey(attributes.getValue("person")))	{
 							//process the trip
 							if(!attributes.getValue("actType").equals("pt interaction"))	{
 								
 								String[] personTrip = person2trip.get(attributes.getValue("person")).split("===");
 								double tripTime = Double.parseDouble(attributes.getValue("time")) - Double.parseDouble(personTrip[2]);
-								
+								// double distance = distance aus person2trip zu attributes.getValue("link")
+								// mit getEuclidianDistance
+								double tripDistance = CoordUtils.calcEuclideanDistance(link2Coords.get(personTrip[1]),link2Coords.get(attributes.getValue("link")));
 								person2PTTrip.put(attributes.getValue("person")+"==="+personTrip[0]+"==="+attributes.getValue("actType"),
-										tripTime+"==="+personTrip[1]+"==="+personTrip[3]);
+										tripTime+"==="+personTrip[1]+"==="+personTrip[3]+"==="+tripDistance);
 								
 								person2trip.remove(attributes.getValue("person"));
 							}
@@ -185,7 +189,7 @@ public final class TripLength {
 							person2AVtrip.put(attributes.getValue("person"), person2AVtrip.get(attributes.getValue("person"))+"==="+attributes.getValue("legMode"));
 						}
 						
-						if(attributes.getValue("type").equals("actstart") && person2AVtrip.containsKey(attributes.getValue("person")))	{
+						if(attributes.getValue("type").equals("actstart") && linkList.contains(attributes.getValue("link")) && person2AVtrip.containsKey(attributes.getValue("person")))	{
 							//process the trip
 							if(!attributes.getValue("actType").equals("pt interaction"))	{
 								
@@ -213,10 +217,15 @@ public final class TripLength {
 										e.printStackTrace();
 									}
 									
+									//trip distance change
+									double tripDistance = CoordUtils.calcEuclideanDistance(link2Coords.get(personTrip[1]),link2Coords.get(attributes.getValue("link")));
+									double tripDistanceDifference = (tripDistance - Double.parseDouble(ptTrip[3]));
+									
 									
 									try {
-										CSVUtils.writeLine(writerSpatial, Arrays.asList(Double.toString(link2Coords.get(ptTrip[1]).x), 
-												Double.toString(link2Coords.get(ptTrip[1]).y), Double.toString(decreaseInTravelTime),ptTrip[2],mode), ';');
+										CSVUtils.writeLine(writerSpatial, Arrays.asList(Double.toString(link2Coords.get(ptTrip[1]).getX()), 
+												Double.toString(link2Coords.get(ptTrip[1]).getY()), Double.toString(decreaseInTravelTime),
+												ptTrip[2],mode,Double.toString(tripDistanceDifference)), ';');
 									} catch (IOException e) {
 										e.printStackTrace();
 									}

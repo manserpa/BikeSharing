@@ -4,6 +4,8 @@ public interface TicketMachineI {
 
 	double getFare(StageContainer stageContainer);
 	
+	boolean isSubsidized(StageContainer stageContainer);
+	
 	double getPassengerDistanceKilometer(StageContainer stageContainer);
 
 }
