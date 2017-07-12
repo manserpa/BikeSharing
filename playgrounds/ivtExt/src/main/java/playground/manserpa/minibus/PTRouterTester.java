@@ -7,13 +7,9 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.population.Leg;
-import org.matsim.contrib.dvrp.run.DvrpConfigGroup;
-import org.matsim.contrib.dvrp.trafficmonitoring.VrpTravelTimeModules;
-import org.matsim.contrib.dynagent.run.DynQSimModule;
 import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.contrib.minibus.hook.PModule;
 import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.scenario.ScenarioUtils;
@@ -21,9 +17,6 @@ import org.matsim.pt.router.FakeFacility;
 import org.matsim.pt.router.TransitRouterConfig;
 import org.matsim.pt.router.TransitRouterImpl;
 
-import playground.sebhoerl.avtaxi.framework.AVConfigGroup;
-import playground.sebhoerl.avtaxi.framework.AVModule;
-import playground.sebhoerl.avtaxi.framework.AVQSimProvider;
 
 
 /**
@@ -54,8 +47,10 @@ public final class PTRouterTester {
 				scenario.getConfig().plansCalcRoute(), scenario.getConfig().transitRouter(),
 				scenario.getConfig().vspExperimental() ), scenario.getTransitSchedule() ) ;
 		
+		// zwei coord i
+		List<Leg> legs = router.calcRoute(new FakeFacility(new Coord(1000.0, 1500.0)), new FakeFacility(new Coord(5000.0, 5000.0)), 5.5*3600, null);
 		
-		List<Leg> legs = router.calcRoute(new FakeFacility(new Coord(, (double) 0)), new FakeFacility(new Coord(x, (double) 0)), 5.5*3600, null);
-		
+		System.out.println(legs);
+		System.out.println(legs.get(0).getRoute().getDistance());
 	}		
 }
