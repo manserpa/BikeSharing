@@ -176,6 +176,7 @@ public final class VehKmAndHPara {
 			        }
 					
 			        if(qName.equals("transitRoute")) {
+			        	//if(!transitMode.equals("pt") && crossesScenario)	{
 			        	if(isParatransit)	{
 			        		// ArrayList containing all the IDs
 			        		transitRoutesInScenario.add(transitRoute);

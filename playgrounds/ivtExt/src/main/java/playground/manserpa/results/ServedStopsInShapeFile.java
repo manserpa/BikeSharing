@@ -130,6 +130,7 @@ public final class ServedStopsInShapeFile {
 					
 					if(qName.equalsIgnoreCase("stop"))	{
 						if (stopList.containsKey(attributes.getValue("refId")) && !transitMode.equals("pt"))	{
+						//if (stopList.containsKey(attributes.getValue("refId")))	{
 							servedStops.add(attributes.getValue("refId"));
 						}
 					}
