@@ -42,13 +42,13 @@ public final class ShapeFile2TransitRoutesCSV {
 		for(SimpleFeature f: features){
 			boolean incl = true;
 			Geometry g = null;
-			for(Object o: f.getAttributes()){
-				if(o instanceof Polygon){
+			for(Object o: f.getAttributes())	{
+				if(o instanceof Polygon)	{
 					g = (Geometry) o;
-				}else if (o instanceof MultiPolygon){
+				}else if (o instanceof MultiPolygon)	{
 					g = (Geometry) o;
 				}
-				else if (o instanceof String){
+				else if (o instanceof String)	{
 					incl = Boolean.parseBoolean((String) o);
 				}
 			}
