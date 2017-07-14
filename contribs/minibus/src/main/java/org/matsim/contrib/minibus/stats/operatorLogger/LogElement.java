@@ -55,6 +55,7 @@ public final class LogElement {
 	private double timeDriven;
 	private double passengerKilometer;
 	private int subsidizedTrips;
+	private int totalAmountOfSubsidies;
 	private Id<PPlan> parentId;
 	private int nVeh;
 	private int nPax;
@@ -127,6 +128,9 @@ public final class LogElement {
 	public void setSubsidizedTrips(int subsidizedTrips2) {
 		this.subsidizedTrips = subsidizedTrips2;
 	}
+	public void setAmountOfSubsidies(int amountOfSubsidies) {
+		this.totalAmountOfSubsidies = amountOfSubsidies;
+	}
 	public Id<PPlan> getParentId() {
 		return parentId;
 	}
@@ -198,6 +202,7 @@ public final class LogElement {
 		strB.append(DELIMITER).append("passenger kilometer");
 		strB.append(DELIMITER).append("pax");
 		strB.append(DELIMITER).append("subidized pax");
+		strB.append(DELIMITER).append("tot subsidies");
 		strB.append(DELIMITER).append("score");
 		strB.append(DELIMITER).append("budget");
 		strB.append(DELIMITER).append("start time");
@@ -222,6 +227,7 @@ public final class LogElement {
 		strB.append(DELIMITER).append(this.passengerKilometer);
 		strB.append(DELIMITER).append(this.nPax);
 		strB.append(DELIMITER).append(this.subsidizedTrips);
+		strB.append(DELIMITER).append(this.totalAmountOfSubsidies);
 		strB.append(DELIMITER).append(this.score);
 		strB.append(DELIMITER).append(this.budget);
 		strB.append(DELIMITER).append(Time.writeTime(this.startTime));

@@ -31,7 +31,7 @@ public final class AccessibilityServedStops {
 		ArrayList<String> transitSchedules = new ArrayList<String>();
 		
 		for(int i = 0; i < 1; i++){
-			transitSchedules.add("transitScheduleSubs.xml");
+			transitSchedules.add(args[1]);
 		}
 		cs.run(transitSchedules, args[2]);
 		

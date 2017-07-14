@@ -65,6 +65,8 @@ public final class PPlan implements Comparable<PPlan>{
 	private Set<Id<Vehicle>> vehicleIds;
 
 	private int subsidizedTrips;
+
+	private int amountOfSubsidies;
 	
 	public PPlan(Id<PPlan> planId, String creator, Id<PPlan> parentId) {
 		this.planId = planId;
@@ -216,6 +218,14 @@ public final class PPlan implements Comparable<PPlan>{
 
 	public void setNumberOfSubsidizedTrips(int totalNumberOfSubsTrips) {
 		this.subsidizedTrips = totalNumberOfSubsTrips;		
+	}
+	
+	public int getTotalAmountOfSubsidies() {
+		return this.amountOfSubsidies;
+	}
+
+	public void setTotalAmountOfSubsidies(int totalAmountOfSubsidies) {
+		this.amountOfSubsidies = totalAmountOfSubsidies;		
 	}
 
 	public double getScorePerVehicle() {

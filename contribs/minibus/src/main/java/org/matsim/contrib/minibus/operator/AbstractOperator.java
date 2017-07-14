@@ -275,6 +275,7 @@ abstract class AbstractOperator implements Operator{
 		double totalLineScore = 0.0;
 		int totalTripsServed = 0;
 		int totalSubsidizedTrips = 0;
+		int totalAmountOfSubsidies = 0;
 		double totalMeterDriven = 0.0;
 		double totalTimeDriven = 0.0;
 		double totalPassengerKilometer = 0.0;
@@ -286,6 +287,7 @@ abstract class AbstractOperator implements Operator{
 			totalTimeDriven += driverId2ScoreMap.get(vehId).getTotalTimeDriven();
 			totalPassengerKilometer += driverId2ScoreMap.get(vehId).getTotalPassengerKilometer();
 			totalSubsidizedTrips += driverId2ScoreMap.get(vehId).getNumberOfSubsidizedTrips();
+			totalAmountOfSubsidies += driverId2ScoreMap.get(vehId).getAmountOfSubsidies();
 		}
 		
 		plan.setScore(totalLineScore);
@@ -295,6 +297,7 @@ abstract class AbstractOperator implements Operator{
 		plan.setPassengerKilometerPerVehicle(totalPassengerKilometer / plan.getNVehicles());
 		plan.setTotalPassengerKilometer(totalPassengerKilometer);
 		plan.setNumberOfSubsidizedTrips(totalSubsidizedTrips);
+		plan.setTotalAmountOfSubsidies(totalAmountOfSubsidies);
 	}
 	
 }

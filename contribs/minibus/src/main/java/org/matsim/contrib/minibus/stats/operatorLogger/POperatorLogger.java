@@ -126,6 +126,7 @@ public final class POperatorLogger implements StartupListener, IterationEndsList
 					
 					local.setnPax(plan.getTripsServed());
 					local.setSubsidizedTrips(plan.getSubsidizedTrips());
+					local.setAmountOfSubsidies(plan.getTotalAmountOfSubsidies());
 					
 					total.setnPax(total.getnPax() + local.getnPax());
 					

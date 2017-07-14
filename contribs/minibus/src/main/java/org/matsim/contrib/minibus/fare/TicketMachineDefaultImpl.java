@@ -19,13 +19,8 @@
 
 package org.matsim.contrib.minibus.fare;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.HashSet;
 
 import javax.inject.Inject;
 
@@ -40,20 +35,18 @@ import org.matsim.contrib.minibus.PConfigGroup.PVehicleSettings;
  */
 public final class TicketMachineDefaultImpl implements TicketMachineI {
 	
-	//private final double earningsPerBoardingPassenger;
-	//private final double earningsPerMeterAndPassenger;
 	private final double subsidiesPerBoardingPassenger;
 	private final Collection<PVehicleSettings> pVehicleSettings;
-	private String subsidyFile2;
 	private boolean isSubsidized = false;
+	private HashSet<String> subsidizedStops100;
+	private int amountOfSubsidies;
+	private HashSet<String> subsidizedStops150;
+	private HashSet<String> subsidizedStops300;
+	private HashSet<String> subsidizedStops225;
 	
 	@Inject public TicketMachineDefaultImpl(PConfigGroup pConfig ) {
 		this.pVehicleSettings = pConfig.getPVehicleSettings();
 		this.subsidiesPerBoardingPassenger = pConfig.getSubsidiesPerBoardingPassenger();
-		this.subsidyFile2 = pConfig.getInitialSubsidyFile();
-		
-		//this.earningsPerBoardingPassenger = pConfig.getEarningsPerBoardingPassenger() ;
-		//this.earningsPerMeterAndPassenger = pConfig.getEarningsPerKilometerAndPassenger()/1000. ;
 	}
 	
 	@Override
@@ -68,40 +61,70 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
             	earningsPerMeterAndPassenger = pVS.getEarningsPerKilometerAndPassenger() / 1000.;
             }
         }
-		
-		List<String> subsidizedStops = new ArrayList<>();
-        String line = "";
         
-        if(this.subsidyFile2 != null)	{
-        	File subsidyFile = new File(this.subsidyFile2);
-        	
-        	if (subsidyFile.exists())	{
-		       try (BufferedReader br = new BufferedReader(new FileReader(subsidyFile))) {
-		
-		            while ((line = br.readLine()) != null) {
-		                subsidizedStops.add(line);
-		            }
-		
-		        } catch (IOException e) {
-		            e.printStackTrace();
-		        }
-        	}
-        }
-        
-		if (subsidizedStops.contains(stageContainer.getStopEntered().toString()))	{
+		if (this.subsidizedStops100.contains(stageContainer.getStopEntered().toString()) && !this.subsidizedStops150.contains(stageContainer.getStopEntered().toString())
+				&& !this.subsidizedStops225.contains(stageContainer.getStopEntered().toString()) && !this.subsidizedStops300.contains(stageContainer.getStopEntered().toString()))	{
 			this.isSubsidized  = true;
+			this.amountOfSubsidies = (int) this.subsidiesPerBoardingPassenger;
 			return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter() + 
 					this.subsidiesPerBoardingPassenger;
 		}
+		if (!this.subsidizedStops100.contains(stageContainer.getStopEntered().toString()) && this.subsidizedStops150.contains(stageContainer.getStopEntered().toString())
+				&& !this.subsidizedStops225.contains(stageContainer.getStopEntered().toString()) && !this.subsidizedStops300.contains(stageContainer.getStopEntered().toString()))	{
+			this.isSubsidized  = true;
+			this.amountOfSubsidies = (int) this.subsidiesPerBoardingPassenger + 5;
+			return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter() + 
+					this.subsidiesPerBoardingPassenger + 5;
+		}
+		if (!this.subsidizedStops100.contains(stageContainer.getStopEntered().toString()) && !this.subsidizedStops150.contains(stageContainer.getStopEntered().toString())
+				&& this.subsidizedStops225.contains(stageContainer.getStopEntered().toString()) && !this.subsidizedStops300.contains(stageContainer.getStopEntered().toString()))	{
+			this.isSubsidized  = true;
+			this.amountOfSubsidies = (int) this.subsidiesPerBoardingPassenger + 10;
+			return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter() + 
+					this.subsidiesPerBoardingPassenger + 10;
+		}
+		if (!this.subsidizedStops100.contains(stageContainer.getStopEntered().toString()) && !this.subsidizedStops150.contains(stageContainer.getStopEntered().toString())
+				&& !this.subsidizedStops225.contains(stageContainer.getStopEntered().toString()) && this.subsidizedStops300.contains(stageContainer.getStopEntered().toString()))	{
+			this.isSubsidized  = true;
+			this.amountOfSubsidies = (int) this.subsidiesPerBoardingPassenger + 15;
+			return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter() + 
+					this.subsidiesPerBoardingPassenger + 15;
+		}
 		else {
 			this.isSubsidized  = false;
+			this.amountOfSubsidies = 0;
 			return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter();
 		}
 	}
 	
 	@Override
+	public void setSubsidizedStops100(HashSet<String> subsidizedStops) {
+		this.subsidizedStops100 = subsidizedStops;
+	}
+	
+	@Override
+	public void setSubsidizedStops150(HashSet<String> subsidizedStops) {
+		this.subsidizedStops150 = subsidizedStops;
+	}
+	
+	@Override
+	public void setSubsidizedStops225(HashSet<String> subsidizedStops) {
+		this.subsidizedStops225 = subsidizedStops;
+	}
+	
+	@Override
+	public void setSubsidizedStops300(HashSet<String> subsidizedStops) {
+		this.subsidizedStops300 = subsidizedStops;
+	}
+	
+	@Override
 	public boolean isSubsidized(StageContainer stageContainer) {
 		return this.isSubsidized;
+	}
+	
+	@Override
+	public int getAmountOfSubsidies(StageContainer stageContainer) {
+		return this.amountOfSubsidies;
 	}
 	
 	@Override

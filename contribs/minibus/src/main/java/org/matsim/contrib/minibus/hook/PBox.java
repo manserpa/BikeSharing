@@ -20,16 +20,11 @@
 package org.matsim.contrib.minibus.hook;
 
 import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import javax.inject.Inject;
 
@@ -74,7 +69,6 @@ import org.matsim.vehicles.Vehicle;
  */
 public final class PBox implements POperators {
 
-	@SuppressWarnings("unused")
 	private final static Logger log = Logger.getLogger(PBox.class);
 
 	private LinkedList<Operator> operators;
@@ -130,6 +124,13 @@ public final class PBox implements POperators {
 
 	void notifyStartup(StartupEvent event) {
 		// This is the first iteration
+		HashSet<String> dummyHashSet = new HashSet<>();
+		dummyHashSet.add("");
+		dummyHashSet.add("");
+		this.ticketMachine.setSubsidizedStops100(dummyHashSet);
+		this.ticketMachine.setSubsidizedStops150(dummyHashSet);
+		this.ticketMachine.setSubsidizedStops225(dummyHashSet);
+		this.ticketMachine.setSubsidizedStops300(dummyHashSet);
 
 		TimeProvider timeProvider = new TimeProvider(this.pConfig, event.getServices().getControlerIO().getOutputPath());
 		event.getServices().getEvents().addHandler(timeProvider);
@@ -194,14 +195,9 @@ public final class PBox implements POperators {
 			operator.replan(this.strategyManager, event.getIteration());
 		}
 		
-		
 		if(event.getIteration() == 101) {
 			
-			this.pConfig.setInitialSubsidyFile(event.getServices().getControlerIO().getOutputFilename("StopsToSubsidize.csv"));
-
 			HashSet<String> allServedStopsToGrid = new HashSet<>();
-			
-			// zuerst ein Grid aufstellen mit allen served stops
 			for (Operator operator : this.operators) {				
 				for(PPlan thisPlan: operator.getAllPlans())	{
 					for(TransitStopFacility thisFacility: thisPlan.getStopsToBeServed())	{
@@ -212,34 +208,141 @@ public final class PBox implements POperators {
 			}
 			
 			HashSet<String> allStopsNotInALockedCell = new HashSet<>();
-			// dann schauen, welche stops nicht in einem Grid sind
 			for(TransitStopFacility thisTransitStop: this.pStopsOnly.getFacilities().values())	{
 				if(!allServedStopsToGrid.contains(GridNode.getGridNodeIdForCoord(thisTransitStop.getCoord(), 500)))	{
 					allStopsNotInALockedCell.add(thisTransitStop.getId().toString());
 				}	
 			}
 		
-			// dann diese Stops in ein File schreiben
+			
 		    BufferedWriter writer;
 			try {
-				writer = IOUtils.getBufferedWriter(event.getServices().getControlerIO().getOutputFilename("StopsToSubsidize.csv"));
-		    
+				writer = IOUtils.getBufferedWriter(event.getServices().getControlerIO().getOutputFilename("StopsToSubsidize100.csv"));
 				writer.write("StopId");
-				
-				// hier müssen die stops to subsidize rein
 				for(String stopsToSubs: allStopsNotInALockedCell)	{
 					writer.newLine();
 					writer.write(stopsToSubs);
 				}
-			    
 			    writer.flush();
 		        writer.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			
+			this.ticketMachine.setSubsidizedStops100(allStopsNotInALockedCell);
 		}
-	    
-		// if iteration = 100 - save a stop subsidy file
+		
+		if(event.getIteration() == 151) {
+			
+			HashSet<String> allServedStopsToGrid = new HashSet<>();
+			for (Operator operator : this.operators) {				
+				for(PPlan thisPlan: operator.getAllPlans())	{
+					for(TransitStopFacility thisFacility: thisPlan.getStopsToBeServed())	{
+						String gridNodeId = GridNode.getGridNodeIdForCoord(thisFacility.getCoord(), 500);
+						allServedStopsToGrid.add(gridNodeId);
+					}
+				}
+			}
+			
+			HashSet<String> allStopsNotInALockedCell = new HashSet<>();
+			for(TransitStopFacility thisTransitStop: this.pStopsOnly.getFacilities().values())	{
+				if(!allServedStopsToGrid.contains(GridNode.getGridNodeIdForCoord(thisTransitStop.getCoord(), 500)))	{
+					allStopsNotInALockedCell.add(thisTransitStop.getId().toString());
+				}	
+			}
+		
+			
+		    BufferedWriter writer;
+			try {
+				writer = IOUtils.getBufferedWriter(event.getServices().getControlerIO().getOutputFilename("StopsToSubsidize150.csv"));
+				writer.write("StopId");
+				for(String stopsToSubs: allStopsNotInALockedCell)	{
+					writer.newLine();
+					writer.write(stopsToSubs);
+				}
+			    writer.flush();
+		        writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			this.ticketMachine.setSubsidizedStops150(allStopsNotInALockedCell);
+		}
+		
+		if(event.getIteration() == 225) {
+			
+			HashSet<String> allServedStopsToGrid = new HashSet<>();
+			for (Operator operator : this.operators) {				
+				for(PPlan thisPlan: operator.getAllPlans())	{
+					for(TransitStopFacility thisFacility: thisPlan.getStopsToBeServed())	{
+						String gridNodeId = GridNode.getGridNodeIdForCoord(thisFacility.getCoord(), 500);
+						allServedStopsToGrid.add(gridNodeId);
+					}
+				}
+			}
+			
+			HashSet<String> allStopsNotInALockedCell = new HashSet<>();
+			for(TransitStopFacility thisTransitStop: this.pStopsOnly.getFacilities().values())	{
+				if(!allServedStopsToGrid.contains(GridNode.getGridNodeIdForCoord(thisTransitStop.getCoord(), 500)))	{
+					allStopsNotInALockedCell.add(thisTransitStop.getId().toString());
+				}	
+			}
+		
+			
+		    BufferedWriter writer;
+			try {
+				writer = IOUtils.getBufferedWriter(event.getServices().getControlerIO().getOutputFilename("StopsToSubsidize225.csv"));
+				writer.write("StopId");
+				for(String stopsToSubs: allStopsNotInALockedCell)	{
+					writer.newLine();
+					writer.write(stopsToSubs);
+				}
+			    writer.flush();
+		        writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			this.ticketMachine.setSubsidizedStops225(allStopsNotInALockedCell);
+		}
+		
+		if(event.getIteration() == 300) {
+			
+			HashSet<String> allServedStopsToGrid = new HashSet<>();
+			for (Operator operator : this.operators) {				
+				for(PPlan thisPlan: operator.getAllPlans())	{
+					for(TransitStopFacility thisFacility: thisPlan.getStopsToBeServed())	{
+						String gridNodeId = GridNode.getGridNodeIdForCoord(thisFacility.getCoord(), 500);
+						allServedStopsToGrid.add(gridNodeId);
+					}
+				}
+			}
+			
+			HashSet<String> allStopsNotInALockedCell = new HashSet<>();
+			for(TransitStopFacility thisTransitStop: this.pStopsOnly.getFacilities().values())	{
+				if(!allServedStopsToGrid.contains(GridNode.getGridNodeIdForCoord(thisTransitStop.getCoord(), 500)))	{
+					allStopsNotInALockedCell.add(thisTransitStop.getId().toString());
+				}	
+			}
+		
+			
+		    BufferedWriter writer;
+			try {
+				writer = IOUtils.getBufferedWriter(event.getServices().getControlerIO().getOutputFilename("StopsToSubsidize300.csv"));
+				writer.write("StopId");
+				for(String stopsToSubs: allStopsNotInALockedCell)	{
+					writer.newLine();
+					writer.write(stopsToSubs);
+				}
+			    writer.flush();
+		        writer.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			this.ticketMachine.setSubsidizedStops300(allStopsNotInALockedCell);
+		}
+
 
 		// Collect current lines offered
 		// why is the following done twice (see notifyScoring)?

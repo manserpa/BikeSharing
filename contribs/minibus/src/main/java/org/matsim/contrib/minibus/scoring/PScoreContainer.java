@@ -48,6 +48,8 @@ public final class PScoreContainer {
 	private double totalMeterDriven = 0.0;
 	private double totalTimeDriven = 0.0;
 	private double passengerKilometer = 0.0;
+
+	private int amountOfSubsidies;
 	
 	public PScoreContainer(Id<Vehicle> vehicleId, TicketMachineI ticketMachine) {
 		this.vehicleId = vehicleId;
@@ -56,6 +58,7 @@ public final class PScoreContainer {
 
 	public void handleStageContainer(StageContainer stageContainer) {
 		this.servedTrips++;
+		this.amountOfSubsidies += this.ticketMachine.getAmountOfSubsidies(stageContainer);
 		if(this.ticketMachine.isSubsidized(stageContainer))
 			this.numberOfSubsidizedTrips++;
 		this.passengerKilometer += this.ticketMachine.getPassengerDistanceKilometer(stageContainer);
@@ -99,6 +102,10 @@ public final class PScoreContainer {
 	
 	public int getNumberOfSubsidizedTrips()	{
 		return this.numberOfSubsidizedTrips;
+	}
+	
+	public int getAmountOfSubsidies()	{
+		return this.amountOfSubsidies;
 	}
 	
 	public double getTotalPassengerKilometer()	{
