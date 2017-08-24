@@ -18,7 +18,7 @@ import playground.manserpa.spatialData.CSVUtils;
 public class MeanVolumeAndCapacity {
 	public static void main(String[] args) throws IOException {
 		
-		int numberOfRuns = 10;
+		int numberOfRuns = 5;
 		
 		HashMap<String, Double> capacity = new HashMap<String, Double>();
 		HashMap<String, Double> volume = new HashMap<String, Double>();

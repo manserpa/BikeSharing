@@ -53,10 +53,11 @@ import java.util.Collection;
 
 
 /**
- * Entry point, registers all necessary hooks
+ * Run the minibus contrib in the Zurich Scenario with the reduced population. Some files (zurich_replanning) are necessary to let it work
  * 
- * @author aneumann
  */
+
+
 public final class RunMinibusZurich {
 
 	private final static Logger log = Logger.getLogger(RunMinibusTest.class);

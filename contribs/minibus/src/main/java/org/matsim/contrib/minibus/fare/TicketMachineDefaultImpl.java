@@ -55,6 +55,8 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 		double earningsPerBoardingPassenger = 0.0;
 		double earningsPerMeterAndPassenger = 0.0;
 	
+		// manserpa: earnings could be set differently for the different vehicle types
+		
 		for (PVehicleSettings pVS : this.pVehicleSettings) {
             if (stageContainer.getVehicleId().toString().contains(pVS.getPVehicleName())) {
             	earningsPerBoardingPassenger = pVS.getEarningsPerBoardingPassenger();
@@ -62,6 +64,11 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
             }
         }
         
+		
+		// subsidy approach by manserpa: the operators get a configurable amount of subsidies after a certain number of iterations, if the passenger
+		// boards at a subsidized stop.
+		// TODO make the subsidy approach nicer, now everything is hard-coded (move everything into the config.xml)
+		
 		if (this.subsidizedStops100.contains(stageContainer.getStopEntered().toString()) && !this.subsidizedStops150.contains(stageContainer.getStopEntered().toString())
 				&& !this.subsidizedStops225.contains(stageContainer.getStopEntered().toString()) && !this.subsidizedStops300.contains(stageContainer.getStopEntered().toString()))	{
 			this.isSubsidized  = true;
@@ -69,22 +76,20 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 			return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter() + 
 					this.subsidiesPerBoardingPassenger;
 		}
-		if (!this.subsidizedStops100.contains(stageContainer.getStopEntered().toString()) && this.subsidizedStops150.contains(stageContainer.getStopEntered().toString())
+		if (this.subsidizedStops150.contains(stageContainer.getStopEntered().toString())
 				&& !this.subsidizedStops225.contains(stageContainer.getStopEntered().toString()) && !this.subsidizedStops300.contains(stageContainer.getStopEntered().toString()))	{
 			this.isSubsidized  = true;
 			this.amountOfSubsidies = (int) this.subsidiesPerBoardingPassenger + 5;
 			return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter() + 
 					this.subsidiesPerBoardingPassenger + 5;
 		}
-		if (!this.subsidizedStops100.contains(stageContainer.getStopEntered().toString()) && !this.subsidizedStops150.contains(stageContainer.getStopEntered().toString())
-				&& this.subsidizedStops225.contains(stageContainer.getStopEntered().toString()) && !this.subsidizedStops300.contains(stageContainer.getStopEntered().toString()))	{
+		if (this.subsidizedStops225.contains(stageContainer.getStopEntered().toString()) && !this.subsidizedStops300.contains(stageContainer.getStopEntered().toString()))	{
 			this.isSubsidized  = true;
 			this.amountOfSubsidies = (int) this.subsidiesPerBoardingPassenger + 10;
 			return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter() + 
 					this.subsidiesPerBoardingPassenger + 10;
 		}
-		if (!this.subsidizedStops100.contains(stageContainer.getStopEntered().toString()) && !this.subsidizedStops150.contains(stageContainer.getStopEntered().toString())
-				&& !this.subsidizedStops225.contains(stageContainer.getStopEntered().toString()) && this.subsidizedStops300.contains(stageContainer.getStopEntered().toString()))	{
+		if (this.subsidizedStops300.contains(stageContainer.getStopEntered().toString()))	{
 			this.isSubsidized  = true;
 			this.amountOfSubsidies = (int) this.subsidiesPerBoardingPassenger + 15;
 			return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter() + 

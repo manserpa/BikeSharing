@@ -18,11 +18,11 @@ import playground.manserpa.spatialData.CSVUtils;
 public class MeanVolume {
 	public static void main(String[] args) throws IOException {
 		
-		int numberOfRuns = 10;
+		int numberOfRuns = 5;
 		
 		HashMap<String, Double> volume = new HashMap<String, Double>();
 	    
-	    String csvFileMeanVolume = "MeanFrequency8amtill9am.csv";
+	    String csvFileMeanVolume = "MeanCapacity.csv";
 	    FileWriter writerMeanVolume = new FileWriter(csvFileMeanVolume);
 	    
 	    CSVUtils.writeLine(writerMeanVolume, Arrays.asList("LinkId", "MeanCapacity"), ';');

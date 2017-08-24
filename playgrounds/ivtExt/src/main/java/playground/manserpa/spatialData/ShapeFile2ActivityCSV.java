@@ -23,10 +23,11 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
-/*
- * purpose: search in the plan file for the selected plans and the desired modes
- * input file = xml file with plans
- * output file = xml and csv containing all the legs (distance and travel time) of the desired mode
+/**
+ * 
+ * purpose: search in the plan file for activities that the agents perform during the day (selected plans only)
+ * input: shape file and plan file
+ * output: a .csv containing all activities and the coordinates
  * 
  */
 
@@ -82,7 +83,7 @@ public class ShapeFile2ActivityCSV {
 	}
 		
 	
-	public void run(String networkFile)  throws IOException {
+	public void run(String planFile)  throws IOException {
 		
 		List<ActivityList> activityList = new ArrayList<>();
 		
@@ -148,7 +149,7 @@ public class ShapeFile2ActivityCSV {
 			    }
 			};
 			
-			saxParser.parse(networkFile, handler);
+			saxParser.parse(planFile, handler);
 			
 			writer.flush();
 	        writer.close();

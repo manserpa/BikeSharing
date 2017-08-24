@@ -18,6 +18,19 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 public final class ReducePopulationSize {
+	
+	/**
+	 * 
+	 * ReducesPopulationSize: Trims the total population to a certain shape file (I took an area with a 2km buffer around my actual area of interest).
+	 * 	it cuts of all agents that do not have any activity within the shape file nor cross the area during the day.
+	 * 
+	 * Input: Shape file, network file and population file
+	 * Output: A .csv containing all IDs of the remaining agents
+	 * 
+	 * @author manserpa
+	 * 
+	 */
+	
 	private Geometry include;
 	private Geometry exclude;
 	private final GeometryFactory factory;

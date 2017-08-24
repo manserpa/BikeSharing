@@ -30,9 +30,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Collects all {@link PersonStuckEvent} and returns a set of the ids of the agents
+ * Returns the number and the IDs of the agents that have to reroute their trip using PT.
  *
- * @author aneumann
  */
 class AgentReRouteHandlerImpl	{
 

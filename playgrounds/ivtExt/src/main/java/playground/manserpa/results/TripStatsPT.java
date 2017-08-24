@@ -26,7 +26,10 @@ public final class TripStatsPT {
 	public static void main(String[] args) throws IOException	{
 		TripStatsPT cs = new TripStatsPT(args[0]);
 		
-		cs.run(args[1], args[2], args[3]);
+		for(int simulationRun = 1; simulationRun <= 10; simulationRun++)	{
+			cs.run(args[1], "Run" + simulationRun + args[2], "Run" + simulationRun + args[3], simulationRun);
+		}
+//		cs.run(args[1], args[2], args[3]);
 		
 	}
 	
@@ -68,7 +71,7 @@ public final class TripStatsPT {
 		this.exclude = this.factory.createGeometryCollection(exclude.toArray(new Geometry[exclude.size()])).buffer(0);
 	}
 	
-	private void run(String networkFile, String transitScheduleFile, String eventFile) throws IOException	{
+	private void run(String networkFile, String transitScheduleFile, String eventFile, int simulationRun) throws IOException	{
 		
 		List<String> transitRoutesInScenario = new ArrayList<>();
 		HashMap<String, Double> linkLength = new HashMap<String, Double>();
@@ -351,7 +354,7 @@ public final class TripStatsPT {
 			}
 			double meanTotalTripTime = totAmount / totalTripTime.size();
 			
-			String csvFile = "TripStats.csv";
+			String csvFile = "TripStats" + simulationRun + ".csv";
 		    FileWriter writer = new FileWriter(csvFile);
 		    
 		    CSVUtils.writeLine(writer, Arrays.asList("NumberOfTrips", "AccessWalk [m]", "EgressWalk [m]", "InVehicleTime", "Transfers", "FirstWaitingTime",

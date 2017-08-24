@@ -20,6 +20,20 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 public final class StopFacilityGenerator {
+	
+	/**
+	 * 
+	 * StopFacilityGenerator: The station generator introduces a stop facility on every link in a certain area (shape file). There are certain limitations:
+	 * The free-flow speed, the link type. This could be adjusted within this script.
+	 * 
+	 * Input: Shape file, network file
+	 * Output: A .xml containing all desired stop facilities
+	 * 
+	 * @author manserpa
+	 * 
+	 */
+	
+	
 	private Geometry include;
 	private Geometry exclude;
 	private final GeometryFactory factory;

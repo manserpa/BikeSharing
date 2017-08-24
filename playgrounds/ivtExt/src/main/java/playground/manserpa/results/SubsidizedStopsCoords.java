@@ -29,7 +29,10 @@ public final class SubsidizedStopsCoords {
 	public static void main(String[] args) throws IOException	{
 		SubsidizedStopsCoords cs = new SubsidizedStopsCoords(args[0]);
 		
-		cs.run(args[1],args[2]);
+		for(int simulationRun = 1; simulationRun <= 9; simulationRun++)	{
+			cs.run("Run" + simulationRun + args[1], "Run" + simulationRun + args[2], simulationRun);
+		}
+//		cs.run(args[1],args[2]);
 		
 	}
 	
@@ -71,12 +74,12 @@ public final class SubsidizedStopsCoords {
 		this.exclude = this.factory.createGeometryCollection(exclude.toArray(new Geometry[exclude.size()])).buffer(0);
 	}
 	
-	private void run(String transitSchedule, String subsidizedStops) throws IOException	{
+	private void run(String transitSchedule, String subsidizedStops, int simulationRun) throws IOException	{
 		
 		HashSet<String> servedStops = new HashSet<>(); 
 		HashMap<String, Coordes> stopList = new HashMap<>();
 	
-		String csvFile = "SubsidizedStops.csv";
+		String csvFile = "SubsidizedStops" + simulationRun + ".csv";
 	    FileWriter writer = new FileWriter(csvFile);
 	    
 	    CSVUtils.writeLine(writer, Arrays.asList("id", "x", "y"), ';');

@@ -7,6 +7,20 @@ import org.matsim.core.population.algorithms.ParallelPersonAlgorithmRunner;
 import org.matsim.core.router.PlanRouter;
 import org.matsim.core.scenario.MutableScenario;
 
+/**
+ * This is to PT-Replanning module
+ * 
+ * @author manserpa
+ * 
+ * !!! Very important !!! a change in the core replanning module has been made. Otherwise, this feature does not work properly
+ * 
+ * A big problem is that the files are in the playground, but they should be better in the contrib. Now, the running file is in the playground,
+ * the execution happens in the contrib, which targets again to the playground for the replanning module -> results in a circle (Eclipse complains)
+ *
+ */
+
+// TODO: move all pseudo replanning files to minibus contrib
+
 public class PseudoReplanning  {
 
 	private final static Logger log = Logger.getLogger(PseudoReplanning.class);

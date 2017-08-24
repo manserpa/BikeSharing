@@ -19,10 +19,11 @@ import playground.sebhoerl.avtaxi.framework.AVQSimProvider;
 
 
 /**
- * Entry point, registers all necessary hooks
+ * Sioux Falls Scenario with AVs and Minibuses
  * 
  * @author manserpa
  */
+
 public final class RunMinibusWithAVsTest {
 
 	private final static Logger log = Logger.getLogger(RunMinibusWithAVsTest.class);

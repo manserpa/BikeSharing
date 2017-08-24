@@ -23,7 +23,10 @@ public final class ShapeFile2TransitRoutesCSV {
 	public static void main(String[] args) throws IOException	{
 		ShapeFile2TransitRoutesCSV cs = new ShapeFile2TransitRoutesCSV(args[0]);
 		
-		cs.run(args[1], args[2]);
+		for(int simulationRun = 1; simulationRun <= 6; simulationRun++)	{
+			cs.run(args[1], "Run" + simulationRun + args[2], simulationRun);
+		}
+//		cs.run(args[1], args[2]);
 		
 	}
 	
@@ -65,21 +68,21 @@ public final class ShapeFile2TransitRoutesCSV {
 		this.exclude = this.factory.createGeometryCollection(exclude.toArray(new Geometry[exclude.size()])).buffer(0);
 	}
 	
-	private void run(String networkFile, String transitScheduleFile) throws IOException	{
+	private void run(String networkFile, String transitScheduleFile, int simulationRun) throws IOException	{
 	
 		LinkedHashSet<String> transitSet = new LinkedHashSet<String>();
 	
-		String csvFileNodes = "NodesZH.csv";
+		String csvFileNodes = "NodesZH" + simulationRun + ".csv";
 	    FileWriter writerNodes = new FileWriter(csvFileNodes);
 	    
 	    CSVUtils.writeLine(writerNodes, Arrays.asList("id", "x", "y"), ';');
 	    
-	    String csvFileLinks = "LinksZH.csv";
+	    String csvFileLinks = "LinksZH" + simulationRun + ".csv";
 	    FileWriter writerLinks = new FileWriter(csvFileLinks );
 	    
 	    CSVUtils.writeLine(writerLinks , Arrays.asList("id", "from","to","length","modes","freespeed"), ';');
 	    
-	    String csvFileTransitLinks = "TransitLinksSubsidized.csv";
+	    String csvFileTransitLinks = "TransitLinksSubsidized" + simulationRun + ".csv";
 	    FileWriter writerTransitLinks = new FileWriter(csvFileTransitLinks );
 	    
 	    CSVUtils.writeLine(writerTransitLinks , Arrays.asList("TransitLine", "TransitMode","LinkId"), ';');

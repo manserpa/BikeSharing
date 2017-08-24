@@ -26,17 +26,13 @@ import org.matsim.core.scenario.MutableScenario;
 import java.util.Set;
 
 
-/**
- * @author droeder
- *
- */
 interface AgentReRouteFactory {
 	
 
 	/**
 	 * @param router
 	 * @param scenario
-	 * @param agentsStuck
+	 * @param agentsToReRoute
 	 * @return
 	 */
 	public AbstractAgentReRoute getReRouteStuck(PlanAlgorithm router, MutableScenario scenario, Set<Id<Person>> agentsToReRoute) ;

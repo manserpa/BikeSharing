@@ -42,10 +42,10 @@ import java.util.Collection;
 
 
 /**
- * Entry point, registers all necessary hooks
+ * Reference Scenario -> no minibus, no AVs, just a normal Zurich Scenario
  * 
- * @author aneumann
  */
+
 public final class RunZurichReference {
 
 	private final static Logger log = Logger.getLogger(RunMinibusTest.class);

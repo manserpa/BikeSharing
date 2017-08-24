@@ -30,9 +30,8 @@ import org.matsim.pt.router.TransitActsRemover;
 import java.util.Set;
 
 /**
- * ReRoutes every person from a given set of person ids
+ * Takes the plan set of all agents that have to reroute their trips and then selects the worst plan of those agents.
  *
- * @author aneumann
  */
 final class AgentReRoute extends AbstractAgentReRoute {
 

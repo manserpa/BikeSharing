@@ -139,6 +139,7 @@ public final class SidewaysRouteExtension extends AbstractPStrategyModule {
 		TransitStopFacility stopWithSmallestDistance = stops.get(0);
 		TransitStopFacility stopWithSecondSmallestDistance = stops.get(0);
 		for (TransitStopFacility transitStopFacility : stops) {
+			// manserpa: take the Djkstra!
 			double currentDistance = CoordUtils.calcEuclideanDistance(stop.getCoord(), transitStopFacility.getCoord());
 			if (currentDistance < smallestDistance) {
 				smallestDistance = currentDistance;

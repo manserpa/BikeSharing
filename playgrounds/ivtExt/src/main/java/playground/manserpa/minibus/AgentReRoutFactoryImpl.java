@@ -26,10 +26,7 @@ import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.population.algorithms.PlanAlgorithm;
 import org.matsim.core.scenario.MutableScenario;
 
-/**
- * @author droeder
- *
- */
+
 class AgentReRouteFactoryImpl implements AgentReRouteFactory {
 
 	@SuppressWarnings("unused")

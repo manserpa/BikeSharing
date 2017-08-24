@@ -33,10 +33,6 @@ import org.matsim.core.population.algorithms.PlanAlgorithm;
 import org.matsim.core.scenario.MutableScenario;
 
 
-/**
- * @author droeder
- *
- */
 abstract class AbstractAgentReRoute extends AbstractPersonAlgorithm  {
 	
 	final PlanAlgorithm router;

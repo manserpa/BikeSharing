@@ -31,12 +31,17 @@ import com.vividsolutions.jts.geom.Polygon;
 import playground.manserpa.spatialData.CSVUtils;
 
 
-
 /**
- * Entry point, registers all necessary hooks
  * 
- * @author aneumann
+ * TestPTRouting: Class to route a configurable amount of random OD-Pairs within a shape file through a public transport network at a certain time of the day
+ * 
+ * Input: config, transitSchedule, shape file, number of OD-Pairs, time of the day (in hours, e.g. 8am)
+ * Output: a csv containing the beeline distance between the OD-pairs and the time needed to go from origin to destination using the public transport network.
+ * 
+ * @author manserpa
+ * 
  */
+
 public final class TestPTRouting {
 
 	public static void main(final String[] args) {
@@ -110,7 +115,6 @@ public final class TestPTRouting {
 		    } while(!nodeInServiceArea(x1,y1));
 			
 			List<Leg> legs = router.calcRoute(new FakeFacility(new Coord(x1, y1)), new FakeFacility(new Coord(x, y)), dayTime*3600, null); // should map to stops A and I
-				
 			
 			double totTime = 0;
 			double totDistance = 0;
@@ -122,6 +126,7 @@ public final class TestPTRouting {
 			for (Leg e : legs)	{
 				totTime += e.getTravelTime();
 				totDistance += e.getRoute().getDistance();
+				System.out.println(e.getRoute().getDistance());
 			}
 			Coord fromCoord = new Coord(x1,y1);
 			Coord toCoord = new Coord(x,y);

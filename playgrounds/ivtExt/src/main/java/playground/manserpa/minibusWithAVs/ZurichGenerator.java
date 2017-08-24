@@ -15,6 +15,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * Additional code to make the AV-contrib work. Not sure if really needed
+ * 
+ */
+
 public class ZurichGenerator implements AVGenerator {
     final private AVOperator operator;
     final private Collection<Link> permissibleLinks;

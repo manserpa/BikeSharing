@@ -20,10 +20,10 @@ import playground.sebhoerl.avtaxi.framework.AVQSimProvider;
 
 
 /**
- * Entry point, registers all necessary hooks
+ * Run the minibus contrib in the Sioux Falls Scenario. For input files see folder Sioux Falls
  * 
- * @author aneumann
  */
+
 public final class RunMinibusTest {
 
 	private final static Logger log = Logger.getLogger(RunMinibusTest.class);

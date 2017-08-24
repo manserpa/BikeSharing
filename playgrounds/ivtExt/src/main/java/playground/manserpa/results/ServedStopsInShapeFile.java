@@ -25,7 +25,10 @@ public final class ServedStopsInShapeFile {
 	public static void main(String[] args) throws IOException	{
 		ServedStopsInShapeFile cs = new ServedStopsInShapeFile(args[0]);
 		
-		cs.run(args[1]);
+		for(int simulationRun = 1; simulationRun <= 5; simulationRun++)	{
+			cs.run("0AVs/Run" + simulationRun + args[1], simulationRun);
+		}
+//		cs.run(args[1], 10);
 		
 	}
 	
@@ -67,12 +70,12 @@ public final class ServedStopsInShapeFile {
 		this.exclude = this.factory.createGeometryCollection(exclude.toArray(new Geometry[exclude.size()])).buffer(0);
 	}
 	
-	private void run(String transitSchedule) throws IOException	{
+	private void run(String transitSchedule, int simulationRun) throws IOException	{
 		
 		HashSet<String> servedStops = new HashSet<>(); 
 		HashMap<String, Coordinates> stopList = new HashMap<>();
 	
-		String csvFile = "ServedStops.csv";
+		String csvFile = "ServedStops" + simulationRun + ".csv";
 	    FileWriter writer = new FileWriter(csvFile);
 	    
 	    CSVUtils.writeLine(writer, Arrays.asList("id", "x", "y"), ';');
@@ -155,7 +158,7 @@ public final class ServedStopsInShapeFile {
 			
 			for(String i: servedStops)	{
 				Coordinates thisStop = stopList.get(i);
-				System.out.println(i + "; x: " + thisStop.x + "; y: "+ thisStop.y);
+//				System.out.println(i + "; x: " + thisStop.x + "; y: "+ thisStop.y);
 				
 				
 				try {
@@ -165,7 +168,7 @@ public final class ServedStopsInShapeFile {
 				}
 				
 			}
-			System.out.println(servedStops.size());
+			System.out.println("Results for Run" + simulationRun + ": " + servedStops.size());
 			
 			writer.flush();
 	        writer.close();

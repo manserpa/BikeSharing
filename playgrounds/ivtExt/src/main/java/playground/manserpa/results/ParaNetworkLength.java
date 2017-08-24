@@ -23,7 +23,10 @@ public final class ParaNetworkLength {
 	public static void main(String[] args) throws IOException	{
 		ParaNetworkLength cs = new ParaNetworkLength(args[0]);
 		
-		cs.run(args[1], args[2]);
+//		for(int simulationRun = 1; simulationRun <= 9; simulationRun++)	{
+//			cs.run(args[1], "Run" + simulationRun + args[2], simulationRun);
+//		}
+		cs.run(args[1], args[2], 10);
 		
 	}
 	
@@ -65,7 +68,7 @@ public final class ParaNetworkLength {
 		this.exclude = this.factory.createGeometryCollection(exclude.toArray(new Geometry[exclude.size()])).buffer(0);
 	}
 	
-	private void run(String networkFile, String transitScheduleFile) throws IOException	{
+	private void run(String networkFile, String transitScheduleFile, int simulationRun) throws IOException	{
 	
 		HashSet<String> networkLinks = new HashSet<String>();
 		HashMap<String, Double> linkLength = new HashMap<String, Double>();
@@ -154,7 +157,7 @@ public final class ParaNetworkLength {
 				totalLength += linkLength.get(i);;
 			}
 			
-			System.out.println(totalLength / 1000);
+			System.out.println("Results for Run" + simulationRun + ": " + totalLength / 1000);
 			
 		} catch (Exception e)	{
 			e.printStackTrace();

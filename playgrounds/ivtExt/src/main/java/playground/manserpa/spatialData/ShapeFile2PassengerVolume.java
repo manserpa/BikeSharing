@@ -25,7 +25,10 @@ public final class ShapeFile2PassengerVolume {
 	public static void main(String[] args) throws IOException	{
 		ShapeFile2PassengerVolume cs = new ShapeFile2PassengerVolume(args[0]);
 		
-		cs.run(args[1], args[2], args[3]);
+		for(int simulationRun = 1; simulationRun <= 10; simulationRun++)	{
+			cs.run(args[1], "Run" + simulationRun + args[2], "Run" + simulationRun + args[3], simulationRun);
+		}
+		//cs.run(args[1], args[2], args[3]);
 		
 	}
 	
@@ -67,7 +70,7 @@ public final class ShapeFile2PassengerVolume {
 		this.exclude = this.factory.createGeometryCollection(exclude.toArray(new Geometry[exclude.size()])).buffer(0);
 	}
 	
-	private void run(String networkFile, String transitScheduleFile, String eventFile) throws IOException	{
+	private void run(String networkFile, String transitScheduleFile, String eventFile, int simulationRun) throws IOException	{
 	
 		List<String> transitRoutesInScenario = new ArrayList<>();
 		
@@ -76,7 +79,7 @@ public final class ShapeFile2PassengerVolume {
 		HashMap<String, Double> linkLength = new HashMap<String, Double>();
 		HashMap<String, Integer> person2vehicle = new HashMap<String, Integer>();
 	    
-	    String csvFileTransitLinks = "LinkPassengerVolume.csv";
+	    String csvFileTransitLinks = "LinkPassengerVolume" + simulationRun + ".csv";
 	    FileWriter writerTransitLinks = new FileWriter(csvFileTransitLinks );
 	    
 	    CSVUtils.writeLine(writerTransitLinks , Arrays.asList("LinkId", "PAX"), ';');

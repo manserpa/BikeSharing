@@ -150,9 +150,14 @@ public class ExcessWaitingTimeCalculator implements Serializable, PersonDepartur
 		if(stop==null)
 			throw new RuntimeException("Stop doesn't belong to the given line-route");
 		SortedMap<Double, Departure> sortedDepartures = new TreeMap<Double, Departure>();
+		
 		for(Departure departure:route.getDepartures().values())
 			if(departure.getDepartureTime()<26*3600)
 				sortedDepartures.put(departure.getDepartureTime(), departure);
+		System.out.println(sortedDepartures.size());
+		System.out.println(sortedDepartures.toString());
+		System.out.println(headways.get(key).size());
+		System.out.println(headways.get(key).toString());
 		Iterator<Departure> it;
 		double pDeparture, cDeparture;
 		switch(mode) {
@@ -160,10 +165,12 @@ public class ExcessWaitingTimeCalculator implements Serializable, PersonDepartur
 			it = sortedDepartures.values().iterator();
 			pDeparture = it.next().getDepartureTime();
 			for(double headway:headways.get(key)) {
-				cDeparture = it.next().getDepartureTime();
-				average += headway*(headway/2-(cDeparture-pDeparture)/2);
-				pDeparture = cDeparture;
-				sum += headway;
+				if(it.hasNext())	{
+					cDeparture = it.next().getDepartureTime();
+					average += headway*(headway/2-(cDeparture-pDeparture)/2);
+					pDeparture = cDeparture;
+					sum += headway;
+				}
 			}
 			/*if(Integer.parseInt(stopId.toString())==1229) {
 				try {
@@ -209,10 +216,12 @@ public class ExcessWaitingTimeCalculator implements Serializable, PersonDepartur
 			it = sortedDepartures.values().iterator();
 			pDeparture = it.next().getDepartureTime();
 			for(int i=0; i<headwaysLineRouteStop.size(); i++) {
+				if(it.hasNext())	{
 				cDeparture = it.next().getDepartureTime();
 				average += waitTimeCollections.get(i+1).size()*(headwaysLineRouteStop.get(i)/2-(cDeparture-pDeparture)/2);
 				pDeparture = cDeparture;
 				sum += waitTimeCollections.get(i+1).size();
+				}
 			}
 			return average==0 && sum==0?0:average/sum;
 		case FULL_SAMPLE:
@@ -221,12 +230,14 @@ public class ExcessWaitingTimeCalculator implements Serializable, PersonDepartur
 			boolean first = true;
 			for(Collection<Double> waitTimeCollection:waitTimes.get(key)) {
 				if(!first) {
+					if(it.hasNext())	{
 					cDeparture = it.next().getDepartureTime();
 					for(Double waitTime:waitTimeCollection) {
 						average += waitTime-(cDeparture-pDeparture)/2;
 						sum++;
 					}
 					pDeparture = cDeparture;
+					}
 				}
 				else
 					first = false;

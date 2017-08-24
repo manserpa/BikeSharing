@@ -11,6 +11,11 @@ import org.matsim.core.population.PopulationUtils;
 import org.matsim.core.population.algorithms.PlanAlgorithm;
 import org.matsim.pt.PtConstants;
 
+/**
+ * Removes all legs from a plan and sets the mode to public transport
+ *
+ */
+
 public class LegRemover implements PlanAlgorithm {
 
 	public void run(final Plan plan) {

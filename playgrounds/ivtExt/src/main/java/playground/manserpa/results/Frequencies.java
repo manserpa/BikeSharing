@@ -26,8 +26,8 @@ public final class Frequencies {
 	public static void main(String[] args) throws IOException	{
 		Frequencies cs = new Frequencies(args[0]);
 		
-		for(int simulationRun = 1; simulationRun <= 1; simulationRun++)	{
-			cs.run(args[1], args[2], simulationRun);
+		for(int simulationRun = 10; simulationRun <= 10; simulationRun++)	{
+			cs.run(args[1], "Run" + simulationRun + args[2], simulationRun);
 		}
 		
 	}
@@ -190,6 +190,7 @@ public final class Frequencies {
 			saxParser.parse(transitScheduleFile, handler2);
 			
 			List<Double> departures2Interval = new ArrayList<>();
+			List<Double> departuresAvg2Interval = new ArrayList<>();
 			List<Double> frequencies = new ArrayList<>();
 			
 			for(int i = 1800; i <= 108000; i += 1800)	{
@@ -208,19 +209,21 @@ public final class Frequencies {
 				double totfrequ = 0.0;
 				double maxfrequ = 0.0;
 				for(double frequ: frequencies)	{
+					totfrequ += frequ;
 					if(maxfrequ < frequ)
 						maxfrequ = frequ;
 				}
 				double averagefrequ = totfrequ / frequencies.size();
 				
 				departures2Interval.add(maxfrequ);
+				departuresAvg2Interval.add(averagefrequ);
 				
 			}
 			
-			String csvFile = "FrequencyAnalysisMaxReference.csv";
+			String csvFile = "FrequencyAnalysisMax" + simulationRun + ".csv";
 		    FileWriter writer = new FileWriter(csvFile);
 		    
-		    CSVUtils.writeLine(writer, Arrays.asList("TimeInterval", "NumberOfDepartures"), ';');
+		    CSVUtils.writeLine(writer, Arrays.asList("TimeInterval", "MaxFrequency"), ';');
 			
 		    
 		    int interval = 1800;
@@ -237,10 +240,31 @@ public final class Frequencies {
 	        writer.flush();
 	        writer.close();
 	        
+	        String csvFile3 = "FrequencyAnalysisAvg" + simulationRun + ".csv";
+		    FileWriter writer3 = new FileWriter(csvFile3);
+		    
+		    CSVUtils.writeLine(writer3, Arrays.asList("TimeInterval", "AvgFrequency"), ';');
+			
+		    
+
+		    interval = 1800;
+		    for(int i = 0; i < departures2Interval.size(); i++)	{
+				try {
+					CSVUtils.writeLine(writer3, Arrays.asList(Integer.toString(interval),
+							Double.toString(departuresAvg2Interval.get(i))), ';');
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				interval += 1800;
+		    }
+		
+	        writer3.flush();
+	        writer3.close();
+	        
 	        /*
 	         * Spatial Frequency-Analysis
 	         */
-	        
+	        /*
 			String csvFile2 = "FrequencyAnalysisSpatial"+simulationRun+".csv";
 		    FileWriter writer2 = new FileWriter(csvFile2);
 		    
@@ -289,6 +313,7 @@ public final class Frequencies {
 			
 	        writer2.flush();
 	        writer2.close();
+	        */
 			
 		} catch (Exception e)	{
 			e.printStackTrace();

@@ -18,6 +18,21 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 public final class TransitSchedule2CapacityPerLink {
+	
+	// TODO: move this to another folder
+	
+	/**
+	 * 
+	 * This file calculates the total seat capacity provided for each link during the whole day. It can do that for a number of simulation runs, but
+	 * the folder hierarchy has to be correct
+	 * 
+	 * Input: Shape file, network file, transitSchedule
+	 * Output: A .csv containing all linkIDs and the corresponding capacity per day in a sorted list (due to nicer plots)
+	 * 
+	 * @author manserpa
+	 * 
+	 */
+	
 	private Geometry include;
 	private Geometry exclude;
 	private final GeometryFactory factory;
@@ -25,7 +40,12 @@ public final class TransitSchedule2CapacityPerLink {
 	public static void main(String[] args) throws IOException	{
 		TransitSchedule2CapacityPerLink cs = new TransitSchedule2CapacityPerLink(args[0]);
 		
-		cs.run(args[1], args[2]);
+		//for(int simulationRun = 1; simulationRun <= 5; simulationRun++)	{
+		//	cs.run(args[1], "0AVs/Run" + simulationRun + args[2], simulationRun);
+		//}
+		
+		
+		cs.run(args[1], args[2], 1);
 		
 	}
 	
@@ -67,13 +87,13 @@ public final class TransitSchedule2CapacityPerLink {
 		this.exclude = this.factory.createGeometryCollection(exclude.toArray(new Geometry[exclude.size()])).buffer(0);
 	}
 	
-	private void run(String networkFile, String transitScheduleFile) throws IOException	{
+	private void run(String networkFile, String transitScheduleFile, int simulationRun) throws IOException	{
 		
 		List<String> transitLinkList = new ArrayList<>();
 		
 		List<CapacityTot> totCapacity = new ArrayList<>();
 		    
-	    String csvFileTransitLinks = "CapacityPerLinkPara.csv";
+	    String csvFileTransitLinks = "CapacityPerLinkPara" + simulationRun + ".csv";
 	    FileWriter writerTransitLinks = new FileWriter(csvFileTransitLinks );
 	    
 	    CSVUtils.writeLine(writerTransitLinks , Arrays.asList("LinkRefId", "TotCap"), ';');

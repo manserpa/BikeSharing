@@ -12,8 +12,8 @@ public class CSVUtils {
         writeLine(w, values, DEFAULT_SEPARATOR, ' ');
     }
 
-    public static void writeLine(Writer w, List<String> values, char separators) throws IOException {
-        writeLine(w, values, separators, ' ');
+    public static void writeLine(Writer w, List<String> list, char separators) throws IOException {
+        writeLine(w, list, separators, ' ');
     }
 
     //https://tools.ietf.org/html/rfc4180
