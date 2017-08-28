@@ -2,6 +2,7 @@ package playground.manserpa.spatialData;
 
 import com.vividsolutions.jts.geom.*;
 
+
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.xml.sax.Attributes;
@@ -14,6 +15,19 @@ import java.util.*;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
+
+/**
+ * 
+ * Returns all transit stops within a certain shape file
+ * 
+ * Input: shapefile, transitschedule.xml
+ * Output: .csv with all transit stops and coordinates
+ * 
+ * @author manserpa
+ * 
+ */
+
 
 public final class ShapeFile2TransitStopsCSV {
 	private Geometry include;

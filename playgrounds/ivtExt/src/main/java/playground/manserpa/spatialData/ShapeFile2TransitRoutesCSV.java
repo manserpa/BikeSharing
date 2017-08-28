@@ -15,6 +15,17 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+/**
+ * 
+ * Purpose: Returns a csv with all linkIds served by public transport
+ * 
+ * Input: shape file, network.xml and transitschedule.xml
+ * Output: .csv containing all links served by public transport
+ * 
+ * @author manserpa
+ * 
+ */
+
 public final class ShapeFile2TransitRoutesCSV {
 	private Geometry include;
 	private Geometry exclude;

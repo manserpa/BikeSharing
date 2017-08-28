@@ -15,6 +15,19 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+/**
+ * 
+ * RoutesInScenarioArea: deprecated -> new script is the ShapeFile2TransitRoutesCSV
+ * 
+ * Input: Shape file, network file and transit schedule
+ * Output: All public transport links that are located within the shape file
+ * 
+ * @author manserpa
+ * 
+ */
+
+
+@Deprecated
 public final class RoutesInScenarioArea {
 	private Geometry include;
 	private Geometry exclude;

@@ -26,8 +26,11 @@ import com.vividsolutions.jts.geom.Polygon;
 /**
  * 
  * purpose: search in the plan file for activities that the agents perform during the day (selected plans only)
+ * 
  * input: shape file and plan file
  * output: a .csv containing all activities and the coordinates
+ * 
+ * @author manserpa
  * 
  */
 

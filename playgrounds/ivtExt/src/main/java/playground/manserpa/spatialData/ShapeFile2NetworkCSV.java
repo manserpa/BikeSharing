@@ -15,6 +15,17 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+/**
+ * 
+ * Purpose: Gives a .csv with all linkIds within a certain area (shape file)
+ * 
+ * Input: shape file, network.xml
+ * Output: .csv with linkIDs
+ * 
+ * @author manserpa
+ * 
+ */
+
 public final class ShapeFile2NetworkCSV {
 	private Geometry include;
 	private Geometry exclude;

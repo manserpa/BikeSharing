@@ -16,6 +16,17 @@ import java.util.Map.Entry;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+/**
+ * 
+ * ShapeFile2PassengerVolume: Reads the event file and returns the total number of passengers served by public transport on each link within a certain area.
+ * 
+ * Input: shape file, network.xml, transitschedule.xml, events.xml
+ * Output: .csv with the linkIds and the associated passengers volumes.
+ * 
+ * @author manserpa
+ * 
+ */
+
 public final class ShapeFile2PassengerVolume {
 	private Geometry include;
 	private Geometry exclude;
