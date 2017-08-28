@@ -17,6 +17,18 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+
+/**
+ * 
+ * Purpose: analysis of the mode shares (pt, walk, car, bike)
+ * 
+ * Input: shape file and plans.xml
+ * Output: the shares of these modes in a csv
+ * 
+ * @author manserpa
+ * 
+ */
+
 public final class ModeShares {
 	private Geometry include;
 	private Geometry exclude;

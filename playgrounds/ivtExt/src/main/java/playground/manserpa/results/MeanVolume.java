@@ -15,6 +15,7 @@ import java.util.Map.Entry;
 
 import playground.manserpa.spatialData.CSVUtils;
 
+@Deprecated
 public class MeanVolume {
 	public static void main(String[] args) throws IOException {
 		

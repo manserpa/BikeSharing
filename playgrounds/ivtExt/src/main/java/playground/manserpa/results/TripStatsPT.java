@@ -17,6 +17,17 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+/**
+ * 
+ * Purpose: analysis of the pt trips (waiting times, trip times, etc)
+ * 
+ * Input: shape file , network.xml, transitSchedule.xml, events.xml
+ * Output: a .csv with the statistics
+ * 
+ * @author manserpa
+ * 
+ */
+
 public final class TripStatsPT {
 	private Geometry include;
 	private Geometry exclude;

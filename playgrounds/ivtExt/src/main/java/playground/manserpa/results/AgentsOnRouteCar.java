@@ -17,6 +17,17 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+/**
+ * 
+ * Purpose: Show the number of agents traveling with cars at a given time of the day. Trips starting within the shape file are considered only.
+ * 
+ * Input: shape file, network.xml, events.xml
+ * Output: csv with the time of the day and the number of agents traveling with cars
+ * 
+ * @author manserpa
+ * 
+ */
+
 public final class AgentsOnRouteCar {
 	private Geometry include;
 	private Geometry exclude;

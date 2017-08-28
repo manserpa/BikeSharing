@@ -17,6 +17,17 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+/**
+ * 
+ * Purpose: analysis from the bus operator's perspective (vehicle kilometers etc.)
+ * 
+ * Input: shape file, network.xml, transitSchedule.xml, events.xml
+ * Output: a .csv with the statistics
+ * 
+ * @author manserpa
+ * 
+ */
+
 public final class VehKmAndHPara {
 	private Geometry include;
 	private Geometry exclude;

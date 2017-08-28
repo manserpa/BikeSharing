@@ -14,6 +14,19 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+
+/**
+ * 
+ * Purpose: returns the network length of the bus network of the model (every link served is counted once)
+ * 
+ * Input: shape file and transitSchedule.xml
+ * Output: the network lengths of all simulation runs in the console
+ * 
+ * @author manserpa
+ * 
+ */
+
+
 public final class ParaNetworkLength {
 	private Geometry include;
 	private Geometry exclude;

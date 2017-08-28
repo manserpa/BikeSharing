@@ -17,6 +17,19 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+
+/**
+ * 
+ * Purpose: analysis of the A-Taxi trips (waiting times, trip times, etc)
+ * 
+ * Input: shape file and events.xml
+ * Output: a .csv with the statistics
+ * 
+ * @author manserpa
+ * 
+ */
+
+
 public final class TripStatisticsAV {
 	private Geometry include;
 	private Geometry exclude;

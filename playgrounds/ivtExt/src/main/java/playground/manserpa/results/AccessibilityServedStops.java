@@ -20,6 +20,17 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+/**
+ * 
+ * Purpose: Searches the share of households being within a certain distance to their next public transport stop
+ * 
+ * Input: shape file, network.xml, transitschedule.xml, facilities.xml
+ * Output: csv with the percentages and the associated distances
+ * 
+ * @author manserpa
+ * 
+ */
+
 public final class AccessibilityServedStops {
 	private Geometry include;
 	private Geometry exclude;

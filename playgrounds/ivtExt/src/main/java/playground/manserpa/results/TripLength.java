@@ -19,6 +19,16 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+/**
+ * 
+ * Purpose: pretty complex. Compares the duration of the same trip (same activities before and after) between two plan files and additionally gives
+ * information about the mode used.
+ * 
+ * @author manserpa
+ * 
+ */
+
+
 public final class TripLength {
 	private Geometry include;
 	private Geometry exclude;

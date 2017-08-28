@@ -11,6 +11,18 @@ import java.util.List;
 
 import playground.manserpa.spatialData.CSVUtils;
 
+/**
+ * 
+ * Purpose: Generating some csv file used as inputs for MATLAB scripts (see this folder)
+ * 
+ * Input: pOperatorlogger.text
+ * Output: several csv's showing the number of vehicle, operators, ... of a simulation run as well as the average of all simulation runs at a given
+ * time during the simulation.
+ * 
+ * @author manserpa
+ * 
+ */
+
 public class EvolutionOfPaxOpAndRoutes {
 	public static void main(String[] args) throws IOException {
 		

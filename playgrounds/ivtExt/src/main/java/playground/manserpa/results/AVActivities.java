@@ -26,13 +26,16 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import playground.manserpa.spatialData.CSVUtils;
 
-/*
- * purpose: search in the plan file for the selected plans and the desired modes
- * input file = xml file with plans
- * output file = xml and csv containing all the legs (distance and travel time) of the desired mode
+/**
+ * 
+ * Purpose: Spatially locating the A-Taxi activities. Returns a csv with the pick up and drop off locations
+ * 
+ * Input: shape file, network.xml, events.xml
+ * Output: csv pick up and drop off locations (coordinates)
+ * 
+ * @author manserpa
  * 
  */
-
 
 public class AVActivities {
 	private Geometry include;

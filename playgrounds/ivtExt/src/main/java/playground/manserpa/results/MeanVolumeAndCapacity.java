@@ -15,6 +15,20 @@ import java.util.Map.Entry;
 
 import playground.manserpa.spatialData.CSVUtils;
 
+
+/**
+ * 
+ * Purpose: Csv with the average passenger flow and link capacities of several simulation runs.
+ * 
+ * Input: all passengerVolume.csv (output from spatialData/ShapeFile2PassengerVolume) and linkCapacity 
+ * (output from helper/TransitSchedule2CapacityPerLink) of the different simulation runs.
+ * Output: csv with the mean values on each link
+ * 
+ * @author manserpa
+ * 
+ */
+
+
 public class MeanVolumeAndCapacity {
 	public static void main(String[] args) throws IOException {
 		

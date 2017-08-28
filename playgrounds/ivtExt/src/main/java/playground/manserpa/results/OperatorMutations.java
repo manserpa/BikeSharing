@@ -10,6 +10,20 @@ import java.util.List;
 
 import playground.manserpa.spatialData.CSVUtils;
 
+
+/**
+ * 
+ * Purpose: prepare a csv for a Matlab script (see this folder). It shows all the mutation of the operators and the mutation type at a given time
+ * during the simulation
+ * 
+ * Input: pOperatorlogger.txt
+ * Output: csv
+ * 
+ * @author manserpa
+ * 
+ */
+
+
 public class OperatorMutations {
 	
 	public static void main(String[] args)  {

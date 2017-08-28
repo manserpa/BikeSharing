@@ -26,10 +26,14 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import playground.manserpa.spatialData.CSVUtils;
 
-/*
- * purpose: search in the plan file for the selected plans and the desired modes
- * input file = xml file with plans
- * output file = xml and csv containing all the legs (distance and travel time) of the desired mode
+/**
+ * 
+ * Purpose: Show the standing time of the a-taxis at a given location. Everytime a taxi is idle, a new entry is made.
+ * 
+ * Input: shape file, network.xml, events.xml
+ * Output: csv with the coordinates and the standing time.
+ * 
+ * @author manserpa
  * 
  */
 

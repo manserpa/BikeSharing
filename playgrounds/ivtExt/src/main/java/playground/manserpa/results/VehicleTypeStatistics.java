@@ -18,6 +18,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import playground.manserpa.spatialData.CSVUtils;
 
+@Deprecated
 public class VehicleTypeStatistics {
 	public static void main(String[] args) throws IOException {
 		

@@ -18,6 +18,18 @@ import java.util.Map.Entry;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+/**
+ * 
+ * Purpose: returns the shares of the modes within public transport (Bus, Tram, Train)
+ * 
+ * Input: shape file, transitSchedule.xml, events.xml
+ * Output: the shares of these modes in a csv
+ * 
+ * @author manserpa
+ * 
+ */
+
+
 public final class ModeSharesPT {
 	private Geometry include;
 	private Geometry exclude;

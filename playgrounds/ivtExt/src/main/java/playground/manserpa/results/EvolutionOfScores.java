@@ -11,6 +11,17 @@ import java.util.List;
 
 import playground.manserpa.spatialData.CSVUtils;
 
+/**
+ * 
+ * Purpose: Show the evolution of the agents' score during a simulation run.
+ * 
+ * Input: score file
+ * Output: csv 
+ * 
+ * @author manserpa
+ * 
+ */
+
 public class EvolutionOfScores {
 	public static void main(String[] args) throws IOException {
 		

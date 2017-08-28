@@ -17,6 +17,19 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+/**
+ * 
+ * Purpose: Show the number of agents traveling with public transport at a given time of the day. Agents traveling on the buses introduced by
+ * the minibus model are considered only.
+ * 
+ * Input: shape file, network.xml, events.xml
+ * Output: csv with the time of the day and the number of agents traveling with minibuses.
+ * 
+ * @author manserpa
+ * 
+ */
+
+
 public final class AgentsOnRoutePara {
 	private Geometry include;
 	private Geometry exclude;

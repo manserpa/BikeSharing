@@ -17,6 +17,18 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+
+/**
+ * 
+ * Purpose: same as ModeShares but with the autonomous taxi as a new mode
+ * 
+ * Input: shape file and plans.xml
+ * Output: the shares of these modes in a csv
+ * 
+ * @author manserpa
+ * 
+ */
+
 public final class ModeSharesFuture {
 	private Geometry include;
 	private Geometry exclude;

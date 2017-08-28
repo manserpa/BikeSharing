@@ -17,6 +17,20 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+
+/**
+ * 
+ * Purpose: vehicle kilometers driven by car and AVs
+ * 
+ * Input: shape file, network.xml, transitSchedule.xml (not really needed I think), events.xml
+ * Output: a .csv with the statistics
+ * 
+ * @author manserpa
+ * 
+ */
+
+
+
 public final class VehKmCarAndAV {
 	private Geometry include;
 	private Geometry exclude;

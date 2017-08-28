@@ -17,6 +17,17 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+/**
+ * 
+ * Purpose: returns the number of stops served and their coordinates
+ * 
+ * Input: shape file and transitSchedule.xml
+ * Output: a .csv containing all stop coordinates
+ * 
+ * @author manserpa
+ * 
+ */
+
 public final class ServedStopsInShapeFile {
 	private Geometry include;
 	private Geometry exclude;

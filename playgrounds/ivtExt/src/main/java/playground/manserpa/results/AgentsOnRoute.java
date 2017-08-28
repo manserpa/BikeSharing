@@ -17,6 +17,7 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+@Deprecated
 public final class AgentsOnRoute {
 	private Geometry include;
 	private Geometry exclude;

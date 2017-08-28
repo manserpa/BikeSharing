@@ -11,6 +11,17 @@ import java.util.List;
 
 import playground.manserpa.spatialData.CSVUtils;
 
+/**
+ * 
+ * Purpose: Show the evolution of the subsidies during a simulation run.
+ * 
+ * Input: pOperatorlogger.txt
+ * Output: csv 
+ * 
+ * @author manserpa
+ * 
+ */
+
 public class EvolutionOfSubsidies {
 	public static void main(String[] args) throws IOException {
 		

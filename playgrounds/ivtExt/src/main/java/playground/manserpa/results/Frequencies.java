@@ -17,6 +17,18 @@ import java.util.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+/**
+ * 
+ * Purpose: Frequency analysis
+ * 
+ * Input: shape file, network.xml, transitschedule.xml
+ * Output: one .csv with the maximal frequency of a line at a given time of the day and one .csv with the average frequency over all lines providing
+ * a service at a given time of the day. 
+ * 
+ * @author manserpa
+ * 
+ */
+
 public final class Frequencies {
 	private Geometry include;
 	private Geometry exclude;
