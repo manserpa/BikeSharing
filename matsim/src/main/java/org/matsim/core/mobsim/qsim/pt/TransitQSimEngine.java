@@ -173,12 +173,15 @@ public class TransitQSimEngine implements  DepartureHandler, MobsimEngine, Agent
 			return;
 		}
 		TransitStopFacility stop = this.schedule.getFacilities().get(accessStopId);
-		if (stop.getLinkId() == null || stop.getLinkId().equals(linkId)) {
-			double now = this.qSim.getSimTimer().getTimeOfDay();
-			this.agentTracker.addAgentToStop(now, (PTPassengerAgent) planAgent, stop.getId());
-			this.internalInterface.registerAdditionalAgentOnLink(planAgent) ;
-		} else {
-			throw new TransitAgentTriesToTeleportException("Agent "+planAgent.getId() + " tries to enter a transit stop at link "+stop.getLinkId()+" but really is at "+linkId+"!");
+		// manserpa: problem with the new code -> agents has a stop in its plan that does not exist
+		if (stop != null)	{
+			if (stop.getLinkId() == null || stop.getLinkId().equals(linkId)) {
+				double now = this.qSim.getSimTimer().getTimeOfDay();
+				this.agentTracker.addAgentToStop(now, (PTPassengerAgent) planAgent, stop.getId());
+				this.internalInterface.registerAdditionalAgentOnLink(planAgent) ;
+			} else {
+				throw new TransitAgentTriesToTeleportException("Agent "+planAgent.getId() + " tries to enter a transit stop at link "+stop.getLinkId()+" but really is at "+linkId+"!");
+			}
 		}
 	}
 

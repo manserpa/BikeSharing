@@ -155,6 +155,7 @@ public final class PBox implements POperators {
 		this.stageCollectorHandler.addStageContainerHandler(fare2AgentMoney);
 
 		// init possible paratransit stops
+		// no existing stop can be used because of the new back - and forth scheduler
 		this.pStopsOnly = PStopsFactory.createPStops(event.getServices().getScenario().getNetwork(), this.pConfig, event.getServices().getScenario().getTransitSchedule());
 
 		this.operators = new LinkedList<>();

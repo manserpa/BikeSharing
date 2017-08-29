@@ -26,6 +26,7 @@ import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
+import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.core.network.algorithms.NetworkCalcTopoType;
 import org.matsim.core.utils.geometry.geotools.MGC;
@@ -44,7 +45,7 @@ import java.util.*;
 /**
  * Create one TransitStopFacility for each car mode link of the network
  * 
- * @author aneumann, droeder
+ * @author aneumann, droeder, manserpa
  *
  */
 public final class CreatePStops{
@@ -61,9 +62,9 @@ public final class CreatePStops{
 
 	private final LinkedHashMap<Id<Link>, TransitStopFacility> linkId2StopFacilityMap;
 
-	private List<Integer> topoTypesForStops = null;
+	//private List<Integer> topoTypesForStops = null;
 
-	private NetworkCalcTopoType networkCalcTopoType;
+	//private NetworkCalcTopoType networkCalcTopoType;
 	
 	public static TransitSchedule createPStops(Network network, PConfigGroup pConfigGroup){
 		return createPStops(network, pConfigGroup, null);
@@ -123,6 +124,7 @@ public final class CreatePStops{
 		}
 		
 		this.exclude = this.factory.buildGeometry(new ArrayList<Geometry>());
+		
 		if(!new File(pConfigGroup.getServiceAreaFile()).exists()){
 			log.warn("file " + this.pConfigGroup.getServiceAreaFile() + " not found. Falling back to min/max serviceArea parameters.");
 			createServiceArea(pConfigGroup.getMinX(), pConfigGroup.getMaxX(), pConfigGroup.getMinY(), pConfigGroup.getMaxY());
@@ -134,11 +136,12 @@ public final class CreatePStops{
 		if (stopsWithoutLinkIds.size() > 0) {
 			log.warn("There are " + stopsWithoutLinkIds.size() + " stop facilities without a link id, namely: " + stopsWithoutLinkIds.toString());
 		}
-		this.topoTypesForStops = this.pConfigGroup.getTopoTypesForStops();
-		if(!(this.topoTypesForStops == null)){
-			this.networkCalcTopoType = new NetworkCalcTopoType();
-			this.networkCalcTopoType.run(net);
-		}
+		
+		//this.topoTypesForStops = this.pConfigGroup.getTopoTypesForStops();
+		//if(!(this.topoTypesForStops == null)){
+		//	this.networkCalcTopoType = new NetworkCalcTopoType();
+		//	this.networkCalcTopoType.run(net);
+		//}
 	}
 
 	/**
@@ -254,7 +257,7 @@ public final class CreatePStops{
 		int stopsAdded = 0;
 		
 		for (Link link : this.net.getLinks().values()) {
-			if(link.getAllowedModes().contains(TransportMode.car)){
+			if(link.getAllowedModes().contains(TransportMode.car) && !this.linkId2StopFacilityMap.containsKey(link.getId())){
 				stopsAdded += addStopOnLink(link);
 			}
 		}
@@ -275,11 +278,8 @@ public final class CreatePStops{
 			return 0;
 		}
 		
-		if(!topoTypeAllowed(link)){
-			return 0;
-		}
-		
-		if (link.getFreespeed() >= this.pConfigGroup.getSpeedLimitForStops()) {
+		// manserpa: set speed limit for stops (80km/h -> 22.222222m/s)
+		if (link.getFreespeed() >= 22.5) {
 			return 0;
 		}
 		
@@ -288,12 +288,39 @@ public final class CreatePStops{
 			return 0;
 		}
 		
-		Id<TransitStopFacility> stopId = Id.create(this.pConfigGroup.getPIdentifier() + link.getId(), TransitStopFacility.class);
-		TransitStopFacility stop = this.transitSchedule.getFactory().createTransitStopFacility(stopId, link.getToNode().getCoord(), false);
-		stop.setLinkId(link.getId());
-		this.transitSchedule.addStopFacility(stop);
-		return 1;		
+		// manserpa: at this point, it would be the goal to have the same Identifier for stops with the same to and from nodes (just with the difference A and B)
+		
+		Node fromNode = link.getFromNode();
+		Node toNode = link.getToNode();
+		
+		// wenn ein Link existiert mit fromNode = toNode UND toNode = fromNode
+		for (Link wayBack : this.net.getLinks().values())	{
+			if(wayBack.getFromNode().equals(toNode) && wayBack.getToNode().equals(fromNode))	{
+				
+				log.warn("Forth: " + link.getId().toString());
+				log.warn("Back: " + wayBack.getId().toString());
+				Id<TransitStopFacility> stopId = Id.create(this.pConfigGroup.getPIdentifier() + link.getId() + "_A", TransitStopFacility.class);
+				TransitStopFacility stop = this.transitSchedule.getFactory().createTransitStopFacility(stopId, link.getToNode().getCoord(), false);
+				stop.setLinkId(link.getId());
+				stop.setName(Integer.toString(this.transitSchedule.getFacilities().size() + 1));
+				this.transitSchedule.addStopFacility(stop);
+				this.linkId2StopFacilityMap.put(link.getId(), stop);
+				
+				Id<TransitStopFacility> stopIdBack = Id.create(this.pConfigGroup.getPIdentifier() + link.getId() + "_B", TransitStopFacility.class);
+				TransitStopFacility stopBack = this.transitSchedule.getFactory().createTransitStopFacility(stopIdBack, wayBack.getToNode().getCoord(), false);
+				stopBack.setLinkId(wayBack.getId());
+				stopBack.setName(Integer.toString(this.transitSchedule.getFacilities().size() + 1));
+				this.transitSchedule.addStopFacility(stopBack);
+				this.linkId2StopFacilityMap.put(wayBack.getId(), stopBack);
+				return 1;	
+			}
+		}
+		return 0;
+	
+			
 	}
+	
+	/* manserpa: I don't need this one
 
 	private boolean topoTypeAllowed(Link link) {
 		if(this.topoTypesForStops == null){
@@ -302,12 +329,15 @@ public final class CreatePStops{
 		}
 		Integer topoType = this.networkCalcTopoType.getTopoType(link.getToNode());
 		return this.topoTypesForStops.contains(topoType);
-	}	
+	}
+	
+	*/
 
 	private boolean linkToNodeInServiceArea(Link link) {
-		Point p = factory.createPoint(MGC.coord2Coordinate(link.getToNode().getCoord()));
-		if(this.include.contains(p)){
-			if(exclude.contains(p)){
+		Point pToNode = factory.createPoint(MGC.coord2Coordinate(link.getToNode().getCoord()));
+		Point pFromNode = factory.createPoint(MGC.coord2Coordinate(link.getFromNode().getCoord()));
+		if(this.include.contains(pToNode) && this.include.contains(pFromNode)){
+			if(exclude.contains(pToNode) || exclude.contains(pFromNode)){
 				return false;
 			}
 			return true;
@@ -318,7 +348,10 @@ public final class CreatePStops{
 	private boolean linkHasAlreadyAFormalPTStopFromTheGivenSchedule(Link link) {
 		if (this.linkId2StopFacilityMap.containsKey(link.getId())) {
 			// There is already a stop at this link, used by formal public transport - Use this one instead
-			this.transitSchedule.addStopFacility(this.linkId2StopFacilityMap.get(link.getId()));
+			
+			// manserpa: I don't want this stop in the choice set of the operators
+			
+			//this.transitSchedule.addStopFacility(this.linkId2StopFacilityMap.get(link.getId()));
 			return true;
 		} else {
 			return false;
