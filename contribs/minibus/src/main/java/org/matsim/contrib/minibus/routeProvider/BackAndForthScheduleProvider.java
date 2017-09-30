@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -59,18 +60,11 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 	private final String transportMode;
 	private final Collection<PVehicleSettings> pVehicleSettings;
 	private PPlan pOperatorPlan;
+	private ArrayList<TransitStopFacility> stopsServedBackPattern;
 	
 	public BackAndForthScheduleProvider(TransitSchedule scheduleWithStopsOnly, Network network, RandomStopProvider randomStopProvider, RandomPVehicleProvider randomPVehicleProvider, double vehicleMaximumVelocity, double planningSpeedFactor, double driverRestTime, String pIdentifier, EventsManager eventsManager, final String transportMode, Collection<PVehicleSettings> pVehicleSettings) {
 		
-		Network pTransitNetwork = network;
-		for (Link l : pTransitNetwork.getLinks().values())	{
-			if(!l.getAllowedModes().contains("car"))
-				pTransitNetwork.removeLink(l.getId());
-			if(l.getFreespeed() > 23)
-				l.setFreespeed(80/3.6);
-		}
-		
-		this.net = pTransitNetwork;
+		this.net = network;
 		
 		this.pVehicleSettings = pVehicleSettings;
 		this.randomPVehicleProvider = randomPVehicleProvider;
@@ -118,67 +112,97 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 	private TransitLine createTransitLine(Id<TransitLine> pLineId, double startTime, double endTime, int numberOfVehicles, ArrayList<TransitStopFacility> stopsToBeServed, String pVehicleType, Id<TransitRoute> routeId, Id<PPlan> planId){
 		
 		// initialize
-		TransitLine line = this.scheduleWithStopsOnly.getFactory().createTransitLine(pLineId);			
-		routeId = Id.create(pLineId + "-" + routeId, TransitRoute.class);
-		// create this route according to stopsToBeServed
-		TransitRoute transitRouteBack = createRoute(routeId, stopsToBeServed, pVehicleType, planId);
-		// create this route according to the reversed stopsToBeServed (if A -> B)
-		TransitRoute transitRouteForth = createRoute(routeId, stopsToBeServedReversed, pVehicleType, planId);
+		TransitLine line = this.scheduleWithStopsOnly.getFactory().createTransitLine(pLineId);	
+		this.stopsServedBackPattern = new ArrayList<>();
+		
+		Id<TransitRoute> routeIdBack = Id.create(pLineId + "-" + routeId + "-Back", TransitRoute.class);
+		Id<TransitRoute> routeIdForth = Id.create(pLineId + "-" + routeId + "-Forth", TransitRoute.class);
+		
+		// create the first route
+		TransitRoute transitRouteBack = createRoute(routeIdBack, stopsToBeServed, pVehicleType, planId, "back");
+		
+		// create the other route containing the stops on the other side of the road in a reversed order
+		ArrayList<TransitStopFacility> stopsToBeServedReversed = new ArrayList<>();
+		ListIterator<TransitStopFacility> listIterator = this.stopsServedBackPattern.listIterator(this.stopsServedBackPattern.size());
+		while(listIterator.hasPrevious()) {
+			String[] stopName = listIterator.previous().getId().toString().split("_");
+			
+			StringBuilder builder = new StringBuilder();
+			for(int i = 0; i < stopName.length; i++)	{
+				if(i != stopName.length - 1) {
+					builder.append(stopName[i] + "_");
+				} else {
+					if(stopName[i].equals("A"))
+						builder.append("B");
+					if(stopName[i].equals("B"))
+						builder.append("A");
+				}
+			}
+			String str = builder.toString();
+			
+			Id<TransitStopFacility> reversedStopID = Id.create(str, TransitStopFacility.class);
+			stopsToBeServedReversed.add(this.scheduleWithStopsOnly.getFacilities().get(reversedStopID));
+		}
+		
+		TransitRoute transitRouteForth = createRoute(routeIdForth, stopsToBeServedReversed, pVehicleType, planId, "forth");
 		
 		// register route
 		line.addRoute(transitRouteBack);
 		line.addRoute(transitRouteForth);
 		
-		
-		// add departures
 		// ----------------------------------------------------------
-		//TODO (manserpa) adapt the disutilities according to the config
+		// manserpa: the following code schedules the departures for the back and forth approach. It assumes full cicles (back and forth)
+		// !! to be honest, I don't know how MATSim handles the delays of the vehicles. If a vehicle on the way forth is delayed, I don't know if it is delayed on the way back as well
 		// ----------------------------------------------------------
 		
 		int n = 0;
 		
-		int headway = (int) (this.driverRestTime + transitRoute.getStops().get(transitRoute.getStops().size() - 1).getDepartureOffset()) / numberOfVehicles;
+		// driver rest after each route
+		int headway = (int) (2 * this.driverRestTime + transitRouteBack.getStops().get(transitRouteBack.getStops().size() - 1).getDepartureOffset() + 
+				transitRouteForth.getStops().get(transitRouteForth.getStops().size() - 1).getDepartureOffset()) / numberOfVehicles;
+		
+		// possibility to introduce a maximal frequency
+		// headway = Math.max(5*60, headway);
+		this.pOperatorPlan.setHeadway(headway);
 		for (int i = 0; i < numberOfVehicles; i++) {
 			for (double j = startTime + i * headway; j <= endTime; ) {
-				Departure departure = this.scheduleWithStopsOnly.getFactory().createDeparture(Id.create(n, Departure.class), j);
+				Departure departureBack = this.scheduleWithStopsOnly.getFactory().createDeparture(Id.create(n, Departure.class), j);
+				departureBack.setVehicleId(Id.create(pLineId + "-" + routeId + "-" + i +"_" + pVehicleType, Vehicle.class));
+				transitRouteBack.addDeparture(departureBack);
+				j += transitRouteBack.getStops().get(transitRouteBack.getStops().size() - 1).getDepartureOffset() + this.driverRestTime;
+				n++;
 				
-				departure.setVehicleId(Id.create(transitRoute.getId().toString() + "-" + i +"_" + pVehicleType, Vehicle.class));
-				//departure.setVehicleId(Id.create(vehicleIdNew + "-" + i, Vehicle.class));
-				transitRoute.addDeparture(departure);
-				j += transitRoute.getStops().get(transitRoute.getStops().size() - 1).getDepartureOffset() + this.driverRestTime;
+				Departure departureForth = this.scheduleWithStopsOnly.getFactory().createDeparture(Id.create(n, Departure.class), j);
+				departureForth.setVehicleId(Id.create(pLineId + "-" + routeId + "-" + i +"_" + pVehicleType, Vehicle.class));
+				transitRouteForth.addDeparture(departureForth);
+				j += transitRouteForth.getStops().get(transitRouteForth.getStops().size() - 1).getDepartureOffset() + this.driverRestTime;
 				n++;
 			}
 		}		
 		
-//		log.info("added " + n + " departures");		
 		return line;
+		
 	}
 	
-	
-	
-	
-	// ----------------------------------------------------------
-	//TODO (manserpa) modify the router
-	// ----------------------------------------------------------
-	
-	
-	private TransitRoute createRoute(Id<TransitRoute> routeID, ArrayList<TransitStopFacility> stopsToBeServed, String pVehicleType, Id<PPlan> planId){
+	private TransitRoute createRoute(Id<TransitRoute> routeID, ArrayList<TransitStopFacility> stopsToBeServed, String pVehicleType, Id<PPlan> planId, String routePattern){
 		
 		ArrayList<TransitStopFacility> tempStopsToBeServed = new ArrayList<>();
 		HashSet<String> gridStopHashSet = new HashSet<>();
 		
+		// locks all grids in which stop is located
+		// and puts these gridIds into a HashSet
 		for (TransitStopFacility transitStopFacility : stopsToBeServed) {
 			tempStopsToBeServed.add(transitStopFacility);
 			
 			String gridNodeId = GridNode.getGridNodeIdForCoord(transitStopFacility.getCoord(), 300);
 			gridStopHashSet.add(gridNodeId);
 		}
-		tempStopsToBeServed.add(stopsToBeServed.get(0));
+		// this would be the last stop, not necessary anymore
+		// tempStopsToBeServed.add(stopsToBeServed.get(0));
 		
 		// create links - network route		
 		Id<Link> startLinkId = null;
 		Id<Link> lastLinkId = null;
-
 		
 		List<Link> links = new LinkedList<>();
 		
@@ -199,7 +223,8 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 			
 			lastLinkId = stop.getLinkId();
 		}
-
+		
+		// i don't really understand this one, maybe the first link is in the set twice
 		links.remove(0);
 		LinkNetworkRouteImpl route = new LinkNetworkRouteImpl(startLinkId, lastLinkId);
 		route.setLinkIds(startLinkId, NetworkUtils.getLinkIds(links), lastLinkId);
@@ -214,6 +239,8 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 		
 		for (PVehicleSettings pVS : this.pVehicleSettings) {
             if (pVehicleType.equals(pVS.getPVehicleName())) {
+            	
+            	// manserpa: !!attention: the factor 10 is because of the downscaled scenario. Not really nice because it is hard-coded
             	capacity = pVS.getCapacityPerVehicle() * 10;
             }
         }
@@ -221,10 +248,11 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 		// first stop
 		TransitRouteStop routeStop;
 		routeStop = this.scheduleWithStopsOnly.getFactory().createTransitRouteStop(tempStopsToBeServed.get(0), runningTime, runningTime);
-		
 		routeStop.setAwaitDepartureTime(true);
 		stops.add(routeStop);
 		
+		
+		// now the iteration process begins
 		ArrayList<TransitStopFacility> tempStopsToBeServedNew = new ArrayList<>();
 		tempStopsToBeServedNew.add(tempStopsToBeServed.get(0));
 		
@@ -237,7 +265,7 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 		// additional stops
 		for (Link link : links) {
 			
-			// there is no stop on this link
+			// accumulate the scheduled running time
 			runningTime += (link.getLength() / (Math.min(this.vehicleMaximumVelocity, link.getFreespeed()) * this.planningSpeedFactor));
 			
 			// is there any stop facility on that link?
@@ -245,7 +273,7 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 				continue;
 			}
 			
-			
+			// this is true if the operator really wants to serve a stop on this link
 			if (tempStopsToBeServed.get(k).getLinkId().equals(link.getId()))	{
 				
 				// different from {@link ComplexCircleScheduleProvider}		
@@ -273,7 +301,10 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 				k++;
 				
 			}
-			else	{
+			// now this thing provides information about stops passed by anyway
+			// TODO manserpa look at the code
+			
+			else if(routePattern.equals("back"))	{
 				
 				String gridNode = GridNode.getGridNodeIdForCoord(this.linkId2StopFacilityMap.get(link.getId()).getCoord(), 300);
 				
@@ -309,31 +340,34 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 					gridStopHashSet.add(gridNode);
 				}
 			}
+			
 		}
 		
 		// last stop
-		runningTime += (this.net.getLinks().get(tempStopsToBeServed.get(0).getLinkId()).getLength() / (Math.min(this.vehicleMaximumVelocity, this.net.getLinks().get(tempStopsToBeServed.get(0).getLinkId()).getFreespeed()) * this.planningSpeedFactor));
+		// manserpa: I think this is not necessary anymore
+		
+		runningTime += (this.net.getLinks().get(tempStopsToBeServed.get(tempStopsToBeServed.size()-1).getLinkId()).getLength() / (Math.min(this.vehicleMaximumVelocity, this.net.getLinks().get(tempStopsToBeServed.get(tempStopsToBeServed.size()-1).getLinkId()).getFreespeed()) * this.planningSpeedFactor));
 		
 		// different from {@link ComplexCircleScheduleProvider}
 		if(isSameStopSequenceAsLastIteration)	{
-			if(tempStopsToBeServed.get(0).equals(this.handler.getServedStopsInLastIteration(routeID, stops.size())))	{
+			if(tempStopsToBeServed.get(tempStopsToBeServed.size()-1).equals(this.handler.getServedStopsInLastIteration(routeID, stops.size())))	{
 				double runningTimeMod = modifyRunningTimeAccordingToTheLastIterationIfPossible(runningTime, this.handler.getOffsetForRouteAndStopNumber(routeID, stops.size()));
 				if (runningTimeMod > runningTime)
 					runningTime = runningTimeMod;
 			}
 		}
 		
-		routeStop = this.scheduleWithStopsOnly.getFactory().createTransitRouteStop(tempStopsToBeServed.get(0), runningTime, runningTime + getMinStopTime(capacity));
+		routeStop = this.scheduleWithStopsOnly.getFactory().createTransitRouteStop(tempStopsToBeServed.get(tempStopsToBeServed.size()-1), runningTime, runningTime + getMinStopTime(capacity));
 		routeStop.setAwaitDepartureTime(true);
 		stops.add(routeStop);
+		
+		tempStopsToBeServedNew.add(tempStopsToBeServed.get(tempStopsToBeServed.size()-1));
+		if(routePattern.equals("back"))
+			this.stopsServedBackPattern = tempStopsToBeServedNew;
 		
 		TransitRoute transitRoute = this.scheduleWithStopsOnly.getFactory().createTransitRoute(routeID, route, stops, this.transportMode);
 		return transitRoute;
 	}
-
-
-
-	
 	
 	public int getMinStopTime(double capacity){
 		int minStopTime = (int) (0.2 * capacity + 15);

@@ -67,6 +67,8 @@ public final class PPlan implements Comparable<PPlan>{
 	private int subsidizedTrips;
 
 	private int amountOfSubsidies;
+
+	private double headway;
 	
 	public PPlan(Id<PPlan> planId, String creator, Id<PPlan> parentId) {
 		this.planId = planId;
@@ -154,6 +156,14 @@ public final class PPlan implements Comparable<PPlan>{
 	
 	public void setNVehicles(int nVehicles){
 		this.nVehicles = nVehicles;
+	}
+	
+	public double getHeadway(){
+		return this.headway;
+	}
+	
+	public void setHeadway(double headway){
+		this.headway = headway;
 	}
 	
 	public String getPVehicleType()	{

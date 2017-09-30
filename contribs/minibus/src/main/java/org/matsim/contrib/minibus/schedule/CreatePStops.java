@@ -297,8 +297,6 @@ public final class CreatePStops{
 		for (Link wayBack : this.net.getLinks().values())	{
 			if(wayBack.getFromNode().equals(toNode) && wayBack.getToNode().equals(fromNode))	{
 				
-				log.warn("Forth: " + link.getId().toString());
-				log.warn("Back: " + wayBack.getId().toString());
 				Id<TransitStopFacility> stopId = Id.create(this.pConfigGroup.getPIdentifier() + link.getId() + "_A", TransitStopFacility.class);
 				TransitStopFacility stop = this.transitSchedule.getFactory().createTransitStopFacility(stopId, link.getToNode().getCoord(), false);
 				stop.setLinkId(link.getId());

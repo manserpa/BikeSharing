@@ -19,6 +19,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
 import contrib.baseline.IVTBaselineScoringFunctionFactory;
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
@@ -32,7 +33,9 @@ import org.matsim.core.controler.AbstractModule;
 import org.matsim.core.controler.Controler;
 import org.matsim.core.controler.OutputDirectoryHierarchy.OverwriteFileSetting;
 import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.router.StageActivityTypesImpl;
+import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.scoring.ScoringFunctionFactory;
 import org.matsim.pt.PtConstants;
@@ -85,7 +88,33 @@ public final class RunMinibusZurich {
         controler.getConfig().controler().setCreateGraphs(false);
 
 		controler.addOverridingModule(new PModule()) ;
-
+		
+		/* idea for the future (manserpa):
+		 * load the scenario a second time and filter the network for the links needed in the paratransit routing only
+		 * like this:
+		 */
+		
+		 Scenario pScenario = ScenarioUtils.loadScenario(config);
+		 
+		 Network pNetwork = pScenario.getNetwork();
+		 ArrayList<Id<Link>> nonPLinks = new ArrayList<>();
+		 
+		 for (Link l : pNetwork.getLinks().values())	{
+			if(!l.getAllowedModes().contains("car"))	{
+				nonPLinks.add(l.getId());
+			}
+			if(l.getFreespeed() > 23.0)	{
+				pNetwork.getLinks().get(l.getId()).setFreespeed(22.222223);
+			}
+		 }
+		 
+		 for(Id<Link> linkId : nonPLinks)	{
+			 pNetwork.removeLink(linkId);
+		 }
+		
+		 ConfigUtils.addOrGetModule(controler.getConfig(), PConfigGroup.class ).setPNetwork(pNetwork);
+		
+		
 		// 3. IVT-specifics
 
         controler.addOverridingModule(new BlackListedTimeAllocationMutatorStrategyModule());

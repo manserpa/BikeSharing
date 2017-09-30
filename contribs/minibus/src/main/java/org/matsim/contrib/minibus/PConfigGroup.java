@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Network;
 import org.matsim.contrib.minibus.operator.BasicOperator;
 import org.matsim.contrib.minibus.operator.WelfareCarefulMultiPlanOperator;
 import org.matsim.contrib.minibus.replanning.ReduceStopsToBeServedRFare;
@@ -82,6 +83,7 @@ public final class PConfigGroup extends ConfigGroup{
 	private static final String MIN_INITIAL_STOP_DISTANCE = "minInitialStopDistance";
 	private static final String USEFRANCHISE = "useFranchise";
 	private static final String USEAVCONTRIB = "useAVContrib";
+	private static final String PNETWOrK = "pNetwork";
 	private static final String WRITESTATS_INTERVAL = "writeStatsInterval";
 	private static final String LOG_OPERATORS = "logOperators";
 	private static final String WRITE_METRICS = "writeMetrics";
@@ -146,6 +148,7 @@ public final class PConfigGroup extends ConfigGroup{
 	private double earningsPerBoardingPassenger = 0.0;
 	private double subsidyPerBoardingPassenger = 0.0;
 	private String subsidizedStopFile = null;
+	private Network pNetwork = null;
 	private double earningsPerKilometerAndPassenger = 0.50;
 	private double pricePerVehicleBought = 1000.0;
 	private double pricePerVehicleSold = 1000.0;
@@ -578,15 +581,15 @@ public final class PConfigGroup extends ConfigGroup{
 		return this.costPerVehicleAndDay;
 	}
 	
-	/*
-	public double getCostPerKilometer() {
-		return this.costPerKilometer;
+	
+	public Network getPNetwork() {
+		return this.pNetwork;
 	}
 	
-	public double getCostPerHour() {
-		return this.costPerHour;
+	public void setPNetwork(Network network) {
+		this.pNetwork = network;
 	}
-	*/
+	
 	
 	public double getEarningsPerBoardingPassenger() {
 		return this.earningsPerBoardingPassenger;

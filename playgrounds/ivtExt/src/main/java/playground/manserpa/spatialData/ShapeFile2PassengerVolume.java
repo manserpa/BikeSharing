@@ -35,11 +35,12 @@ public final class ShapeFile2PassengerVolume {
 	
 	public static void main(String[] args) throws IOException	{
 		ShapeFile2PassengerVolume cs = new ShapeFile2PassengerVolume(args[0]);
-		
+		/*
 		for(int simulationRun = 1; simulationRun <= 10; simulationRun++)	{
 			cs.run(args[1], "Run" + simulationRun + args[2], "Run" + simulationRun + args[3], simulationRun);
 		}
-		//cs.run(args[1], args[2], args[3]);
+		*/
+		cs.run(args[1], args[2], args[3],1);
 		
 	}
 	

@@ -17,53 +17,58 @@
  *                                                                         *
  * *********************************************************************** */
 
-package playground.manserpa.minibus;
+package org.matsim.contrib.minibus.ptReplanningModule;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.events.PersonStuckEvent;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.gbl.MatsimRandom;
+import org.matsim.api.core.v01.population.Plan;
+import org.matsim.core.population.algorithms.PlanAlgorithm;
+import org.matsim.core.scenario.MutableScenario;
+import org.matsim.pt.router.TransitActsRemover;
 
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
- * Returns the number and the IDs of the agents that have to reroute their trip using PT.
+ * Takes the plan set of all agents that have to reroute their trips and then selects the worst plan of those agents.
  *
  */
-class AgentReRouteHandlerImpl	{
+final class AgentReRoute extends AbstractAgentReRoute {
 
-	private static final Logger log = Logger.getLogger(AgentReRouteHandlerImpl.class);
 
-	private Set<Id<Person>> agentsToReRoute;
+	private static final Logger log = Logger.getLogger(AgentReRoute.class);
+	
+	private final LegRemover legRemover;
 
-	private Map<Id<Person>, ? extends Person> agents;
-
-	public AgentReRouteHandlerImpl(Map<Id<Person>, ? extends Person> agents, int iteration) {
-		this.agents = agents;
-		
-		this.agentsToReRoute = new TreeSet<>();
-		
-		double percentageToReRoute = -1 * Math.pow(2,0.02 * iteration) / 35 + 0.65;
-		
-		for( Id<Person> e : this.agents.keySet())	{
-			double rand = MatsimRandom.getRandom().nextDouble();
-			if ( rand > (1 - percentageToReRoute) )
-				this.agentsToReRoute.add(e);
-		}
-		
-		log.info("initialized " + (1 - percentageToReRoute));
+	public AgentReRoute(final PlanAlgorithm router, final MutableScenario scenario, Set<Id<Person>> agentsToReRoute) {
+		super(router, scenario, agentsToReRoute);
+		this.legRemover = new LegRemover(); 
 	}
 	
-	public Set<Id<Person>> resetAgentsToReRoute() {
-		this.agentsToReRoute = new TreeSet<>();
-		return this.agentsToReRoute;
-	}
-
-	public Set<Id<Person>> getAgentsToReRoute() {
-		log.info("Returning " + this.agentsToReRoute.size() + " agent ids");
-		return this.agentsToReRoute;
+	@Override
+	public void run(final Person person) {
+		
+		double minScore = Double.POSITIVE_INFINITY;
+		
+		for (Plan p: person.getPlans())	{
+			if (p.getScore() < minScore)	{
+				minScore = p.getScore();
+				
+				person.setSelectedPlan(p);
+			}
+		}
+		
+		Plan selectedPlan = person.getSelectedPlan();
+		
+		if (selectedPlan == null) {
+			// the only way no plan can be selected should be when the person has no plans at all
+			log.warn("Person " + person.getId() + " has no plans!");
+			return;
+		}
+		
+		if(this.agentsToReRoute.contains(person.getId())){
+			this.legRemover.run(selectedPlan);
+			this.router.run(selectedPlan);
+		}
 	}
 }

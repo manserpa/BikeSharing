@@ -134,9 +134,13 @@ public final class PBox implements POperators {
 
 		TimeProvider timeProvider = new TimeProvider(this.pConfig, event.getServices().getControlerIO().getOutputPath());
 		event.getServices().getEvents().addHandler(timeProvider);
+		
+		// init possible paratransit stops
+		// no existing stop can be used because of the new back - and forth scheduler
+		this.pStopsOnly = PStopsFactory.createPStops(event.getServices().getScenario().getNetwork(), this.pConfig, event.getServices().getScenario().getTransitSchedule());
 
 		// initialize strategy manager
-		this.strategyManager.init(this.pConfig, this.stageCollectorHandler, this.ticketMachine, timeProvider, event.getServices().getControlerIO().getOutputPath());
+		this.strategyManager.init(this.pConfig, this.stageCollectorHandler, this.ticketMachine, timeProvider, event.getServices().getControlerIO().getOutputPath(), this.pStopsOnly);
 
 		// init fare collector
 		this.stageCollectorHandler.init(event.getServices().getScenario().getNetwork());
@@ -154,9 +158,6 @@ public final class PBox implements POperators {
 		StageContainer2AgentMoneyEvent fare2AgentMoney = new StageContainer2AgentMoneyEvent(event.getServices(), this.ticketMachine);
 		this.stageCollectorHandler.addStageContainerHandler(fare2AgentMoney);
 
-		// init possible paratransit stops
-		// no existing stop can be used because of the new back - and forth scheduler
-		this.pStopsOnly = PStopsFactory.createPStops(event.getServices().getScenario().getNetwork(), this.pConfig, event.getServices().getScenario().getTransitSchedule());
 
 		this.operators = new LinkedList<>();
 		this.operatorInitializer = new OperatorInitializer(this.pConfig, this.franchise, this.pStopsOnly, event.getServices(), timeProvider, this.welfareAnalyzer, this.routeOverlap);

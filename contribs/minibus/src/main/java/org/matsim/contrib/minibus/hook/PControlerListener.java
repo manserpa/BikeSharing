@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.contrib.minibus.operator.POperators;
+import org.matsim.contrib.minibus.ptReplanningModule.PseudoReplanning;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.MatsimServices;
@@ -46,8 +47,6 @@ import org.matsim.vehicles.VehicleWriterV1;
 import org.matsim.vehicles.Vehicles;
 
 import com.google.inject.Inject;
-
-import playground.manserpa.minibus.PseudoReplanning;
 
 import java.util.HashSet;
 import java.util.Set;

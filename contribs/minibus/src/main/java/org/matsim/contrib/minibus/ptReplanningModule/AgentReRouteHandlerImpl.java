@@ -3,7 +3,7 @@
  *                                                                         *
  * *********************************************************************** *
  *                                                                         *
- * copyright       : (C) 2012 by the members listed in the COPYING,        *
+ * copyright       : (C) 2011 by the members listed in the COPYING,        *
  *                   LICENSE and WARRANTY file.                            *
  * email           : info at matsim dot org                                *
  *                                                                         *
@@ -16,29 +16,54 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.manserpa.minibus;
 
-import java.util.Set;
+package org.matsim.contrib.minibus.ptReplanningModule;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.events.PersonStuckEvent;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.population.algorithms.PlanAlgorithm;
-import org.matsim.core.scenario.MutableScenario;
+import org.matsim.core.gbl.MatsimRandom;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
-class AgentReRouteFactoryImpl implements AgentReRouteFactory {
+/**
+ * Returns the number and the IDs of the agents that have to reroute their trip using PT.
+ *
+ */
+class AgentReRouteHandlerImpl	{
 
-	@SuppressWarnings("unused")
-	private static final Logger log = Logger.getLogger(AgentReRouteFactoryImpl.class);
+	private static final Logger log = Logger.getLogger(AgentReRouteHandlerImpl.class);
 
-	public AgentReRouteFactoryImpl() {
+	private Set<Id<Person>> agentsToReRoute;
+
+	private Map<Id<Person>, ? extends Person> agents;
+
+	public AgentReRouteHandlerImpl(Map<Id<Person>, ? extends Person> agents, int iteration) {
+		this.agents = agents;
 		
+		this.agentsToReRoute = new TreeSet<>();
+		
+		double percentageToReRoute = -1 * Math.pow(2,0.02 * iteration) / 35 + 0.65;
+		
+		for( Id<Person> e : this.agents.keySet())	{
+			double rand = MatsimRandom.getRandom().nextDouble();
+			if ( rand > (1 - percentageToReRoute) )
+				this.agentsToReRoute.add(e);
+		}
+		
+		log.info("initialized " + (1 - percentageToReRoute));
+	}
+	
+	public Set<Id<Person>> resetAgentsToReRoute() {
+		this.agentsToReRoute = new TreeSet<>();
+		return this.agentsToReRoute;
 	}
 
-	@Override
-	public AbstractAgentReRoute getReRouteStuck(final PlanAlgorithm router, final MutableScenario scenario, Set<Id<Person>> agentsStuck) {
-		return new AgentReRoute(router, scenario, agentsStuck);
+	public Set<Id<Person>> getAgentsToReRoute() {
+		log.info("Returning " + this.agentsToReRoute.size() + " agent ids");
+		return this.agentsToReRoute;
 	}
 }
-

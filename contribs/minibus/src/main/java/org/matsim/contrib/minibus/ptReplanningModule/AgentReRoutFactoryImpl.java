@@ -16,47 +16,29 @@
  *   See also COPYING, LICENSE and WARRANTY file                           *
  *                                                                         *
  * *********************************************************************** */
-package playground.manserpa.minibus;
+package org.matsim.contrib.minibus.ptReplanningModule;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Person;
-import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.network.algorithms.TransportModeNetworkFilter;
-import org.matsim.core.population.algorithms.AbstractPersonAlgorithm;
 import org.matsim.core.population.algorithms.PlanAlgorithm;
 import org.matsim.core.scenario.MutableScenario;
 
 
-abstract class AbstractAgentReRoute extends AbstractPersonAlgorithm  {
-	
-	final PlanAlgorithm router;
+class AgentReRouteFactoryImpl implements AgentReRouteFactory {
 
-    private static final Logger log = Logger.getLogger(AgentReRoute.class);
-	
-	final Set<Id<Person>> agentsToReRoute;
+	@SuppressWarnings("unused")
+	private static final Logger log = Logger.getLogger(AgentReRouteFactoryImpl.class);
 
-	AbstractAgentReRoute(final PlanAlgorithm router, final MutableScenario scenario, Set<Id<Person>> agentsToReRoute) {
-		super();
-		this.router = router;
-        Network network = scenario.getNetwork();
-		Network net = network;
-		if (NetworkUtils.isMultimodal(network)) {
-			log.info("Network seems to be multimodal. XY2Links will only use car links.");
-			TransportModeNetworkFilter filter = new TransportModeNetworkFilter(network);
-			net = NetworkUtils.createNetwork();
-			HashSet<String> modes = new HashSet<>();
-			modes.add(TransportMode.car);
-			filter.filter(net, modes);
-		}
-		this.agentsToReRoute = agentsToReRoute;
-		log.info("initialized");
+	public AgentReRouteFactoryImpl() {
+		
 	}
 
+	@Override
+	public AbstractAgentReRoute getReRouteStuck(final PlanAlgorithm router, final MutableScenario scenario, Set<Id<Person>> agentsStuck) {
+		return new AgentReRoute(router, scenario, agentsStuck);
+	}
 }
 

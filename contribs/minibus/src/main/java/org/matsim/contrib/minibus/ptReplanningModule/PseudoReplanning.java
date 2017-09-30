@@ -1,4 +1,4 @@
-package playground.manserpa.minibus;
+package org.matsim.contrib.minibus.ptReplanningModule;
 
 import org.apache.log4j.Logger;
 import org.matsim.core.controler.MatsimServices;
@@ -27,12 +27,12 @@ public class PseudoReplanning  {
 	private MatsimServices controler;
 	
 	
-	public PseudoReplanning(MatsimServices controler, int iteration)	{
+	public PseudoReplanning(final MatsimServices controler, int iteration)	{
 		this.controler = controler;
 		
-		AgentReRouteHandlerImpl agentsToReRoute = new AgentReRouteHandlerImpl(this.controler.getScenario().getPopulation().getPersons(), iteration);
+		final AgentReRouteHandlerImpl agentsToReRoute = new AgentReRouteHandlerImpl(this.controler.getScenario().getPopulation().getPersons(), iteration);
 		
-		AgentReRouteFactoryImpl stuckFactory = new AgentReRouteFactoryImpl();
+		final AgentReRouteFactoryImpl stuckFactory = new AgentReRouteFactoryImpl();
 		
 		ParallelPersonAlgorithmRunner.run(controler.getScenario().getPopulation(), controler.getConfig().global().getNumberOfThreads(), new ParallelPersonAlgorithmRunner.PersonAlgorithmProvider() {
 			@Override

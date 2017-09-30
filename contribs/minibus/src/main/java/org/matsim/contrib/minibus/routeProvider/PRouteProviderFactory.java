@@ -41,7 +41,12 @@ public final class PRouteProviderFactory {
 		RandomStopProvider randomStopProvider = new RandomStopProvider(pConfig, population, pStopsOnly, outputDir);
 		
 		RandomPVehicleProvider randomPVehicleProvider = new RandomPVehicleProvider(pConfig);
-
+		
+		// runs the new routing
+		return new BackAndForthScheduleProvider(pStopsOnly, network, randomStopProvider, randomPVehicleProvider, pConfig.getVehicleMaximumVelocity(), pConfig.getPlanningSpeedFactor(), pConfig.getDriverRestTime(), pConfig.getPIdentifier(), eventsManager, pConfig.getMode(), pConfig.getPVehicleSettings());
+		
+		/* old code by Neumann
+		 * 
 		if(pConfig.getRouteProvider().equalsIgnoreCase(SimpleBackAndForthScheduleProvider.NAME)){
 			return new SimpleBackAndForthScheduleProvider(pConfig.getPIdentifier(), pStopsOnly, network, randomStopProvider, randomPVehicleProvider, pConfig.getVehicleMaximumVelocity(), pConfig.getDriverRestTime(), pConfig.getMode());
 		} else if(pConfig.getRouteProvider().equalsIgnoreCase(SimpleCircleScheduleProvider.NAME)){
@@ -54,5 +59,6 @@ public final class PRouteProviderFactory {
 			log.error("There is no route provider specified. " + pConfig.getRouteProvider() + " unknown");
 			return null;
 		}
+		*/
 	}
 }

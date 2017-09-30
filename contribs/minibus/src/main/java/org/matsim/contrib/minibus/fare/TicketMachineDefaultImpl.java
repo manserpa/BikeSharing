@@ -69,6 +69,7 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 		// boards at a subsidized stop.
 		// TODO make the subsidy approach nicer, now everything is hard-coded (move everything into the config.xml)
 		
+		/*
 		if (this.subsidizedStops100.contains(stageContainer.getStopEntered().toString()) && !this.subsidizedStops150.contains(stageContainer.getStopEntered().toString())
 				&& !this.subsidizedStops225.contains(stageContainer.getStopEntered().toString()) && !this.subsidizedStops300.contains(stageContainer.getStopEntered().toString()))	{
 			this.isSubsidized  = true;
@@ -98,8 +99,9 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 		else {
 			this.isSubsidized  = false;
 			this.amountOfSubsidies = 0;
+			*/
 			return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter();
-		}
+		//}
 	}
 	
 	@Override

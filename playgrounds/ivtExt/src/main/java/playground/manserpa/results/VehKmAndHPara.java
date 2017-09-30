@@ -40,8 +40,8 @@ public final class VehKmAndHPara {
 //		for(int simulationRun = 1; simulationRun <= 9; simulationRun++)	{
 //			cs.run(args[1], "Run" + simulationRun + args[2], "Run" + simulationRun + args[3], simulationRun);
 //		}
-//		cs.run(args[1], args[2], args[3]);
-		cs.run(args[1], "Run" + 10 + args[2], "Run" + 10 + args[3], 10);	
+		cs.run(args[1], args[2], args[3],1);
+//		cs.run(args[1], "Run" + 10 + args[2], "Run" + 10 + args[3], 10);	
 	}
 	
 	private VehKmAndHPara(String shpFile)	{

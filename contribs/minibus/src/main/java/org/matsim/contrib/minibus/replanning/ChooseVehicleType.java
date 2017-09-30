@@ -40,10 +40,11 @@ public final class ChooseVehicleType extends AbstractPStrategyModule {
 		PPlan oldPlan = operator.getBestPlan();
 		
 		// calculate the timetable intervals of the old plan (maybe this can be easier done)
-		Id<TransitRoute> routeId = Id.create(Id.create(operator.getId(), TransitLine.class) + "-" + Id.create(oldPlan.getId(), TransitRoute.class), TransitRoute.class);
-		TransitRoute route = oldPlan.getLine().getRoutes().get(routeId);
-		double numberOfVehiclesOld = oldPlan.getTotalPassengerKilometer() / oldPlan.getPassengerKilometerPerVehicle();
-		double headway =  (this.pConfig.getDriverRestTime() + route.getStops().get(route.getStops().size() - 1).getDepartureOffset()) / numberOfVehiclesOld;
+		//Id<TransitRoute> routeId = Id.create(Id.create(operator.getId(), TransitLine.class) + "-" + Id.create(oldPlan.getId(), TransitRoute.class), TransitRoute.class);
+		//TransitRoute route = oldPlan.getLine().getRoutes().get(routeId);
+		//double numberOfVehiclesOld = oldPlan.getTotalPassengerKilometer() / oldPlan.getPassengerKilometerPerVehicle();
+		//double headway =  (this.pConfig.getDriverRestTime() + route.getStops().get(route.getStops().size() - 1).getDepartureOffset()) / numberOfVehiclesOld;
+		double headway = oldPlan.getHeadway();
 		double vehiclesPerHourOld = 3600 / headway;
 		
 		
@@ -143,7 +144,8 @@ public final class ChooseVehicleType extends AbstractPStrategyModule {
 			
 			// calculation of the EXPECTED new occupancy 
 			
-			double headwayNew =  (this.pConfig.getDriverRestTime() + route.getStops().get(route.getStops().size() - 1).getDepartureOffset()) / newPlan.getNVehicles();
+			//double headwayNew =  (this.pConfig.getDriverRestTime() + route.getStops().get(route.getStops().size() - 1).getDepartureOffset()) / newPlan.getNVehicles();
+			double headwayNew = oldPlan.getHeadway() * oldPlan.getNVehicles() / newPlan.getNVehicles();
 			double vehiclesPerHourNew = 3600 / headwayNew;
 			
 			double demandRatioOld;
