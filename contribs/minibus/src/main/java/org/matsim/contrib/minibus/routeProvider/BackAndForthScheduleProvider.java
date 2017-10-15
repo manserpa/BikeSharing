@@ -167,13 +167,12 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 		for (int i = 0; i < numberOfVehicles; i++) {
 			for (double j = startTime + i * headway; j <= endTime; ) {
 				Departure departureBack = this.scheduleWithStopsOnly.getFactory().createDeparture(Id.create(n, Departure.class), j);
-				departureBack.setVehicleId(Id.create(pLineId + "-" + routeId + "-" + i +"_" + pVehicleType, Vehicle.class));
+				departureBack.setVehicleId(Id.create(pLineId + "-" + routeId + "-" + n +"_" + pVehicleType + "-Back-" + i, Vehicle.class));
 				transitRouteBack.addDeparture(departureBack);
 				j += transitRouteBack.getStops().get(transitRouteBack.getStops().size() - 1).getDepartureOffset() + this.driverRestTime;
-				n++;
 				
 				Departure departureForth = this.scheduleWithStopsOnly.getFactory().createDeparture(Id.create(n, Departure.class), j);
-				departureForth.setVehicleId(Id.create(pLineId + "-" + routeId + "-" + i +"_" + pVehicleType, Vehicle.class));
+				departureForth.setVehicleId(Id.create(pLineId + "-" + routeId + "-" + n +"_" + pVehicleType + "-Forth-" + i, Vehicle.class));
 				transitRouteForth.addDeparture(departureForth);
 				j += transitRouteForth.getStops().get(transitRouteForth.getStops().size() - 1).getDepartureOffset() + this.driverRestTime;
 				n++;

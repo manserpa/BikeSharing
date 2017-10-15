@@ -290,11 +290,13 @@ abstract class AbstractOperator implements Operator{
 			totalAmountOfSubsidies += driverId2ScoreMap.get(vehId).getAmountOfSubsidies();
 		}
 		
+		totalLineScore = totalLineScore - plan.getNVehicles() * this.costPerVehicleAndDay;
+		
 		plan.setScore(totalLineScore);
 		plan.setTripsServed(totalTripsServed);
-		plan.setTotalKilometersDrivenPerVehicle(totalMeterDriven / (1000 * plan.getNVehicles()));
-		plan.setTotalHoursDrivenPerVehicle(totalTimeDriven / (3600 * plan.getNVehicles()));
-		plan.setPassengerKilometerPerVehicle(totalPassengerKilometer / plan.getNVehicles());
+		plan.setTotalKilometersDrivenPerVehicle(totalMeterDriven / (1000));
+		plan.setTotalHoursDrivenPerVehicle(totalTimeDriven / (3600));
+		plan.setPassengerKilometerPerVehicle(totalPassengerKilometer);
 		plan.setTotalPassengerKilometer(totalPassengerKilometer);
 		plan.setNumberOfSubsidizedTrips(totalSubsidizedTrips);
 		plan.setTotalAmountOfSubsidies(totalAmountOfSubsidies);

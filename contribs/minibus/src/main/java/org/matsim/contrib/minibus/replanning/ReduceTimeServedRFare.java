@@ -30,6 +30,7 @@ import org.matsim.contrib.minibus.operator.PPlan;
 import org.matsim.core.gbl.MatsimRandom;
 import org.matsim.core.utils.collections.Tuple;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
+import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -78,11 +79,14 @@ public final class ReduceTimeServedRFare extends AbstractPStrategyModule impleme
 		// get best plans route id
 		TransitRoute routeToOptimize = null;
 		
-		if (operator.getBestPlan().getLine().getRoutes().size() != 1) {
-			log.error("There should be only one route at this time - Please check");
+		if (operator.getBestPlan().getLine().getRoutes().size() != 2) {
+			log.error("There should be two routes at this time - Please check " + operator.getBestPlan().getId().toString());
 		}
 		for (TransitRoute route : operator.getBestPlan().getLine().getRoutes().values()) {
-			routeToOptimize = route;
+			String[] routeIdSplit = route.getId().toString().split("-");
+			String routeTyp = routeIdSplit[routeIdSplit.length - 1];
+			if(routeTyp.equals("Back"))
+				routeToOptimize = route;
 		}
 		
 		Tuple<Double,Double> timeToBeServed = getTimeToBeServed(this.route2StartTimeSlot2EndTimeSlot2WeightMap.get(routeToOptimize.getId()));
@@ -242,9 +246,22 @@ public final class ReduceTimeServedRFare extends AbstractPStrategyModule impleme
 
 	@Override
 	public void handleFareContainer(StageContainer stageContainer) {
-		Id<TransitRoute> routeId = stageContainer.getRouteId();
+		//Id<TransitRoute> routeId = stageContainer.getRouteId();
 		Integer startTimeSlot = this.getTimeSlotForTime(stageContainer.getTimeEntered());
 		Integer endTimeSlot = this.getTimeSlotForTime(stageContainer.getTimeLeft());
+		
+		// (manserpa) modified the weight map a bit such that it accumulates the trips from the back and the forth route
+		String[] routeIdSplit = stageContainer.getRouteId().toString().split("-");
+		String routeTyp = routeIdSplit[routeIdSplit.length - 1];
+				
+		Id<TransitRoute> routeId = null;
+
+		if(routeTyp.equals("Back"))	{
+			routeId = stageContainer.getRouteId();
+		}
+		else if(routeTyp.equals("Forth")) {
+			routeId = reverseRouteId(stageContainer.getRouteId());
+		}
 		
 		if (this.route2StartTimeSlot2EndTimeSlot2WeightMap.get(routeId) == null) {
 			this.route2StartTimeSlot2EndTimeSlot2WeightMap.put(routeId, new LinkedHashMap<Integer, LinkedHashMap<Integer,Double>>());
@@ -280,5 +297,18 @@ public final class ReduceTimeServedRFare extends AbstractPStrategyModule impleme
 		double endTime = ((double) endSlot + 1) * this.timeBinSize;
 		
 		return new Tuple<>(startTime, endTime);
+	}
+	
+	private Id<TransitRoute> reverseRouteId(Id<TransitRoute> routeId)	{
+		String[] routeIdSplit = routeId.toString().split("-");
+		String reversedRoute = "";
+		for(int i = 0; i < routeIdSplit.length - 1; i++)	{
+			reversedRoute += routeIdSplit[i] + "-";
+		}
+		reversedRoute += "Back";
+		
+		Id<TransitRoute> reversedRouteId = Id.create(reversedRoute, TransitRoute.class);
+		
+		return reversedRouteId;
 	}
 }

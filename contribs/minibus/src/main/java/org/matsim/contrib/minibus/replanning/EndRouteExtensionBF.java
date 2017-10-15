@@ -202,7 +202,7 @@ public final class EndRouteExtensionBF extends AbstractPStrategyModule {
 		
 		// find choice-set
 		for (TransitStopFacility stop : pRouteProvider.getAllPStops()) {
-			if (!stopsUsed.contains(stop.getId())) {
+			if (!stopsUsed.contains(stop.getId()) && !!stopsUsed.contains(reverseStopId(stop.getId()))) {
 				if (buffer.contains(MGC.coord2Point(stop.getCoord()))) {
 					choiceSet.add(stop);
 				}

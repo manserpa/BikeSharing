@@ -66,10 +66,10 @@ public final class PScoreContainer {
 	}
 
 	public void handleOperatorCostContainer(OperatorCostContainer operatorCostContainer) {
-		if (this.isFirstTour) {
-			this.costs += operatorCostContainer.getFixedCostPerDay();
-			this.isFirstTour = false;
-		}
+		//if (this.isFirstTour) {
+		//	this.costs += operatorCostContainer.getFixedCostPerDay();
+		//	this.isFirstTour = false;
+		//}
 		this.totalMeterDriven  += operatorCostContainer.getTotalMeterDriven();
 		this.totalTimeDriven += operatorCostContainer.getTotalTimeDriven();
 		this.costs += operatorCostContainer.getRunningCostDistance();

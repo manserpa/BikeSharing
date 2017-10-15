@@ -126,12 +126,16 @@ public final class PPlan implements Comparable<PPlan>{
 	public void setLine(TransitLine line) {
 		this.line = line;
 		this.vehicleIds = new TreeSet<>();
+		int nbVeh = 0;
 		for (TransitRoute route : this.line.getRoutes().values()) {
 			for (Departure departure : route.getDepartures().values()) {
 				this.vehicleIds.add(departure.getVehicleId());
+				String[] vehId = departure.getVehicleId().toString().split("-");
+				if(Integer.parseInt(vehId[vehId.length - 1]) > nbVeh)
+					nbVeh = Integer.parseInt(vehId[vehId.length - 1]);
 			}
 		}
-		this.nVehicles = this.vehicleIds.size();
+		this.nVehicles = nbVeh + 1;
 	}
 	
 	public double getStartTime() {
@@ -239,7 +243,7 @@ public final class PPlan implements Comparable<PPlan>{
 	}
 
 	public double getScorePerVehicle() {
-		return (this.score / this.vehicleIds.size());
+		return (this.score / this.nVehicles);
 	}
 	
 	public double getPlannedScorePerVehicle(){

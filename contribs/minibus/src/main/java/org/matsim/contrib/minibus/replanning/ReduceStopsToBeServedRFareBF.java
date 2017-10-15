@@ -73,11 +73,14 @@ public final class ReduceStopsToBeServedRFareBF extends AbstractPStrategyModule 
 	public PPlan run(Operator operator) {
 		// get best plans route id
 		TransitRoute routeToOptimize = null;
-		if (operator.getBestPlan().getLine().getRoutes().size() != 1) {
-			log.error("There should be only one route at this time - Please check");
+		if (operator.getBestPlan().getLine().getRoutes().size() != 2) {
+			log.error("Each plan should have 2 routes (BaF) -> there is something wrong in plan: " + operator.getBestPlan().getId().toString());
 		}
 		for (TransitRoute route : operator.getBestPlan().getLine().getRoutes().values()) {
-			routeToOptimize = route;
+			String[] routeIdSplit = route.getId().toString().split("-");
+			String routeTyp = routeIdSplit[routeIdSplit.length - 1];
+			if(routeTyp.equals("Back"))
+				routeToOptimize = route;
 		}
 		
 		ArrayList<TransitStopFacility> stopsToBeServed = getStopsToBeServed(this.route2StartStop2EndStop2WeightMap.get(routeToOptimize.getId()), routeToOptimize);

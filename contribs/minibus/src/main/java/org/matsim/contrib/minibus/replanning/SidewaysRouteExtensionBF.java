@@ -131,6 +131,7 @@ public final class SidewaysRouteExtensionBF extends AbstractPStrategyModule {
 		
 		double smallestDistance = Double.MAX_VALUE;
 		TransitStopFacility stopWithSmallestDistance = currentStopsToBeServed.get(0);
+		TransitStopFacility stopWithSecondSmallestDistance = currentStopsToBeServed.get(0);
 		TransitStopFacility stopToInsert = newStop;
 		
 		for (TransitStopFacility transitStopFacility : currentStopsToBeServed) {
@@ -140,6 +141,7 @@ public final class SidewaysRouteExtensionBF extends AbstractPStrategyModule {
 			if(distanceBack < distanceForth)	{
 				if (distanceBack < smallestDistance) {
 					smallestDistance = distanceBack;
+					stopWithSecondSmallestDistance = stopWithSmallestDistance;
 					stopWithSmallestDistance = transitStopFacility;
 					stopToInsert = newStop;
 				}
@@ -147,6 +149,7 @@ public final class SidewaysRouteExtensionBF extends AbstractPStrategyModule {
 			else	{
 				if (distanceForth < smallestDistance) {
 					smallestDistance = distanceForth;
+					stopWithSecondSmallestDistance = stopWithSmallestDistance;
 					stopWithSmallestDistance = transitStopFacility;
 					stopToInsert = this.pStops.getFacilities().get(reverseStopId(newStop.getId()));
 				}
@@ -154,8 +157,12 @@ public final class SidewaysRouteExtensionBF extends AbstractPStrategyModule {
 		}
 		
 		ArrayList<TransitStopFacility> newStopsToBeServed = currentStopsToBeServed;
+		// find index to insert
+		int index = Math.min(currentStopsToBeServed.indexOf(stopWithSecondSmallestDistance), currentStopsToBeServed.indexOf(stopWithSmallestDistance));
+				
 		// insert
-		newStopsToBeServed.add(currentStopsToBeServed.indexOf(stopWithSmallestDistance) + 1, stopToInsert);
+		newStopsToBeServed.add(index + 1, stopToInsert);
+		//newStopsToBeServed.add(currentStopsToBeServed.indexOf(stopWithSmallestDistance) + 1, stopToInsert);
 		
 		return newStopsToBeServed;
 	}
@@ -204,7 +211,7 @@ public final class SidewaysRouteExtensionBF extends AbstractPStrategyModule {
 		
 		// find choice-set
 		for (TransitStopFacility stop : pRouteProvider.getAllPStops()) {
-			if (!stopsUsed.contains(stop.getId())) {
+			if (!stopsUsed.contains(stop.getId()) && !!stopsUsed.contains(reverseStopId(stop.getId()))) {
 				if (buffer.contains(MGC.coord2Point(stop.getCoord()))) {
 					choiceSet.add(stop);
 				}
