@@ -23,6 +23,7 @@ import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.contrib.minibus.PConstants;
+import org.matsim.contrib.minibus.PConfigGroup.PVehicleSettings;
 import org.matsim.contrib.minibus.replanning.PStrategy;
 import org.matsim.contrib.minibus.routeProvider.PRouteProvider;
 import org.matsim.core.config.ConfigUtils;
@@ -76,8 +77,15 @@ public final class CreateOperatorFromTransitSchedule implements PStrategy {
 
 				PPlan plan = createPlan(lineEntry.getValue());
 				this.operatorId2PlanMap.put(operator.getId(), plan);			
+				
+				double pricePerVehicle = 0;
+				for (PVehicleSettings pVS : pConfig.getPVehicleSettings()) {
+		            if (plan.getPVehicleType().equals(pVS.getPVehicleName())) {
+		            	pricePerVehicle = pVS.getCostPerVehicleBought();
+		            }
+		        }
 
-				double initialBudget = this.pConfig.getInitialBudget() % pConfig.getPricePerVehicleBought();			
+				double initialBudget = this.pConfig.getInitialBudget() % pricePerVehicle;			
 				operator.init(this.routeProvider, this, 0, initialBudget);
 				operatorsToReturn.add(operator);
 			}

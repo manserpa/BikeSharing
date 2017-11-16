@@ -92,7 +92,7 @@ final class PControlerListener implements IterationStartsListener, StartupListen
 	@Override
 	public void notifyIterationStarts(IterationStartsEvent event) {
 		
-	if(((event.getIteration() + 1) % 2 == 0 && event.getIteration() <= 200) || event.getIteration() > 200) {
+	if(((event.getIteration() + 1) % 2 == 0 && event.getIteration() <= 250) || event.getIteration() > 250) {
 		
 		PBox pBox = (PBox) operators ;
 		final MatsimServices controler = event.getServices();
@@ -119,7 +119,7 @@ final class PControlerListener implements IterationStartsListener, StartupListen
 				});
 			}
 			
-			if((event.getIteration() + 1) % 2 == 0 && event.getIteration() <= 200)
+			if((event.getIteration() + 1) % 2 == 0 && event.getIteration() <= 250)
 				new PseudoReplanning(controler, event.getIteration());
 
 		}
@@ -132,7 +132,7 @@ final class PControlerListener implements IterationStartsListener, StartupListen
 	@Override
 	public void notifyScoring(ScoringEvent event) {
 		
-		if ( (event.getIteration() <= 200 && event.getIteration() % 2 == 0) || event.getIteration() > 200 )	{
+		if ( (event.getIteration() <= 250 && event.getIteration() % 2 == 0) || event.getIteration() > 250 )	{
 			
 			PBox pBox = (PBox) operators ;
 			pBox.notifyScoring(event);

@@ -129,9 +129,9 @@ class PTransitAgent extends PersonDriverAgentImpl implements MobsimDriverPasseng
 			}
 		}
 
-		log.error("Stop " + egressStopId + " not found in route " + transitRoute.getId());
+		//log.error("Stop " + egressStopId + " not found in route " + transitRoute.getId());
 		// returning what???
-		return -1.0;
+		return Double.MAX_VALUE;
 	}
 	
 	private double getDepartureOffsetFromRoute(TransitRoute transitRoute, Id<TransitStopFacility> accessStopId) {
@@ -141,9 +141,9 @@ class PTransitAgent extends PersonDriverAgentImpl implements MobsimDriverPasseng
 			}
 		}
 
-		log.error("Stop " + accessStopId + " not found in route " + transitRoute.getId());
+		//log.error("Stop " + accessStopId + " not found in route " + transitRoute.getId());
 		// returning what???
-		return -1.0;
+		return -Double.MAX_VALUE;
 	}
 
 

@@ -49,7 +49,7 @@ public final class TestPTRouting {
 		String configFile = args[0];
 		
 		Config config = ConfigUtils.loadConfig( configFile ) ;
-		config.transit().setTransitScheduleFile(args[1]+".xml.gz");
+		config.transit().setTransitScheduleFile(args[1]+".xml");
 		
 		Scenario scenario = ScenarioUtils.loadScenario(config);
 	
@@ -79,6 +79,10 @@ public final class TestPTRouting {
 		String csvFile = "PseudoPTTripTime"+schedule+dayTime+".csv";
 	    FileWriter writer = new FileWriter(csvFile);
 	    
+	    List<Double> distanzen = new ArrayList<>();
+	    List<Double> reisezeit = new ArrayList<>();
+	    List<Double> oddistanz = new ArrayList<>();
+	    
 	    CSVUtils.writeLine(writer, Arrays.asList("BeelineDistance", "TotalTripTime", "TotalTripDistance"), ';');
 	    
 	    double minX = Double.MAX_VALUE;
@@ -101,18 +105,23 @@ public final class TestPTRouting {
 		double y;
 		double x1;
 		double y1;
-	    
+		
+		// Sioux Falls Coordinates
+		minX = 678126.237;
+		minY = 4818750.241;
+		maxX = 687482.1438;
+		maxY = 4832294.586;
 		
 		for(int i = 0; i < numberOfTrips; i++)	{
-		    do {
+		    //do {
 		        x = minX + (maxX - minX) * Math.random();
 		        y = minY + (maxY - minY) * Math.random();
-		    } while(!nodeInServiceArea(x,y));
+		        //} while(!nodeInServiceArea(x,y));
 		    
-		    do {
+		        //do {
 		        x1 = minX + (maxX - minX) * Math.random();
 		        y1 = minY + (maxY - minY) * Math.random();
-		    } while(!nodeInServiceArea(x1,y1));
+		        //} while(!nodeInServiceArea(x1,y1));
 			
 			List<Leg> legs = router.calcRoute(new FakeFacility(new Coord(x1, y1)), new FakeFacility(new Coord(x, y)), dayTime*3600, null); // should map to stops A and I
 			
@@ -124,17 +133,25 @@ public final class TestPTRouting {
 				continue;
 			
 			for (Leg e : legs)	{
-				totTime += e.getTravelTime();
-				totDistance += e.getRoute().getDistance();
-				System.out.println(e.getRoute().getDistance());
+				if(e.getMode().equals("pt"))	{
+					totDistance += e.getRoute().getDistance();
+					totTime += e.getTravelTime();
+				}
 			}
 			Coord fromCoord = new Coord(x1,y1);
 			Coord toCoord = new Coord(x,y);
 			double beelineDistance = CoordUtils.calcEuclideanDistance(fromCoord,toCoord);
 			
 			CSVUtils.writeLine(writer, Arrays.asList(Double.toString(beelineDistance), Double.toString(totTime), Double.toString(totTime)), ';');
-			
+			if(totDistance > 0)
+				distanzen.add(totDistance);
+			if(beelineDistance > 0)
+				oddistanz.add(beelineDistance);
+			if(totTime > 0)
+				reisezeit.add(totTime);
 		}
+		
+		//System.out.println(Math.);
 		
 		writer.flush();
         writer.close();

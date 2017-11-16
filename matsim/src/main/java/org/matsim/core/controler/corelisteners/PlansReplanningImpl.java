@@ -57,7 +57,7 @@ final class PlansReplanningImpl implements PlansReplanning, ReplanningListener {
 	public void notifyReplanning(final ReplanningEvent event) {
 		// manserpa: not the best solution, because of the change in the core.
 		// should be moved to the playground
-		if ( (event.getIteration() <= 200 && event.getIteration() % 2 == 0) || event.getIteration() > 200 ) 
+		if ( (event.getIteration() <= 250 && event.getIteration() % 2 == 0) || event.getIteration() > 250 ) 
 			strategyManager.run(population, event.getIteration(), replanningContextProvider.get());
 		
 	}

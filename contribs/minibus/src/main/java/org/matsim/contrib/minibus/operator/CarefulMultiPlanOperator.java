@@ -149,21 +149,29 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
 		// First remove vehicles from all plans scored negative and add them to the reserve
 		this.numberOfVehiclesInReserve += this.removeVehiclesFromAllPlansWithNegativeScore(this.plans);
 		
+		
+		double costPerVehicleSell = 0;
+		for (PVehicleSettings pVS : this.pConfig.getPVehicleSettings()) {
+            if (getBestPlan().getPVehicleType().equals(pVS.getPVehicleName())) {
+            	costPerVehicleSell = pVS.getCostPerVehicleSold();
+            }
+        }
+		
 		// Second, balance the budget
 		if(this.budget < 0){
 			// insufficient, try to balance from reserve vehicles
-			int numberOfVehiclesToSell = -1 * Math.min(-1, (int) Math.floor(this.budget / this.costPerVehicleSell));
+			int numberOfVehiclesToSell = -1 * Math.min(-1, (int) Math.floor(this.budget / costPerVehicleSell));
 			
 			while (this.numberOfVehiclesInReserve > 0 && numberOfVehiclesToSell > 0) {
 				// sell one vehicle from the reserve
 				this.numberOfVehiclesInReserve--;
 				numberOfVehiclesToSell--;
-				this.budget += this.costPerVehicleSell;
+				this.budget += costPerVehicleSell;
 			}
 			
 			while (numberOfVehiclesToSell > 0) {
 				this.findWorstPlanAndRemoveOneVehicle();
-				this.budget += this.costPerVehicleSell;
+				this.budget += costPerVehicleSell;
 				numberOfVehiclesToSell--;
 			}
 		}
@@ -255,7 +263,7 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
 		if(probabilityToNotInnovate > rndTreshold)	{
 			// put all the vehicles in reserve on existing positively scored plans
 			while(this.numberOfVehiclesInReserve > 0 && plansWithAPositiveScore.size() > 0)	{
-				log.info("we are in this section");
+				//log.info("we are in this section");
 				for (PPlan plan : plansWithAPositiveScore) {
 					if (this.numberOfVehiclesInReserve > 0) {
 						// increase by one vehicle
@@ -304,9 +312,17 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
 	}
 
 	private void buyAsManyVehiclesAsPossible() {
-		while (this.getBudget() > this.getCostPerVehicleBuy()) {
+		double costPerVehicleBuy = 0;
+		for (PVehicleSettings pVS : this.pConfig.getPVehicleSettings()) {
+            if (this.bestPlan.getPVehicleType().equals(pVS.getPVehicleName())) {
+            	costPerVehicleBuy = pVS.getCostPerVehicleBought();
+            }
+        }
+		while (this.getBudget() > costPerVehicleBuy) {
 			// budget ok, buy one
-			this.setBudget(this.getBudget() - this.getCostPerVehicleBuy());
+			
+			// manserpa: should be easy to take the vehicle type of the best plan
+			this.setBudget(this.getBudget() - costPerVehicleBuy);
 			this.numberOfVehiclesInReserve++;
 		}
 	}
@@ -324,7 +340,14 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
 				// okay plan scored negative - tackle it
 				double score = Math.abs(pPlan.getScore());
 				// remove as many vehicles as necessary to compensate the impact on the budget plus one to hopefully get that plan positively scored in the next iteration
-				int vehiclesToRemove = (int) (score / this.costPerVehicleSell) + 1;
+				
+				double costPerVehicleSell = 0;
+				for (PVehicleSettings pVS : this.pConfig.getPVehicleSettings()) {
+		            if (pPlan.getPVehicleType().equals(pVS.getPVehicleName())) {
+		            	costPerVehicleSell = pVS.getCostPerVehicleSold();
+		            }
+		        }
+				int vehiclesToRemove = (int) (score / costPerVehicleSell) + 1;
 				if(pPlan.getNVehicles() < vehiclesToRemove) {
 					// this plan cannot compensate - remove all vehicles;
 					vehiclesToRemove = pPlan.getNVehicles();

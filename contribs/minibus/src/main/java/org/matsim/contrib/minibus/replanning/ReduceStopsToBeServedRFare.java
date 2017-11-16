@@ -94,6 +94,7 @@ public final class ReduceStopsToBeServedRFare extends AbstractPStrategyModule im
 		newPlan.setStartTime(operator.getBestPlan().getStartTime());
 		newPlan.setEndTime(operator.getBestPlan().getEndTime());
 		newPlan.setPVehicleType(operator.getBestPlan().getPVehicleType());
+		newPlan.setHeadway(operator.getBestPlan().getHeadway());
 		
 		newPlan.setLine(operator.getRouteProvider().createTransitLineFromOperatorPlan(operator.getId(), newPlan));
 		

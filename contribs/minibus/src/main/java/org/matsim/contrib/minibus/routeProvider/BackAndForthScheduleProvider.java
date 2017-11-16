@@ -193,7 +193,7 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 		for (TransitStopFacility transitStopFacility : stopsToBeServed) {
 			tempStopsToBeServed.add(transitStopFacility);
 			
-			String gridNodeId = GridNode.getGridNodeIdForCoord(transitStopFacility.getCoord(), 300);
+			String gridNodeId = GridNode.getGridNodeIdForCoord(transitStopFacility.getCoord(), 200);
 			gridStopHashSet.add(gridNodeId);
 		}
 		// this would be the last stop, not necessary anymore
@@ -237,6 +237,7 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 		double capacity = 0.0;
 		
 		for (PVehicleSettings pVS : this.pVehicleSettings) {
+			
             if (pVehicleType.equals(pVS.getPVehicleName())) {
             	
             	// manserpa: !!attention: the factor 10 is because of the downscaled scenario. Not really nice because it is hard-coded
@@ -305,7 +306,7 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 			
 			else if(routePattern.equals("back"))	{
 				
-				String gridNode = GridNode.getGridNodeIdForCoord(this.linkId2StopFacilityMap.get(link.getId()).getCoord(), 300);
+				String gridNode = GridNode.getGridNodeIdForCoord(this.linkId2StopFacilityMap.get(link.getId()).getCoord(), 200);
 				
 				if(gridStopHashSet.contains(gridNode))	{
 					continue;

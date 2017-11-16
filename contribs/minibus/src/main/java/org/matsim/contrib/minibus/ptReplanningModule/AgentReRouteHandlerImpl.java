@@ -46,7 +46,11 @@ class AgentReRouteHandlerImpl	{
 		
 		this.agentsToReRoute = new TreeSet<>();
 		
-		double percentageToReRoute = -1 * Math.pow(2,0.02 * iteration) / 35 + 0.65;
+		double percentageToReRoute = 0;
+		if(iteration <= 200)
+			percentageToReRoute = -1 * Math.pow(2,0.02 * iteration) / 35 + 0.65;
+		else 
+			percentageToReRoute = -1 * Math.pow(2,0.02 * 200) / 35 + 0.65;
 		
 		for( Id<Person> e : this.agents.keySet())	{
 			double rand = MatsimRandom.getRandom().nextDouble();

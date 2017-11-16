@@ -25,11 +25,14 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import javax.inject.Inject;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.contrib.minibus.PConstants.OperatorState;
 import org.matsim.contrib.minibus.fare.StageContainerCreator;
@@ -58,6 +61,8 @@ import org.matsim.pt.transitSchedule.TransitScheduleFactoryImpl;
 import org.matsim.pt.transitSchedule.TransitScheduleWriterV1;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
+import org.matsim.utils.objectattributes.ObjectAttributes;
+import org.matsim.utils.objectattributes.attributable.Attributes;
 import org.matsim.vehicles.Vehicle;
 
 
@@ -185,6 +190,36 @@ public final class PBox implements POperators {
 	}
 
 	void notifyIterationStarts(IterationStartsEvent event) {
+		
+		
+		if(event.getIteration() == 250)	{
+			Population pop = event.getServices().getScenario().getPopulation();
+			ObjectAttributes subPopLookup = pop.getPersonAttributes();
+			for(Person p: pop.getPersons().values())	{
+				String subpopName = (String) subPopLookup.getAttribute(p.getId().toString(), "subpopulation");
+				if(subpopName == null)	{
+					pop.getPersonAttributes().putAttribute(p.getId().toString(), "subpopulation", "MidReplanners");
+					log.info("Person: " + p.getId().toString() + "changed to MidReplanners");
+				}
+				log.info("Person: " + p.getId().toString() + "is subpopulation " + subpopName);
+			}
+		}
+		
+		
+		if(event.getIteration() == 350)	{
+			Population pop = event.getServices().getScenario().getPopulation();
+			ObjectAttributes subPopLookup = pop.getPersonAttributes();
+			for(Person p: pop.getPersons().values())	{
+				String subpopName = (String) subPopLookup.getAttribute(p.getId().toString(), "subpopulation");
+				if(subpopName.equals("MidReplanners"))	{
+					pop.getPersonAttributes().putAttribute(p.getId().toString(), "subpopulation", "LateReplanners");
+					log.info("Person: " + p.getId().toString() + "changed to LateReplanners");
+				}
+				log.info("Person: " + p.getId().toString() + "is subpopulation " + subpopName);
+			}
+		}
+		
+		
 		
 		this.strategyManager.updateStrategies(event.getIteration());
 

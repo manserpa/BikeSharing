@@ -58,6 +58,7 @@ public final class LogElement {
 	private int totalAmountOfSubsidies;
 	private Id<PPlan> parentId;
 	private int nVeh;
+	private double headway;
 	private int nPax;
 	private double score;
 	private double budget;
@@ -106,6 +107,12 @@ public final class LogElement {
 	}
 	public void setVehicleType(String vehicleType) {
 		this.vehicleType = vehicleType;
+	}
+	public double getHeadway() {
+		return this.headway;
+	}
+	public void setHeadway(double headway) {
+		this.headway = headway;
 	}
 	public double getDistanceDriven() {
 		return this.distanceDriven;
@@ -196,6 +203,7 @@ public final class LogElement {
 		strB.append(DELIMITER).append("creator");
 		strB.append(DELIMITER).append("parent");
 		strB.append(DELIMITER).append("vehicletype");
+		strB.append(DELIMITER).append("headway");
 		strB.append(DELIMITER).append("vehicle");
 		strB.append(DELIMITER).append("distance driven");
 		strB.append(DELIMITER).append("time driven");
@@ -221,6 +229,7 @@ public final class LogElement {
 		strB.append(DELIMITER).append(this.creatorId);
 		strB.append(DELIMITER).append(this.parentId);
 		strB.append(DELIMITER).append(this.vehicleType);
+		strB.append(DELIMITER).append(this.headway);
 		strB.append(DELIMITER).append(this.nVeh);
 		strB.append(DELIMITER).append(this.distanceDriven);
 		strB.append(DELIMITER).append(this.timeDriven);
@@ -242,6 +251,7 @@ public final class LogElement {
 		strB.append(this.iteration);
 		strB.append(DELIMITER).append(this.operatorId.toString());
 		strB.append(DELIMITER).append(this.status);
+		strB.append(DELIMITER).append(NOVALUE);
 		strB.append(DELIMITER).append(NOVALUE);
 		strB.append(DELIMITER).append(NOVALUE);
 		strB.append(DELIMITER).append(NOVALUE);

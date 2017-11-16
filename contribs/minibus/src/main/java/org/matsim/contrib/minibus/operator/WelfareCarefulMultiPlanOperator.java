@@ -95,7 +95,7 @@ public final class WelfareCarefulMultiPlanOperator extends AbstractOperator {
 			}
 		}
 		
-		delegate.processScore();
+		delegate.processScore("BeHappy");
 		
 	}
 
@@ -147,11 +147,6 @@ public final class WelfareCarefulMultiPlanOperator extends AbstractOperator {
 	@Override
 	public PRouteProvider getRouteProvider() {
 		return delegate.getRouteProvider();
-	}
-
-	@Override
-	public double getCostPerVehicleSell() {
-		return delegate.getCostPerVehicleSell();
 	}
 
 	@Override

@@ -119,6 +119,7 @@ public final class EndRouteExtensionBF extends AbstractPStrategyModule {
 		newPlan.setEndTime(oldPlan.getEndTime());
 		newPlan.setPVehicleType(oldPlan.getPVehicleType());
 		newPlan.setStopsToBeServed(newStopsToBeServed);
+		newPlan.setHeadway(oldPlan.getHeadway());
 		
 		newPlan.setLine(operator.getRouteProvider().createTransitLineFromOperatorPlan(operator.getId(), newPlan));
 		
@@ -129,34 +130,23 @@ public final class EndRouteExtensionBF extends AbstractPStrategyModule {
 	private ArrayList<TransitStopFacility> addStopToExistingStops(TransitStopFacility baseStop, TransitStopFacility remoteStop, ArrayList<TransitStopFacility> currentStopsToBeServed, TransitStopFacility newStop) {
 		ArrayList<TransitStopFacility> newStopsToBeServed = new ArrayList<>(currentStopsToBeServed);
 		
-		// decide which stop is closer
 		if (CoordUtils.calcEuclideanDistance(baseStop.getCoord(), newStop.getCoord()) < CoordUtils.calcEuclideanDistance(remoteStop.getCoord(), newStop.getCoord())) {
-			// baseStop is closer - insert before baseStop
-			//newStopsToBeServed.add(0, newStop);
-			
-			// now the problem is that we don't know if the stop is better on the way forth or back -> Dijkstra
 			double distanceBack = getShortestPath(newStop, baseStop);
 			double distanceForth = getShortestPath(this.pStops.getFacilities().get(reverseStopId(newStop.getId())), baseStop);
 			
-			if(distanceBack < distanceForth)	{
-				// the stop is on the way back
+			if(distanceBack < distanceForth)
 				newStopsToBeServed.add(0, newStop);
-			}
-			else	{
+			else	
 				newStopsToBeServed.add(0, this.pStops.getFacilities().get(reverseStopId(newStop.getId())));
-			}
-			
-		} else {
-			// remote stop is closer or both have the same distance - add after remote stop
+		} 
+		else {
 			double distanceBack = getShortestPath(remoteStop, newStop);
 			double distanceForth = getShortestPath(remoteStop, this.pStops.getFacilities().get(reverseStopId(newStop.getId())));
 			
-			if(distanceBack < distanceForth)	{
+			if(distanceBack < distanceForth)	
 				newStopsToBeServed.add(newStopsToBeServed.indexOf(remoteStop) + 1, newStop);
-			}
-			else	{
+			else	
 				newStopsToBeServed.add(newStopsToBeServed.indexOf(remoteStop) + 1, this.pStops.getFacilities().get(reverseStopId(newStop.getId())));
-			}
 		}
 		
 		return newStopsToBeServed;
@@ -202,7 +192,7 @@ public final class EndRouteExtensionBF extends AbstractPStrategyModule {
 		
 		// find choice-set
 		for (TransitStopFacility stop : pRouteProvider.getAllPStops()) {
-			if (!stopsUsed.contains(stop.getId()) && !!stopsUsed.contains(reverseStopId(stop.getId()))) {
+			if (!stopsUsed.contains(stop.getId()) && !stopsUsed.contains(reverseStopId(stop.getId()))) {
 				if (buffer.contains(MGC.coord2Point(stop.getCoord()))) {
 					choiceSet.add(stop);
 				}

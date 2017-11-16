@@ -120,6 +120,7 @@ public final class SidewaysRouteExtensionBF extends AbstractPStrategyModule {
 		newPlan.setEndTime(oldPlan.getEndTime());
 		newPlan.setPVehicleType(oldPlan.getPVehicleType());
 		newPlan.setStopsToBeServed(newStopsToBeServed);
+		newPlan.setHeadway(operator.getBestPlan().getHeadway());
 		
 		newPlan.setLine(operator.getRouteProvider().createTransitLineFromOperatorPlan(operator.getId(), newPlan));
 		
@@ -132,7 +133,33 @@ public final class SidewaysRouteExtensionBF extends AbstractPStrategyModule {
 		double smallestDistance = Double.MAX_VALUE;
 		TransitStopFacility stopWithSmallestDistance = currentStopsToBeServed.get(0);
 		TransitStopFacility stopWithSecondSmallestDistance = currentStopsToBeServed.get(0);
-		TransitStopFacility stopToInsert = newStop;
+		
+		for (TransitStopFacility transitStopFacility : currentStopsToBeServed) {
+			double currentDistance = CoordUtils.calcEuclideanDistance(newStop.getCoord(), transitStopFacility.getCoord());
+			if (currentDistance < smallestDistance) {
+				smallestDistance = currentDistance;
+				stopWithSecondSmallestDistance = stopWithSmallestDistance;
+				stopWithSmallestDistance = transitStopFacility;
+			}
+		}
+		
+		
+		// find index to insert
+		int index = Math.min(currentStopsToBeServed.indexOf(stopWithSecondSmallestDistance), currentStopsToBeServed.indexOf(stopWithSmallestDistance));
+		
+		ArrayList<TransitStopFacility> newStopsToBeServed = new ArrayList<>(currentStopsToBeServed);
+		
+		double distanceBack = getShortestPath(currentStopsToBeServed.get(index), newStop);
+		double distanceForth = getShortestPath(currentStopsToBeServed.get(index), this.pStops.getFacilities().get(reverseStopId(newStop.getId())));
+		
+		if(distanceBack < distanceForth)
+			newStopsToBeServed.add(index + 1, newStop);
+		else	
+			newStopsToBeServed.add(index + 1, this.pStops.getFacilities().get(reverseStopId(newStop.getId())));
+		
+		return newStopsToBeServed;
+		
+		/*
 		
 		for (TransitStopFacility transitStopFacility : currentStopsToBeServed) {
 			double distanceBack = getShortestPath(transitStopFacility, newStop);
@@ -165,6 +192,7 @@ public final class SidewaysRouteExtensionBF extends AbstractPStrategyModule {
 		//newStopsToBeServed.add(currentStopsToBeServed.indexOf(stopWithSmallestDistance) + 1, stopToInsert);
 		
 		return newStopsToBeServed;
+		*/
 	}
 	
 	
@@ -211,7 +239,7 @@ public final class SidewaysRouteExtensionBF extends AbstractPStrategyModule {
 		
 		// find choice-set
 		for (TransitStopFacility stop : pRouteProvider.getAllPStops()) {
-			if (!stopsUsed.contains(stop.getId()) && !!stopsUsed.contains(reverseStopId(stop.getId()))) {
+			if (!stopsUsed.contains(stop.getId()) && !stopsUsed.contains(reverseStopId(stop.getId()))) {
 				if (buffer.contains(MGC.coord2Point(stop.getCoord()))) {
 					choiceSet.add(stop);
 				}
@@ -307,3 +335,5 @@ public final class SidewaysRouteExtensionBF extends AbstractPStrategyModule {
 		return SidewaysRouteExtensionBF.STRATEGY_NAME;
 	}
 }
+
+

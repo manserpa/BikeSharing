@@ -105,6 +105,7 @@ public final class SidewaysRouteExtension extends AbstractPStrategyModule {
 		newPlan.setEndTime(oldPlan.getEndTime());
 		newPlan.setPVehicleType(oldPlan.getPVehicleType());
 		newPlan.setStopsToBeServed(newStopsToBeServed);
+		newPlan.setHeadway(operator.getBestPlan().getHeadway());
 		
 		newPlan.setLine(operator.getRouteProvider().createTransitLineFromOperatorPlan(operator.getId(), newPlan));
 		

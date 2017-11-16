@@ -118,6 +118,8 @@ public final class PConfigGroup extends ConfigGroup{
 	private static final String PVEHICLE_CAPACITY = "VehCapacity_";
 	private static final String PVEHICLE_EARNINGSPERPASSENGERANDKILOMETER = "VehEarningsPerPaxKilometer_";
 	private static final String PVEHICLE_EARNINGSPERBOARDINGANDPASSENGER = "VehEarningsPerPaxBoarding_";
+	private static final String PVEHICLE_PRICEPERVEHICLESOLD = "PricePerVehicleSold_";
+	private static final String PVEHICLE_PRICEPERVEHICLEBOUGHT = "PricePerVehicleBought_";
 
 	private static final String WELFARE_MAXIMIZATION = "welfareMaximization";
 	private static final String INITIAL_SCORES_FILE = "initialScoresFile";
@@ -341,6 +343,12 @@ public final class PConfigGroup extends ConfigGroup{
 		} else if (key != null && key.startsWith(PVEHICLE_EARNINGSPERBOARDINGANDPASSENGER)) {
 			PVehicleSettings pVehicleSettings = getPVehicleSettings(Id.create(key.substring(PVEHICLE_EARNINGSPERBOARDINGANDPASSENGER.length()), PVehicleSettings.class), true);
 			pVehicleSettings.setEarningsPerBoardingPassenger(Double.parseDouble(value));
+		} else if (key != null && key.startsWith(PVEHICLE_PRICEPERVEHICLESOLD)) {
+			PVehicleSettings pVehicleSettings = getPVehicleSettings(Id.create(key.substring(PVEHICLE_PRICEPERVEHICLESOLD.length()), PVehicleSettings.class), true);
+			pVehicleSettings.setCostPerVehicleSold(Double.parseDouble(value));
+		} else if (key != null && key.startsWith(PVEHICLE_PRICEPERVEHICLEBOUGHT)) {
+			PVehicleSettings pVehicleSettings = getPVehicleSettings(Id.create(key.substring(PVEHICLE_PRICEPERVEHICLEBOUGHT.length()), PVehicleSettings.class), true);
+			pVehicleSettings.setCostPerVehicleBought(Double.parseDouble(value));
 			
 		} else if (WELFARE_MAXIMIZATION.equals(key)) {
 			this.welfareMaximization = Boolean.parseBoolean(value);
@@ -349,7 +357,7 @@ public final class PConfigGroup extends ConfigGroup{
 		/*	
 		}else if (key != null && key.startsWith(PVEHICLE)) {
 			VehicleSettings settings = getVehicleSettings(Id.create(key.substring(PVEHICLE.length()), VehicleSettings.class), true);
-			settings.setModuleName(value);
+			settings.setModuleName(value);PVEHICLE_PRICEPERVEHICLESOLD
 			*/
 		} else {
 			log.error("unknown parameter: " + key + "...");
@@ -430,6 +438,8 @@ public final class PConfigGroup extends ConfigGroup{
 			map.put(PVEHICLE_CAPACITY + entry.getKey().toString(), Double.toString(entry.getValue().getCapacityPerVehicle()));
 			map.put(PVEHICLE_EARNINGSPERPASSENGERANDKILOMETER + entry.getKey().toString(), Double.toString(entry.getValue().getEarningsPerKilometerAndPassenger()));
 			map.put(PVEHICLE_EARNINGSPERBOARDINGANDPASSENGER + entry.getKey().toString(), Double.toString(entry.getValue().getEarningsPerBoardingPassenger()));
+			map.put(PVEHICLE_PRICEPERVEHICLESOLD + entry.getKey().toString(), Double.toString(entry.getValue().getCostPerVehicleSold()));
+			map.put(PVEHICLE_PRICEPERVEHICLEBOUGHT + entry.getKey().toString(), Double.toString(entry.getValue().getCostPerVehicleBought()));
 		}
 		
 		return map;
@@ -507,6 +517,8 @@ public final class PConfigGroup extends ConfigGroup{
 			map.put(PVEHICLE_CAPACITY + entry.getKey().toString(), "capacity of the vehicle");
 			map.put(PVEHICLE_EARNINGSPERPASSENGERANDKILOMETER + entry.getKey().toString(), "earnings per passenger and kilometer");
 			map.put(PVEHICLE_EARNINGSPERBOARDINGANDPASSENGER + entry.getKey().toString(), "earnings per boarding passenger");
+			map.put(PVEHICLE_PRICEPERVEHICLEBOUGHT + entry.getKey().toString(), "price to buy one vehicle");
+			map.put(PVEHICLE_PRICEPERVEHICLESOLD + entry.getKey().toString(), "price to sell one vehicle");
 		}
 
 		return map;
@@ -773,6 +785,8 @@ public final class PConfigGroup extends ConfigGroup{
 		private double earningsPerBoardingPassenger = 0.0;
 		private double earningsPerKilometerAndPassenger = 0.0;
 		private int capacityPerVehicle = 0;
+		private double costPerVehicleSo = 0;
+		private double costPerVehicleBo;
 		
 		public PVehicleSettings(final Id<PVehicleSettings> id)	{
 			this.id = id;
@@ -800,6 +814,22 @@ public final class PConfigGroup extends ConfigGroup{
 		
 		public double getCostPerHour()	{
 			return this.costPerHour;
+		}
+		
+		public void setCostPerVehicleSold(final double costPerVehicleSo)	{
+			this.costPerVehicleSo  = costPerVehicleSo;
+		}
+		
+		public double getCostPerVehicleSold()	{
+			return this.costPerVehicleSo;
+		}
+		
+		public void setCostPerVehicleBought(final double costPerVehicleBo)	{
+			this.costPerVehicleBo  = costPerVehicleBo;
+		}
+		
+		public double getCostPerVehicleBought()	{
+			return this.costPerVehicleBo;
 		}
 		
 		public void setCostPerKilometer(final double costPerKilometer)	{
