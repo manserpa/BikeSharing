@@ -1,6 +1,10 @@
 package org.matsim.contrib.minibus.fare;
 
+import java.util.HashMap;
 import java.util.HashSet;
+
+import org.matsim.api.core.v01.Id;
+import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 
 public interface TicketMachineI {
 
@@ -8,7 +12,7 @@ public interface TicketMachineI {
 	
 	boolean isSubsidized(StageContainer stageContainer);
 	
-	int getAmountOfSubsidies(StageContainer stageContainer);
+	double getAmountOfSubsidies(StageContainer stageContainer);
 	
 	void setSubsidizedStops100(HashSet<String> subsidizedStops);
 	
@@ -17,6 +21,8 @@ public interface TicketMachineI {
 	void setSubsidizedStops225(HashSet<String> subsidizedStops);
 	
 	void setSubsidizedStops300(HashSet<String> subsidizedStops);
+	
+	void setActBasedSubs(HashMap<Id<TransitStopFacility>, Double> actBasedSubs);
 	
 	double getPassengerDistanceKilometer(StageContainer stageContainer);
 

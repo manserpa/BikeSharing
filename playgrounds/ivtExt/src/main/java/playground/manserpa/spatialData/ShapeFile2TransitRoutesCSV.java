@@ -34,10 +34,10 @@ public final class ShapeFile2TransitRoutesCSV {
 	public static void main(String[] args) throws IOException	{
 		ShapeFile2TransitRoutesCSV cs = new ShapeFile2TransitRoutesCSV(args[0]);
 		
-		for(int simulationRun = 1; simulationRun <= 6; simulationRun++)	{
-			cs.run(args[1], "Run" + simulationRun + args[2], simulationRun);
-		}
-//		cs.run(args[1], args[2]);
+		//for(int simulationRun = 1; simulationRun <= 6; simulationRun++)	{
+		//	cs.run(args[1], "Run" + simulationRun + args[2], simulationRun);
+		//}
+		cs.run(args[1], args[2], 1);
 		
 	}
 	

@@ -49,7 +49,7 @@ public final class PScoreContainer {
 	private double totalTimeDriven = 0.0;
 	private double passengerKilometer = 0.0;
 
-	private int amountOfSubsidies;
+	private double amountOfSubsidies;
 	
 	public PScoreContainer(Id<Vehicle> vehicleId, TicketMachineI ticketMachine) {
 		this.vehicleId = vehicleId;
@@ -104,7 +104,7 @@ public final class PScoreContainer {
 		return this.numberOfSubsidizedTrips;
 	}
 	
-	public int getAmountOfSubsidies()	{
+	public double getAmountOfSubsidies()	{
 		return this.amountOfSubsidies;
 	}
 	

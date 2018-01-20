@@ -20,12 +20,15 @@
 package org.matsim.contrib.minibus.fare;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import javax.inject.Inject;
 
+import org.matsim.api.core.v01.Id;
 import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.contrib.minibus.PConfigGroup.PVehicleSettings;
+import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 
 /**
  * Calculates the fare for a given {@link StageContainer}.
@@ -39,10 +42,11 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 	private final Collection<PVehicleSettings> pVehicleSettings;
 	private boolean isSubsidized = false;
 	private HashSet<String> subsidizedStops100;
-	private int amountOfSubsidies;
+	private double amountOfSubsidies;
 	private HashSet<String> subsidizedStops150;
 	private HashSet<String> subsidizedStops300;
 	private HashSet<String> subsidizedStops225;
+	private HashMap<Id<TransitStopFacility>, Double> actBasedSubs;
 	
 	@Inject public TicketMachineDefaultImpl(PConfigGroup pConfig ) {
 		this.pVehicleSettings = pConfig.getPVehicleSettings();
@@ -100,8 +104,20 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 			this.isSubsidized  = false;
 			this.amountOfSubsidies = 0;
 			*/
-			return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter();
+			//return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter();
 		//}
+			
+			this.amountOfSubsidies = 0;
+			if (this.actBasedSubs.containsKey(stageContainer.getStopEntered()))	{
+				this.isSubsidized  = true;
+				this.amountOfSubsidies = this.actBasedSubs.get(stageContainer.getStopEntered());
+			}
+			
+			return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter();
+			
+			
+			
+			// new subsidy approach: Eine Schwierigkeit ist, dass eine Linie nur einmal am Tag Subventionen bekommt -> wie macht man das mit dem TimeProvider und dem StopProvider?
 	}
 	
 	@Override
@@ -125,12 +141,17 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 	}
 	
 	@Override
+	public void setActBasedSubs(HashMap<Id<TransitStopFacility>, Double> actBasedSubs) {
+		this.actBasedSubs = actBasedSubs;
+	}
+	
+	@Override
 	public boolean isSubsidized(StageContainer stageContainer) {
 		return this.isSubsidized;
 	}
 	
 	@Override
-	public int getAmountOfSubsidies(StageContainer stageContainer) {
+	public double getAmountOfSubsidies(StageContainer stageContainer) {
 		return this.amountOfSubsidies;
 	}
 	

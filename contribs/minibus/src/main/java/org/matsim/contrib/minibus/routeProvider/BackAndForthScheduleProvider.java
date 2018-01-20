@@ -193,7 +193,7 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 		for (TransitStopFacility transitStopFacility : stopsToBeServed) {
 			tempStopsToBeServed.add(transitStopFacility);
 			
-			String gridNodeId = GridNode.getGridNodeIdForCoord(transitStopFacility.getCoord(), 200);
+			String gridNodeId = GridNode.getGridNodeIdForCoord(transitStopFacility.getCoord(), 300);
 			gridStopHashSet.add(gridNodeId);
 		}
 		// this would be the last stop, not necessary anymore
@@ -306,7 +306,7 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 			
 			else if(routePattern.equals("back"))	{
 				
-				String gridNode = GridNode.getGridNodeIdForCoord(this.linkId2StopFacilityMap.get(link.getId()).getCoord(), 200);
+				String gridNode = GridNode.getGridNodeIdForCoord(this.linkId2StopFacilityMap.get(link.getId()).getCoord(), 300);
 				
 				if(gridStopHashSet.contains(gridNode))	{
 					continue;

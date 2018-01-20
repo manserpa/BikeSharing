@@ -92,6 +92,10 @@ final class PControlerListener implements IterationStartsListener, StartupListen
 	@Override
 	public void notifyIterationStarts(IterationStartsEvent event) {
 		
+		if(event.getIteration() > 550)	{
+			
+		}
+		else {
 	if(((event.getIteration() + 1) % 2 == 0 && event.getIteration() <= 250) || event.getIteration() > 250) {
 		
 		PBox pBox = (PBox) operators ;
@@ -124,7 +128,7 @@ final class PControlerListener implements IterationStartsListener, StartupListen
 
 		}
 		this.dumpTransitScheduleAndVehicles(event.getServices(), event.getIteration());
-	
+	}
 	}
 	
 	}
@@ -132,11 +136,17 @@ final class PControlerListener implements IterationStartsListener, StartupListen
 	@Override
 	public void notifyScoring(ScoringEvent event) {
 		
+		if(event.getIteration() > 550)	{
+			
+		}
+		else {
+		
 		if ( (event.getIteration() <= 250 && event.getIteration() % 2 == 0) || event.getIteration() > 250 )	{
 			
 			PBox pBox = (PBox) operators ;
 			pBox.notifyScoring(event);
 		
+		}
 		}
 		
 	}

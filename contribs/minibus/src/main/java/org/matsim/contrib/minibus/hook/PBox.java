@@ -21,6 +21,7 @@ package org.matsim.contrib.minibus.hook;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -31,7 +32,9 @@ import javax.inject.Inject;
 
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.population.Activity;
 import org.matsim.api.core.v01.population.Person;
+import org.matsim.api.core.v01.population.PlanElement;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.contrib.minibus.PConstants.OperatorState;
@@ -136,6 +139,10 @@ public final class PBox implements POperators {
 		this.ticketMachine.setSubsidizedStops150(dummyHashSet);
 		this.ticketMachine.setSubsidizedStops225(dummyHashSet);
 		this.ticketMachine.setSubsidizedStops300(dummyHashSet);
+		
+		
+		
+		// amount of subsidies depending on  the number of activities: 0.6 .* x .* 0.12 .* exp(-0.008*x)
 
 		TimeProvider timeProvider = new TimeProvider(this.pConfig, event.getServices().getControlerIO().getOutputPath());
 		event.getServices().getEvents().addHandler(timeProvider);
@@ -144,6 +151,36 @@ public final class PBox implements POperators {
 		// no existing stop can be used because of the new back - and forth scheduler
 		this.pStopsOnly = PStopsFactory.createPStops(event.getServices().getScenario().getNetwork(), this.pConfig, event.getServices().getScenario().getTransitSchedule());
 
+		
+		// create subsidy distribution
+		HashMap<String, Integer> gridNodeId2ActsCountMap = new HashMap<>();
+		for (Person person : event.getServices().getScenario().getPopulation().getPersons().values()) {
+			for (PlanElement pE : person.getSelectedPlan().getPlanElements()) {
+				if (pE instanceof Activity) {
+					Activity act = (Activity) pE;
+					String gridNodeId = GridNode.getGridNodeIdForCoord(act.getCoord(), pConfig.getGridSize());
+					if (gridNodeId2ActsCountMap.get(gridNodeId) == null) {
+						gridNodeId2ActsCountMap.put(gridNodeId, 0);
+					}
+					gridNodeId2ActsCountMap.put(gridNodeId, gridNodeId2ActsCountMap.get(gridNodeId) + 1);
+				}
+			}
+		}
+		
+		HashMap<Id<TransitStopFacility>, Double> actBasedSub = new HashMap<>();
+		for(TransitStopFacility fac: this.pStopsOnly.getFacilities().values())	{
+			String gridNodeId = GridNode.getGridNodeIdForCoord(fac.getCoord(), pConfig.getGridSize());
+			double subsidies = 0.0;
+			if(gridNodeId2ActsCountMap.get(gridNodeId) != null) 	{
+				subsidies = 0.6 * gridNodeId2ActsCountMap.get(gridNodeId) * 0.12 * Math.exp(-0.008 * gridNodeId2ActsCountMap.get(gridNodeId));
+			}
+			actBasedSub.put(fac.getId(), subsidies);
+		}
+		
+		this.ticketMachine.setActBasedSubs(actBasedSub);
+		
+				
+				
 		// initialize strategy manager
 		this.strategyManager.init(this.pConfig, this.stageCollectorHandler, this.ticketMachine, timeProvider, event.getServices().getControlerIO().getOutputPath(), this.pStopsOnly);
 
@@ -192,7 +229,7 @@ public final class PBox implements POperators {
 	void notifyIterationStarts(IterationStartsEvent event) {
 		
 		
-		if(event.getIteration() == 250)	{
+		if(event.getIteration() == 550)	{
 			Population pop = event.getServices().getScenario().getPopulation();
 			ObjectAttributes subPopLookup = pop.getPersonAttributes();
 			for(Person p: pop.getPersons().values())	{
@@ -205,8 +242,8 @@ public final class PBox implements POperators {
 			}
 		}
 		
-		
-		if(event.getIteration() == 350)	{
+		/*
+		if(event.getIteration() == 550)	{
 			Population pop = event.getServices().getScenario().getPopulation();
 			ObjectAttributes subPopLookup = pop.getPersonAttributes();
 			for(Person p: pop.getPersons().values())	{
@@ -218,6 +255,7 @@ public final class PBox implements POperators {
 				log.info("Person: " + p.getId().toString() + "is subpopulation " + subpopName);
 			}
 		}
+		*/
 		
 		
 		

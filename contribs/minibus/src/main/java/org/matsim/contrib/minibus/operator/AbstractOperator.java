@@ -303,7 +303,7 @@ abstract class AbstractOperator implements Operator{
 		double totalLineScore = 0.0;
 		int totalTripsServed = 0;
 		int totalSubsidizedTrips = 0;
-		int totalAmountOfSubsidies = 0;
+		double totalAmountOfSubsidies = 0;
 		double totalMeterDriven = 0.0;
 		double totalTimeDriven = 0.0;
 		double totalPassengerKilometer = 0.0;

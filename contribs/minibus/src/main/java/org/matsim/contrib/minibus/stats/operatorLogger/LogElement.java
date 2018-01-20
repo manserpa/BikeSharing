@@ -55,7 +55,7 @@ public final class LogElement {
 	private double timeDriven;
 	private double passengerKilometer;
 	private int subsidizedTrips;
-	private int totalAmountOfSubsidies;
+	private double totalAmountOfSubsidies;
 	private Id<PPlan> parentId;
 	private int nVeh;
 	private double headway;
@@ -135,7 +135,7 @@ public final class LogElement {
 	public void setSubsidizedTrips(int subsidizedTrips2) {
 		this.subsidizedTrips = subsidizedTrips2;
 	}
-	public void setAmountOfSubsidies(int amountOfSubsidies) {
+	public void setAmountOfSubsidies(double amountOfSubsidies) {
 		this.totalAmountOfSubsidies = amountOfSubsidies;
 	}
 	public Id<PPlan> getParentId() {

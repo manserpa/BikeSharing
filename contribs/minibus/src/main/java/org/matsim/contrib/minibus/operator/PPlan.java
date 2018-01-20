@@ -66,7 +66,7 @@ public final class PPlan implements Comparable<PPlan>{
 
 	private int subsidizedTrips;
 
-	private int amountOfSubsidies;
+	private double amountOfSubsidies;
 
 	private double headway;
 	
@@ -234,11 +234,11 @@ public final class PPlan implements Comparable<PPlan>{
 		this.subsidizedTrips = totalNumberOfSubsTrips;		
 	}
 	
-	public int getTotalAmountOfSubsidies() {
+	public double getTotalAmountOfSubsidies() {
 		return this.amountOfSubsidies;
 	}
 
-	public void setTotalAmountOfSubsidies(int totalAmountOfSubsidies) {
+	public void setTotalAmountOfSubsidies(double totalAmountOfSubsidies) {
 		this.amountOfSubsidies = totalAmountOfSubsidies;		
 	}
 
