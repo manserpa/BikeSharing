@@ -3,7 +3,7 @@ package org.matsim.contrib.minibus.ptReplanningModule;
 import org.apache.log4j.Logger;
 import org.matsim.core.controler.MatsimServices;
 import org.matsim.core.population.algorithms.AbstractPersonAlgorithm;
-import org.matsim.core.population.algorithms.ParallelPersonAlgorithmRunner;
+import org.matsim.core.population.algorithms.ParallelPersonAlgorithmUtils;
 import org.matsim.core.router.PlanRouter;
 import org.matsim.core.scenario.MutableScenario;
 
@@ -34,7 +34,7 @@ public class PseudoReplanning  {
 		
 		final AgentReRouteFactoryImpl stuckFactory = new AgentReRouteFactoryImpl();
 		
-		ParallelPersonAlgorithmRunner.run(controler.getScenario().getPopulation(), controler.getConfig().global().getNumberOfThreads(), new ParallelPersonAlgorithmRunner.PersonAlgorithmProvider() {
+		ParallelPersonAlgorithmUtils.run(controler.getScenario().getPopulation(), controler.getConfig().global().getNumberOfThreads(), new ParallelPersonAlgorithmUtils.PersonAlgorithmProvider() {
 			@Override
 			public AbstractPersonAlgorithm getPersonAlgorithm() {
 				return stuckFactory.getReRouteStuck(new PlanRouter(

@@ -28,9 +28,10 @@ import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.minibus.operator.Operator;
 import org.matsim.contrib.minibus.operator.PPlan;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
@@ -123,7 +124,7 @@ final class SimpleBackAndForthScheduleProvider implements PRouteProvider{
 	private TransitRoute createRoute(Id<TransitRoute> routeID, TransitStopFacility startStop, TransitStopFacility endStop){
 		
 		FreespeedTravelTimeAndDisutility tC = new FreespeedTravelTimeAndDisutility(-6.0, 0.0, 0.0);
-		LeastCostPathCalculator routingAlgo = new Dijkstra(this.net, tC, tC);
+		LeastCostPathCalculator routingAlgo = new DijkstraFactory().createPathCalculator(this.net, tC, tC);
 		@SuppressWarnings("serial")
 		Set<String> modes =  new HashSet<String>(){{
 			// this is the networkmode and explicitly not the transportmode
@@ -138,7 +139,7 @@ final class SimpleBackAndForthScheduleProvider implements PRouteProvider{
 		
 		// get Route
 		Path path = routingAlgo.calcLeastCostPath(startNode, endNode, startTime, null, null);
-		NetworkRoute route = new LinkNetworkRouteImpl(startStop.getLinkId(), endStop.getLinkId());
+		NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(startStop.getLinkId(), endStop.getLinkId());
 		route.setLinkIds(startStop.getLinkId(), NetworkUtils.getLinkIds(path.links), endStop.getLinkId());		
 		
 		// get stops at Route

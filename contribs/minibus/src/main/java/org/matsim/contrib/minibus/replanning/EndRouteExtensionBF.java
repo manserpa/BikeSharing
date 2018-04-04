@@ -34,6 +34,7 @@ import org.matsim.contrib.minibus.operator.Operator;
 import org.matsim.contrib.minibus.operator.PPlan;
 import org.matsim.contrib.minibus.routeProvider.PRouteProvider;
 import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
@@ -79,7 +80,7 @@ public final class EndRouteExtensionBF extends AbstractPStrategyModule {
 		this.pStops = pStopsOnly;
 		
 		FreespeedTravelTimeAndDisutility tC = new FreespeedTravelTimeAndDisutility(-6.0, 0.0, 0.0); // Here, it may make sense to use the variable cost parameters given in the config. Ihab/Daniel may'14
-		this.routingAlgo = new Dijkstra(this.network, tC, tC);
+		this.routingAlgo = new DijkstraFactory().createPathCalculator(this.network, tC, tC);
 	}
 
 	@Override

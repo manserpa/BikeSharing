@@ -20,6 +20,7 @@ import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.network.Node;
+import org.matsim.api.core.v01.population.Person;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigGroup;
 import org.matsim.core.config.ConfigUtils;
@@ -36,6 +37,8 @@ import playground.manserpa.minibus.zurich_replanning.ZurichPlanStrategyProvider;
 
 
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collection;
 
@@ -89,6 +92,21 @@ public final class RunZurichReference {
         
         final Network network = scenario.getNetwork();
         
+        String line = "";
+        String agentsToDeleteFile = "AgentsToDelete.csv";
+        
+        if(agentsToDeleteFile != null)	{
+	        try (BufferedReader br = new BufferedReader(new FileReader(agentsToDeleteFile))) {
+	
+	            while ((line = br.readLine()) != null) {
+	            	scenario.getPopulation().removePerson(Id.create(line, Person.class));
+	            }
+	
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+        }
+
 
         FileInputStream stream = new FileInputStream(ConfigGroup.getInputFileURL(config.getContext(), "nodes.list").getPath());
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));

@@ -228,7 +228,7 @@ public final class PBox implements POperators {
 
 	void notifyIterationStarts(IterationStartsEvent event) {
 		
-		
+		/*
 		if(event.getIteration() == 550)	{
 			Population pop = event.getServices().getScenario().getPopulation();
 			ObjectAttributes subPopLookup = pop.getPersonAttributes();
@@ -241,6 +241,7 @@ public final class PBox implements POperators {
 				log.info("Person: " + p.getId().toString() + "is subpopulation " + subpopName);
 			}
 		}
+		*/
 		
 		/*
 		if(event.getIteration() == 550)	{

@@ -30,7 +30,6 @@ import org.matsim.core.controler.listener.IterationEndsListener;
 import org.matsim.core.gbl.Gbl;
 import org.matsim.core.network.io.MatsimNetworkReader;
 import org.matsim.core.population.io.PopulationReader;
-import org.matsim.core.population.routes.GenericRouteImpl;
 import org.matsim.core.scenario.MutableScenario;
 import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.PtConstants;
@@ -125,8 +124,8 @@ final class ActivityLocationsParatransitUser implements IterationEndsListener {
 					// check, if it is a paratransit user
 					Leg leg = (Leg) pE;
 					
-					if (leg.getRoute() instanceof GenericRouteImpl) {
-						GenericRouteImpl route = (GenericRouteImpl) leg.getRoute();
+					//if (leg.getRoute() instanceof GenericRouteImpl) {
+						Route route = leg.getRoute();
 						
 						if (route.getRouteDescription() != null) {
 							if (route.getRouteDescription().contains(this.pIdentifier)) {
@@ -134,7 +133,7 @@ final class ActivityLocationsParatransitUser implements IterationEndsListener {
 								lastLegUsesParatransit = true;
 							}
 						}
-					}
+					//}
 				}
 			}
 		}

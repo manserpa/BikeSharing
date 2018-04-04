@@ -28,9 +28,10 @@ import org.matsim.api.core.v01.network.Node;
 import org.matsim.contrib.minibus.operator.Operator;
 import org.matsim.contrib.minibus.operator.PPlan;
 import org.matsim.core.network.NetworkUtils;
-import org.matsim.core.population.routes.LinkNetworkRouteImpl;
 import org.matsim.core.population.routes.NetworkRoute;
+import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.Dijkstra;
+import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
@@ -69,7 +70,7 @@ final class SimpleCircleScheduleProvider implements PRouteProvider {
 		this.randomPVehicleProvider = randomPVehicleProvider;
 		this.transportMode = transportMode;
 		FreespeedTravelTimeAndDisutility tC = new FreespeedTravelTimeAndDisutility(-6.0, 0.0, 0.0);
-		this.routingAlgo = new Dijkstra(this.net, tC, tC);
+		this.routingAlgo = new DijkstraFactory().createPathCalculator(this.net, tC, tC);
 		@SuppressWarnings("serial")
 		Set<String> modes =  new HashSet<String>(){{
 			// this is the networkmode and explicitly not the transportmode
@@ -137,7 +138,7 @@ final class SimpleCircleScheduleProvider implements PRouteProvider {
 		completeLinkList.add(this.net.getLinks().get(endStop.getLinkId()));
 		completeLinkList.addAll(back.links);
 
-		NetworkRoute route = new LinkNetworkRouteImpl(startStop.getLinkId(), startStop.getLinkId());
+		NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(startStop.getLinkId(), startStop.getLinkId());
 		route.setLinkIds(startStop.getLinkId(), NetworkUtils.getLinkIds(completeLinkList), startStop.getLinkId());		
 		
 		// get stops at Route
