@@ -37,9 +37,9 @@ import org.matsim.vehicles.*;
  * @author aneumann
  *
  */
+
 class PVehiclesFactory {
-	
-	@SuppressWarnings("unused")
+
 	private final static Logger log = Logger.getLogger(PVehiclesFactory.class);
 	
 	private final PConfigGroup pConfig;
@@ -53,21 +53,21 @@ class PVehiclesFactory {
 	 * 
 	 * @return Vehicles used by paratranit lines
 	 */
+
 	public Vehicles createVehicles(TransitSchedule pTransitSchedule){		
 		Vehicles vehicles = VehicleUtils.createVehiclesContainer();		
 		VehiclesFactory vehFactory = vehicles.getFactory();
-		
-		
-		for (PVehicleSettings settings : pConfig.getPVehicleSettings()) {
-			
-			String classname = settings.getPVehicleName();
 
-			VehicleType vehType = vehFactory.createVehicleType(Id.create(classname, VehicleType.class));
+		// create different vehicle types
+		for (PVehicleSettings settings : pConfig.getPVehicleSettings()) {
+			String type = settings.getPVehicleName();
+			VehicleType vehType = vehFactory.createVehicleType(Id.create(type, VehicleType.class));
 			
 			VehicleCapacity capacity = new VehicleCapacityImpl();
 			capacity.setSeats(settings.getCapacityPerVehicle() + 1); // july 2011 the driver takes one seat
 			capacity.setStandingRoom(0);
 			vehType.setCapacity(capacity);
+
 			vehType.setPcuEquivalents(this.pConfig.getPassengerCarEquivalents());
 			vehType.setMaximumVelocity(this.pConfig.getVehicleMaximumVelocity());
 			vehType.setAccessTime(this.pConfig.getDelayPerBoardingPassenger());
@@ -81,15 +81,11 @@ class PVehiclesFactory {
 			for (TransitRoute route : line.getRoutes().values()) {
 				for (Departure departure : route.getDepartures().values()) {
 					if (!vehicles.getVehicles().keySet().contains(departure.getVehicleId())) {
-						
 						for (PVehicleSettings settings : this.pConfig.getPVehicleSettings()) {
-							
-							String classname = settings.getPVehicleName();
-							
-							if(departure.getVehicleId().toString().contains(classname))	{
-							
+							String type = settings.getPVehicleName();
+							if(departure.getVehicleId().toString().contains(type))	{
 								Vehicle vehicle = vehFactory.createVehicle(departure.getVehicleId(), 
-										vehicles.getVehicleTypes().get(Id.create(classname, VehicleType.class)));
+										vehicles.getVehicleTypes().get(Id.create(type, VehicleType.class)));
 								vehicles.addVehicle( vehicle);
 							}
 						}
@@ -98,7 +94,6 @@ class PVehiclesFactory {
 				}
 			}
 		}
-		
 		return vehicles;
 	}
 }

@@ -19,6 +19,7 @@
 
 package org.matsim.contrib.minibus.hook;
 
+import ch.ethz.matsim.baseline_scenario.analysis.transit.readers.EventsTransitTripReader;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.contrib.minibus.PConfigGroup;
@@ -33,6 +34,8 @@ import org.matsim.core.controler.events.StartupEvent;
 import org.matsim.core.controler.listener.IterationStartsListener;
 import org.matsim.core.controler.listener.ScoringListener;
 import org.matsim.core.controler.listener.StartupListener;
+import org.matsim.core.events.EventsManagerImpl;
+import org.matsim.core.events.EventsUtils;
 import org.matsim.core.population.algorithms.AbstractPersonAlgorithm;
 import org.matsim.core.population.algorithms.ParallelPersonAlgorithmUtils;
 import org.matsim.core.router.PlanRouter;
@@ -57,16 +60,13 @@ import java.util.Set;
  * 
  * @author aneumann
  */
+
 final class PControlerListener implements IterationStartsListener, StartupListener, ScoringListener {
 
 	private final static Logger log = Logger.getLogger(PControlerListener.class);
 
 	private final PVehiclesFactory pVehiclesFactory;
-
-	@Inject(optional=true) private AgentsStuckHandlerImpl agentsStuckHandler;
 	private final POperators operators ;
-
-	@Inject(optional=true) private PersonReRouteStuckFactory stuckFactory;
 
 	@Inject PControlerListener(Config config, POperators operators ){
 		PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.GROUP_NAME, PConfigGroup.class);
@@ -80,24 +80,10 @@ final class PControlerListener implements IterationStartsListener, StartupListen
 		pBox.notifyStartup(event);
 		addPTransitScheduleToOriginalOne(event.getServices().getScenario().getTransitSchedule(), pBox.getpTransitSchedule());
 		addPVehiclesToOriginalOnes(event.getServices().getScenario().getTransitVehicles(), this.pVehiclesFactory.createVehicles(pBox.getpTransitSchedule()));
-
-		//		this.pTransitRouterFactory.createTransitRouterConfig(event.getServices().getConfig());
-		//		this.pTransitRouterFactory.updateTransitSchedule();
-
-		if(this.agentsStuckHandler != null){
-			event.getServices().getEvents().addHandler(this.agentsStuckHandler);
-		}
 	}
 
 	@Override
 	public void notifyIterationStarts(IterationStartsEvent event) {
-		
-		if(event.getIteration() > 550)	{
-			
-		}
-		else {
-	if(((event.getIteration() + 1) % 2 == 0 && event.getIteration() <= 250) || event.getIteration() > 250) {
-		
 		PBox pBox = (PBox) operators ;
 		final MatsimServices controler = event.getServices();
 		if(event.getIteration() == controler.getConfig().controler().getFirstIteration()){
@@ -109,47 +95,17 @@ final class PControlerListener implements IterationStartsListener, StartupListen
 			removePreviousPVehiclesFromScenario(event.getServices().getScenario().getTransitVehicles());
 			addPVehiclesToOriginalOnes(event.getServices().getScenario().getTransitVehicles(), this.pVehiclesFactory.createVehicles(pBox.getpTransitSchedule()));
 
-			// this.pTransitRouterFactory.updateTransitSchedule();
-			
-			if(this.agentsStuckHandler != null){
-				ParallelPersonAlgorithmUtils.run(controler.getScenario().getPopulation(), controler.getConfig().global().getNumberOfThreads(), new ParallelPersonAlgorithmUtils.PersonAlgorithmProvider() {
-					@Override
-					public AbstractPersonAlgorithm getPersonAlgorithm() {
-						return stuckFactory.getReRouteStuck(new PlanRouter(
-								controler.getTripRouterProvider().get(),
-								controler.getScenario().getActivityFacilities()
-								), ((MutableScenario)controler.getScenario()), agentsStuckHandler.getAgentsStuck());
-					}
-				});
-			}
-			
-			
-			if((event.getIteration() + 1) % 2 == 0 && event.getIteration() <= 250)
-				new PseudoReplanning(controler, event.getIteration());
-
+			// TODO (PM) I think this can be removed in the long term
+			//if((event.getIteration() + 1) % 2 == 0 && event.getIteration() <= 250)
+				//new PseudoReplanning(controler, event.getIteration());
 		}
 		this.dumpTransitScheduleAndVehicles(event.getServices(), event.getIteration());
-	}
-	}
-	
 	}
 
 	@Override
 	public void notifyScoring(ScoringEvent event) {
-		
-		if(event.getIteration() > 550)	{
-			
-		}
-		else {
-		
-		if ( (event.getIteration() <= 250 && event.getIteration() % 2 == 0) || event.getIteration() > 250 )	{
-			
-			PBox pBox = (PBox) operators ;
-			pBox.notifyScoring(event);
-		
-		}
-		}
-		
+		PBox pBox = (PBox) operators ;
+		pBox.notifyScoring(event);
 	}
 
 	private final Set<Id<TransitStopFacility>> currentExclusivePFacilityIDs = new HashSet<>();

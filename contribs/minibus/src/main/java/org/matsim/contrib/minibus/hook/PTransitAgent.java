@@ -22,6 +22,7 @@ package org.matsim.contrib.minibus.hook;
 import java.util.LinkedList;
 import java.util.List;
 
+import ch.ethz.matsim.baseline_scenario.transit.routing.EnrichedTransitRoute;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.api.core.v01.population.Leg;
@@ -46,6 +47,7 @@ import org.matsim.pt.transitSchedule.api.TransitStopFacility;
  * 
  * @author aneumann
  */
+
 class PTransitAgent extends PersonDriverAgentImpl implements MobsimDriverPassengerAgent {
 	private static final Logger log = Logger.getLogger(PTransitAgent.class);
 
@@ -62,23 +64,29 @@ class PTransitAgent extends PersonDriverAgentImpl implements MobsimDriverPasseng
 
 	@Override
 	public boolean getExitAtStop(final TransitStopFacility stop) {
-		ExperimentalTransitRoute route = (ExperimentalTransitRoute) getCurrentLeg().getRoute();
-		return route.getEgressStopId().equals(stop.getId());
+		EnrichedTransitRoute route = (EnrichedTransitRoute) getCurrentLeg().getRoute();
+		TransitRoute transitRoute = transitSchedule.getTransitLines().get(route.getTransitLineId()).getRoutes().get(route.getTransitRouteId());
+		Id<TransitStopFacility> egressStopId = transitRoute.getStops().get(route.getEgressStopIndex()).getStopFacility().getId();
+		return egressStopId.equals(stop.getId());
 	}
 
 	@Override
 	public boolean getEnterTransitRoute(final TransitLine line, final TransitRoute transitRoute, final List<TransitRouteStop> stopsToCome, TransitVehicle transitVehicle) {
-		ExperimentalTransitRoute route = (ExperimentalTransitRoute) getCurrentLeg().getRoute();
+		EnrichedTransitRoute route = (EnrichedTransitRoute) getCurrentLeg().getRoute();
+		TransitLine passengerLine = transitSchedule.getTransitLines().get(route.getTransitLineId());
+		TransitRoute passengerRoute = passengerLine.getRoutes().get(route.getTransitRouteId());
+		Id<TransitStopFacility> accessStopId = passengerRoute.getStops().get(route.getAccessStopIndex()).getStopFacility().getId();
+		Id<TransitStopFacility> egressStopId = passengerRoute.getStops().get(route.getEgressStopIndex()).getStopFacility().getId();
 		
-		if(containsId(stopsToCome, route.getEgressStopId())){
-			if (route.getRouteId().toString().equalsIgnoreCase(transitRoute.getId().toString())) {
+		if(containsId(stopsToCome, egressStopId))	{
+			if (passengerRoute.getId().toString().equalsIgnoreCase(transitRoute.getId().toString())) {
 				LinkedList<TransitRouteStop> tempStopsToCome = new LinkedList<>(stopsToCome);
 				tempStopsToCome.removeLast();
 				boolean egressStopFound = false;
 				for (TransitRouteStop stop : tempStopsToCome) {
-					if (route.getEgressStopId().equals(stop.getStopFacility().getId())) {
+					if (egressStopId.equals(stop.getStopFacility().getId())) {
 						egressStopFound = true;
-					} else if (route.getAccessStopId().equals(stop.getStopFacility().getId())) {
+					} else if (accessStopId.equals(stop.getStopFacility().getId())) {
 						// route is looping - decide whether to board now or later
 						if (egressStopFound) {
 							// egress stop found - so the agent will be able to reach its destination before the vehicle returns to this stop
@@ -97,12 +105,12 @@ class PTransitAgent extends PersonDriverAgentImpl implements MobsimDriverPasseng
 				return true;
 			}
 			
-			if (this.transitSchedule.getTransitLines().get(route.getLineId()) == null) {
+			if (this.transitSchedule.getTransitLines().get(passengerLine.getId()) == null) {
 				// agent is still on an old line, which probably went bankrupt - enter anyway
 				return true;
 			}
 			
-			TransitRoute transitRoutePlanned = this.transitSchedule.getTransitLines().get(route.getLineId()).getRoutes().get(route.getRouteId());
+			TransitRoute transitRoutePlanned = passengerRoute;
 			if (transitRoutePlanned == null) {
 				// agent is still on an old route, which probably got dropped - enter anyway
 				return true;
@@ -110,8 +118,8 @@ class PTransitAgent extends PersonDriverAgentImpl implements MobsimDriverPasseng
 			
 			TransitRoute transitRouteOffered = this.transitSchedule.getTransitLines().get(line.getId()).getRoutes().get(transitRoute.getId());
 
-			double travelTimePlanned = getArrivalOffsetFromRoute(transitRoutePlanned, route.getEgressStopId()) - getDepartureOffsetFromRoute(transitRoutePlanned, route.getAccessStopId());
-			double travelTimeOffered = getArrivalOffsetFromRoute(transitRouteOffered, route.getEgressStopId()) - getDepartureOffsetFromRoute(transitRouteOffered, route.getAccessStopId());
+			double travelTimePlanned = getArrivalOffsetFromRoute(transitRoutePlanned, egressStopId) - getDepartureOffsetFromRoute(transitRoutePlanned, accessStopId);
+			double travelTimeOffered = getArrivalOffsetFromRoute(transitRouteOffered, egressStopId) - getDepartureOffsetFromRoute(transitRouteOffered, accessStopId);
 			
 			if (travelTimeOffered <= travelTimePlanned) {
 				// transit route offered is faster the the one planned - enter
@@ -169,7 +177,7 @@ class PTransitAgent extends PersonDriverAgentImpl implements MobsimDriverPasseng
 	@Override
 	public Id<TransitStopFacility> getDesiredAccessStopId() {
 		Leg leg = getCurrentLeg();
-		if (!(leg.getRoute() instanceof ExperimentalTransitRoute)) {
+		if (!(leg.getRoute() instanceof EnrichedTransitRoute)) {
 			log.error("pt-leg has no TransitRoute. Removing agent from simulation. Agent " + getId().toString());
 			log.info("route: "
 					+ leg.getRoute().getClass().getCanonicalName()
@@ -177,15 +185,19 @@ class PTransitAgent extends PersonDriverAgentImpl implements MobsimDriverPasseng
 					+ leg.getRoute().getRouteDescription());
 			return null;
 		} else {
-			ExperimentalTransitRoute route = (ExperimentalTransitRoute) leg.getRoute();
-            return route.getAccessStopId();
+			EnrichedTransitRoute route = (EnrichedTransitRoute) leg.getRoute();
+			TransitLine passengerLine = transitSchedule.getTransitLines().get(route.getTransitLineId());
+			TransitRoute passengerRoute = passengerLine.getRoutes().get(route.getTransitRouteId());
+			Id<TransitStopFacility> accessStopId = passengerRoute.getStops().get(route.getAccessStopIndex()).getStopFacility().getId();
+
+            return accessStopId;
 		}
 	}
 	
 	@Override
 	public Id<TransitStopFacility> getDesiredDestinationStopId() {
 		Leg leg = getCurrentLeg();
-		if (!(leg.getRoute() instanceof ExperimentalTransitRoute)) {
+		if (!(leg.getRoute() instanceof EnrichedTransitRoute)) {
 			log.error("pt-leg has no TransitRoute. Removing agent from simulation. Agent " + getId().toString());
 			log.info("route: "
 					+ leg.getRoute().getClass().getCanonicalName()
@@ -193,9 +205,12 @@ class PTransitAgent extends PersonDriverAgentImpl implements MobsimDriverPasseng
 					+ leg.getRoute().getRouteDescription());
 			return null;
 		} else {
-			ExperimentalTransitRoute route = (ExperimentalTransitRoute) leg.getRoute();
-			return route.getEgressStopId();
+			EnrichedTransitRoute route = (EnrichedTransitRoute) leg.getRoute();
+			TransitLine passengerLine = transitSchedule.getTransitLines().get(route.getTransitLineId());
+			TransitRoute passengerRoute = passengerLine.getRoutes().get(route.getTransitRouteId());
+			Id<TransitStopFacility> egressStopId = passengerRoute.getStops().get(route.getEgressStopIndex()).getStopFacility().getId();
+
+			return egressStopId;
 		}
 	}
-
 }

@@ -19,24 +19,26 @@
 
 package org.matsim.contrib.minibus.hook;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-
+import ch.sbb.matsim.mobsim.qsim.pt.SBBTransitEnginePlugin;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Scenario;
 import org.matsim.core.api.experimental.events.EventsManager;
-import org.matsim.core.config.groups.QSimConfigGroup;
 import org.matsim.core.mobsim.framework.Mobsim;
-import org.matsim.core.mobsim.qsim.ActivityEngine;
-import org.matsim.core.mobsim.qsim.DefaultTeleportationEngine;
+import org.matsim.core.mobsim.qsim.AbstractQSimPlugin;
+import org.matsim.core.mobsim.qsim.PopulationPlugin;
 import org.matsim.core.mobsim.qsim.QSim;
+import org.matsim.core.mobsim.qsim.QSimUtils;
 import org.matsim.core.mobsim.qsim.agents.AgentFactory;
 import org.matsim.core.mobsim.qsim.agents.DefaultAgentFactory;
 import org.matsim.core.mobsim.qsim.agents.PopulationAgentSource;
 import org.matsim.core.mobsim.qsim.interfaces.Netsim;
-import org.matsim.core.mobsim.qsim.pt.ComplexTransitStopHandlerFactory;
-import org.matsim.core.mobsim.qsim.pt.TransitQSimEngine;
-import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngineModule;
+import org.matsim.core.mobsim.qsim.pt.TransitEnginePlugin;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * The MobsimFactory is only necessary so that I can add the {@link PTransitAgent}.
@@ -47,45 +49,34 @@ import org.matsim.core.mobsim.qsim.qnetsimengine.QNetsimEngineModule;
 
 class PQSimProvider implements Provider<Mobsim> {
 
-	@SuppressWarnings("unused")
 	private final static Logger log = Logger.getLogger(PQSimProvider.class);
 
-	@Inject Scenario scenario ;
-	@Inject EventsManager eventsManager ;
+	@Inject Scenario scenario;
+	@Inject EventsManager eventsManager;
+	@Inject Collection<AbstractQSimPlugin> plugins;
 
 	@Override
 	public Netsim get() {
-
-		QSimConfigGroup conf = scenario.getConfig().qsim();
-		if (conf == null) {
-			throw new NullPointerException("There is no configuration set for the QSim. Please add the module 'qsim' to your config file.");
+		List<AbstractQSimPlugin> plugins = new LinkedList<>();
+		for (AbstractQSimPlugin plugin : this.plugins) {
+			if (!(plugin instanceof TransitEnginePlugin) && !(plugin instanceof PopulationPlugin)) {
+				plugins.add(plugin);
+			}
 		}
-		
-		
-		QSim qSim = new QSim(scenario, eventsManager);
-		ActivityEngine activityEngine = new ActivityEngine(eventsManager, qSim.getAgentCounter());
-		qSim.addMobsimEngine(activityEngine);
-		qSim.addActivityHandler(activityEngine);
-		QNetsimEngineModule.configure(qSim);
-		DefaultTeleportationEngine teleportationEngine = new DefaultTeleportationEngine(scenario, eventsManager);
-		qSim.addMobsimEngine(teleportationEngine);
-		
-		
-		AgentFactory agentFactory;
+		if(scenario.getConfig().transit().isUseTransit())
+			plugins.add(new SBBTransitEnginePlugin(scenario.getConfig()));
 
+		QSim qSim = QSimUtils.createQSim(scenario, eventsManager, plugins);
+
+		AgentFactory agentFactory;
 		if (scenario.getConfig().transit().isUseTransit()) {
 			agentFactory = new PTransitAgentFactory(qSim);
-			TransitQSimEngine transitEngine = new TransitQSimEngine(qSim);
-			transitEngine.setTransitStopHandlerFactory(new ComplexTransitStopHandlerFactory());
-			qSim.addDepartureHandler(transitEngine);
-			qSim.addAgentSource(transitEngine);
-			qSim.addMobsimEngine(transitEngine);
 		} else {
 			agentFactory = new DefaultAgentFactory(qSim);
 		}
-
 		PopulationAgentSource agentSource = new PopulationAgentSource(scenario.getPopulation(), agentFactory, qSim);
 		qSim.addAgentSource(agentSource);
+
 		return qSim;
 	}
 

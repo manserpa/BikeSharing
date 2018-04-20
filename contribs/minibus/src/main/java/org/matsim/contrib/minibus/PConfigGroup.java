@@ -36,21 +36,18 @@ import org.matsim.core.utils.misc.StringUtils;
 import org.matsim.vehicles.VehicleType.DoorOperationMode;
 
 /**
- * Config group to configure p
+ * Config group to configure minibus
  * 
  * @author aneumann
  *
  */
+
 public final class PConfigGroup extends ConfigGroup{
-	
-	/**
-	 * TODO [AN] This one has to be checked
-	 */
+
 	private static final long serialVersionUID = 4840713748058034511L;
 	private static final Logger log = Logger.getLogger(PConfigGroup.class);
 	
 	// Tags
-	
 	public static final String GROUP_NAME = "p";
 	
 	private static final String P_IDENTIFIER = "pIdentifier";

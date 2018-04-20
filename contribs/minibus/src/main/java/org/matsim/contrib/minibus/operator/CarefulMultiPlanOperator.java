@@ -56,7 +56,6 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
     private List<PPlan> plans;
 
 	private final PConfigGroup pConfig;
-
     
 	public CarefulMultiPlanOperator(Id<Operator> id, PConfigGroup pConfig, PFranchise franchise, PRouteOverlap pRouteOverlap){
 		super(id, pConfig, franchise, pRouteOverlap);
@@ -319,9 +318,6 @@ public final class CarefulMultiPlanOperator extends AbstractOperator{
             }
         }
 		while (this.getBudget() > costPerVehicleBuy) {
-			// budget ok, buy one
-			
-			// manserpa: should be easy to take the vehicle type of the best plan
 			this.setBudget(this.getBudget() - costPerVehicleBuy);
 			this.numberOfVehiclesInReserve++;
 		}

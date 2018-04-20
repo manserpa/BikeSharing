@@ -19,8 +19,6 @@ import org.matsim.core.scenario.MutableScenario;
  *
  */
 
-// TODO: move all pseudo replanning files to minibus contrib
-
 public class PseudoReplanning  {
 
 	private final static Logger log = Logger.getLogger(PseudoReplanning.class);

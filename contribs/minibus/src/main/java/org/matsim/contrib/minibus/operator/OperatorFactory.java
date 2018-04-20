@@ -44,13 +44,6 @@ final class OperatorFactory {
 		this.pRouteOverlap = pRouteOverlap;
 	}
 	
-	public OperatorFactory(PConfigGroup pConfig, PFranchise franchise, WelfareAnalyzer welfareAnalyzer, PRouteOverlap pRouteOverlap){
-		this.pConfig = pConfig;
-		this.franchise = franchise;
-		this.welfareAnalyzer = welfareAnalyzer;
-		this.pRouteOverlap = pRouteOverlap;
-	}
-	
 	public Operator createNewOperator(Id<Operator> id){
 		if(this.pConfig.getOperatorType().equalsIgnoreCase(BasicOperator.OPERATOR_NAME)){
 			return new BasicOperator(id, this.pConfig, this.franchise, this.pRouteOverlap);

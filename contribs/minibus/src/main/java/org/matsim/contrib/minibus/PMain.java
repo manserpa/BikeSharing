@@ -22,11 +22,9 @@ package org.matsim.contrib.minibus;
  * @author nagel
  *
  */
+
 public class PMain {
 
-	/**
-	 * @param args
-	 */
 	public static void main(String[] args) {
 		RunMinibus.main( args );
 	}

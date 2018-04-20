@@ -25,6 +25,7 @@ import org.matsim.contrib.minibus.operator.PPlan;
 /**
  * @author aneumann
  */
+
 public final class PConstants {
 
 	public static final String statsOutputFolder = "/pStats/";
@@ -36,6 +37,5 @@ public final class PConstants {
 	}
 	
 	private PConstants() {
-		
 	}
 }

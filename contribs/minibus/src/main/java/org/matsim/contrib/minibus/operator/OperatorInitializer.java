@@ -50,9 +50,9 @@ public final class OperatorInitializer {
 
 
 	public OperatorInitializer(PConfigGroup pConfig, PFranchise franchise, TransitSchedule pStopsOnly, MatsimServices controler, 
-			TimeProvider timeProvider, WelfareAnalyzer welfareAnalyzer, PRouteOverlap pRouteOverlap) {
+			TimeProvider timeProvider, PRouteOverlap pRouteOverlap) {
 		this.pConfig = pConfig;
-		this.operatorFactory = new OperatorFactory(this.pConfig, franchise, welfareAnalyzer, pRouteOverlap);
+		this.operatorFactory = new OperatorFactory(this.pConfig, franchise, pRouteOverlap);
 		if(this.pConfig.getPNetwork() == null)
 			this.routeProvider = PRouteProviderFactory.createRouteProvider(controler.getScenario().getNetwork(), controler.getScenario().getPopulation(), this.pConfig, pStopsOnly, controler.getControlerIO().getOutputPath(), controler.getEvents());
 		else
@@ -103,6 +103,7 @@ public final class OperatorInitializer {
 				initializedOperator.add(operator);
 			} else {
 				numberOfOperatorsFailedToBeInitialized++;
+				log.info(numberOfOperatorsFailedToBeInitialized);
 			}
 		}
 

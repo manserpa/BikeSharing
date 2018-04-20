@@ -13,23 +13,17 @@ import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.population.io.PopulationReader;
 import org.matsim.core.scenario.ScenarioUtils;
 
-import playground.manserpa.spatialData.CSVUtils;
-
 public class GridCellActivities {
+
+	// TODO (PM): remove?
 	
 	private FileWriter writer;
-	
 	private Scenario scenario;
-	
 	private HashMap<String, Integer> gridNodeId2ActsCountMap = new HashMap<>();
 	
-	
 	private GridCellActivities()	{
-	
-		scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
-		
+		this.scenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
 		new PopulationReader(scenario).readFile("population.xml.gz");
-	
 	}
 	
 	
@@ -40,21 +34,18 @@ public class GridCellActivities {
 					Activity act = (Activity) pE;
 					if(!act.getType().equals("pt interaction"))	{
 						String gridNodeId = GridNode.getGridNodeIdForCoord(act.getCoord(), 300);
-						if (gridNodeId2ActsCountMap.get(gridNodeId) == null) {
-							gridNodeId2ActsCountMap.put(gridNodeId, 0);
-						}
-						gridNodeId2ActsCountMap.put(gridNodeId, gridNodeId2ActsCountMap.get(gridNodeId) + 1);
+						gridNodeId2ActsCountMap.put(gridNodeId, gridNodeId2ActsCountMap.getOrDefault(gridNodeId, 0) + 1);
 					}
 				}
 			}
 		}
 	}
-	
-	
+
 	private void write()	{
+		/*
 		try {
 			writer = new FileWriter("activities.csv");
-	
+
 	    CSVUtils.writeLine(writer , Arrays.asList("GridCell", "Activities"), ';');
 	    for(String id: gridNodeId2ActsCountMap.keySet())	{
 	    	CSVUtils.writeLine(writer, Arrays.asList(id, Integer.toString(gridNodeId2ActsCountMap.get(id))), ';');
@@ -62,17 +53,16 @@ public class GridCellActivities {
 	    writer.flush();
 	    writer.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
-		}	
+		}
+		*/
 	}
 	
 	
 	public static void main(String[] args)	{
-		
 		GridCellActivities gca = new GridCellActivities();
 		gca.run();
 		gca.write();
-		
 	}
 }

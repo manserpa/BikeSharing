@@ -24,10 +24,10 @@ import org.matsim.core.mobsim.qsim.agents.AgentFactory;
 import org.matsim.core.mobsim.qsim.interfaces.Netsim;
 import org.matsim.core.mobsim.qsim.pt.MobsimDriverPassengerAgent;
 
-
 /**
  * @author aneumann
  */
+
 public class PTransitAgentFactory implements AgentFactory {
 
 	private final Netsim simulation;
@@ -41,5 +41,4 @@ public class PTransitAgentFactory implements AgentFactory {
 		MobsimDriverPassengerAgent agent = PTransitAgent.createTransitAgent(p, this.simulation);
 		return agent;
 	}
-
 }

@@ -90,7 +90,6 @@ public final class OperatorCostCollectorHandler implements TransitDriverStartsEv
 	
 	@Override
 	public void handleEvent(TransitDriverStartsEvent event) {
-		
 		double costPerVehicleAndDay = 0.0;
 		double expensesPerMeter = 0.0;
 		double expensesPerSecond = 0.0;

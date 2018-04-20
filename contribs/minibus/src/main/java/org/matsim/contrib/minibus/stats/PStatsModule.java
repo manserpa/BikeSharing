@@ -38,30 +38,33 @@ import org.matsim.core.controler.listener.StartupListener;
  * @author aneumann
  *
  */
+
 public final class PStatsModule extends AbstractModule {
 
 	@Override
 	public void install() {
 		PConfigGroup pConfig = ConfigUtils.addOrGetModule(this.getConfig(), PConfigGroup.class ) ;
 		
-		this.addControlerListenerBinding().to(PStatsOverview.class);
-		this.addControlerListenerBinding().toInstance(new POperatorLogger());
-		this.addControlerListenerBinding().toInstance(new GexfPStat(false, pConfig));
-		this.addControlerListenerBinding().to(GexfPStatLight.class);
-		//this.addControlerListenerBinding().to(Line2GexfPStat.class);
+		this.addControlerListenerBinding().to( PStatsOverview.class );
+		this.addControlerListenerBinding().toInstance( new POperatorLogger() );
+		this.addControlerListenerBinding().toInstance( new GexfPStat(false, pConfig) );
+		this.addControlerListenerBinding().to( GexfPStatLight.class );
 
+		// TODO (PM) remove?
 		if (pConfig.getWriteMetrics()) {
 			this.addControlerListenerBinding().toInstance(new PAnalysisManager(pConfig));
 		}
 
+		// TODO (PM) remove?
 		this.addControlerListenerBinding().to(ActivityLocationsParatransitUser.class);
 
 		this.addControlerListenerBinding().toInstance(new StartupListener() {
-			@Override public void notifyStartup(StartupEvent event) {
+			@Override
+			public void notifyStartup(StartupEvent event) {
+				// TODO (PM) rename?
 				String outFilename = event.getServices().getControlerIO().getOutputPath() + PConstants.statsOutputFolder;
 				new File(outFilename).mkdir();
 			}
 		});
 	}
-
 }
