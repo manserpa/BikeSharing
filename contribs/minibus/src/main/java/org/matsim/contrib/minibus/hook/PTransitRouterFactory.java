@@ -19,76 +19,101 @@
 
 package org.matsim.contrib.minibus.hook;
 
-import org.apache.log4j.Logger;
-import org.matsim.core.config.Config;
-import org.matsim.core.controler.events.IterationStartsEvent;
-import org.matsim.core.controler.events.StartupEvent;
-import org.matsim.core.controler.listener.IterationStartsListener;
-import org.matsim.core.controler.listener.StartupListener;
-import org.matsim.core.gbl.Gbl;
-import org.matsim.pt.router.*;
-import org.matsim.pt.transitSchedule.api.TransitSchedule;
-
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import javax.inject.Inject;
 import javax.inject.Provider;
+import org.apache.log4j.Logger;
+import org.matsim.contrib.minibus.PConfigGroup;
+import org.matsim.contrib.minibus.performance.raptor.Raptor;
+import org.matsim.contrib.minibus.performance.raptor.RaptorDisutility;
+import org.matsim.contrib.minibus.raptor.RaptorUtils;
+import org.matsim.contrib.minibus.raptor.SwissRailRaptor;
+import org.matsim.contrib.minibus.raptor.SwissRailRaptorData;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.gbl.Gbl;
+import org.matsim.pt.router.PreparedTransitSchedule;
+import org.matsim.pt.router.TransitRouter;
+import org.matsim.pt.router.TransitRouterConfig;
+import org.matsim.pt.router.TransitRouterImpl;
+import org.matsim.pt.router.TransitRouterNetwork;
+import org.matsim.pt.router.TransitRouterNetworkTravelTimeAndDisutility;
+import org.matsim.pt.transitSchedule.api.TransitSchedule;
+import org.matsim.pt.transitSchedule.api.TransitStopFacility;
 
 /**
- * 
+ *
  * @author aneumann
  *
  */
-class PTransitRouterFactory implements Provider<TransitRouter>, StartupListener, IterationStartsListener {
-	
-	private final static Logger log = Logger.getLogger(PTransitRouterFactory.class);
+class PTransitRouterFactory implements Provider<TransitRouter> {
+	// How is this working if nothing is injected?  But presumably it uses "Provider" only as a syntax clarifier, but the class
+	// is not injectable. kai, jun'16
 
+	private final static Logger log = Logger.getLogger(PTransitRouterFactory.class);
+	private final Config config;
 	private TransitRouterConfig transitRouterConfig;
+	private final String ptEnabler;
+	private final String ptRouter;
+	private final double costPerBoarding;
+	private final double costPerMeterTraveled;
 
 	private boolean needToUpdateRouter = true;
+	private boolean initializeRaptor = true;
 	private TransitRouterNetwork routerNetwork = null;
 	private Provider<TransitRouter> routerFactory = null;
-
 	@Inject private TransitSchedule schedule;
-	
+	private RaptorDisutility raptorDisutility;
+	private SwissRailRaptorData raptorData;
+
 	public PTransitRouterFactory(Config config){
+		PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class) ;
+		this.config = config;
+		this.ptEnabler = pConfig.getPtEnabler() ;
+		this.ptRouter = pConfig.getPtRouter() ;
+		this.costPerBoarding = pConfig.getEarningsPerBoardingPassenger() ;
+		this.costPerMeterTraveled = pConfig.getEarningsPerKilometerAndPassenger() ;
+
 		this.createTransitRouterConfig(config);
 	}
 
 	private void createTransitRouterConfig(Config config) {
 		this.transitRouterConfig = new TransitRouterConfig(config.planCalcScore(), config.plansCalcRoute(), config.transitRouter(), config.vspExperimental());
 	}
-	
-	private void updateTransitSchedule() {
+
+	void updateTransitSchedule() {
 		this.needToUpdateRouter = true;
 	}
 
 	@Override
 	public TransitRouter get() {
-		if(needToUpdateRouter) {
-			// okay update all routers
-			// TODO (PM) use Raptor as speedy router
-			if(this.routerFactory == null) {
-				Gbl.assertNotNull(this.transitRouterConfig);
-				this.routerNetwork = TransitRouterNetwork.createFromSchedule(this.schedule, this.transitRouterConfig.getBeelineWalkConnectionDistance());
-			}
-			needToUpdateRouter = false;
+		if(initializeRaptor) {
+			this.routerFactory = createSpeedyRouter();
+			initializeRaptor = false;
 		}
-		
-		if (this.routerFactory == null) {
-			PreparedTransitSchedule preparedTransitSchedule = new PreparedTransitSchedule(schedule);
-			TransitRouterNetworkTravelTimeAndDisutility ttCalculator = new TransitRouterNetworkTravelTimeAndDisutility(this.transitRouterConfig, preparedTransitSchedule);
-			return new TransitRouterImpl(this.transitRouterConfig, preparedTransitSchedule, routerNetwork, ttCalculator, ttCalculator);
+		if (needToUpdateRouter) {
+			log.info("Using raptor routing");
+			return this.createRaptorRouter();
 		} else {
 			return this.routerFactory.get();
 		}
 	}
 
-	@Override
-	public void notifyIterationStarts(IterationStartsEvent event) {
-		this.updateTransitSchedule();
+	synchronized private TransitRouter createRaptorRouter() {
+		SwissRailRaptorData raptorData = SwissRailRaptorData.create(this.schedule, RaptorUtils.createRaptorConfig(this.config));
+		return new SwissRailRaptor(raptorData);
 	}
 
-	@Override
-	public void notifyStartup(StartupEvent event) {
-		this.updateTransitSchedule();
+	private Provider<TransitRouter> createSpeedyRouter() {
+		try {
+			Class<?> cls = Class.forName("org.matsim.contrib.minibus.raptor.SwissRailRaptorFactory");
+			Constructor<?> ct = cls.getConstructor(new Class[] {TransitSchedule.class, Config.class});
+			return (Provider<TransitRouter>) ct.newInstance(this.schedule, this.config);
+		} catch (ClassNotFoundException | SecurityException | NoSuchMethodException | IllegalArgumentException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+			log.info(e.toString() );
+		}
+		return null;
 	}
 }
+

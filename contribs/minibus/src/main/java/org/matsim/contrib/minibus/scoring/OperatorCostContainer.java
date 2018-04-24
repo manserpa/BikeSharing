@@ -81,7 +81,14 @@ final class OperatorCostContainer {
 	public double getTotalTimeDriven()	{
 		return this.transitDriverAlightsE.getTime() - this.transitDriverStartsE.getTime();
 	}
-	
+
+	public boolean isStuck()	{
+		if(this.transitDriverAlightsE == null)	{
+			return true;
+		}
+		return false;
+	}
+
 	public double getRunningCostDistance(){
 		return this.expensesPerMeter * this.meterTravelled;
 	}

@@ -106,18 +106,19 @@ public final class TicketMachineDefaultImpl implements TicketMachineI {
 			*/
 			//return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter();
 		//}
-			
-			this.amountOfSubsidies = 0;
-			if (this.actBasedSubs.containsKey(stageContainer.getStopEntered()))	{
-				this.isSubsidized  = true;
-				this.amountOfSubsidies = this.actBasedSubs.get(stageContainer.getStopEntered());
-			}
-			
-			return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter();
-			
-			
-			
-			// new subsidy approach: Eine Schwierigkeit ist, dass eine Linie nur einmal am Tag Subventionen bekommt -> wie macht man das mit dem TimeProvider und dem StopProvider?
+
+
+		/*
+		this.amountOfSubsidies = 0;
+		if (this.actBasedSubs.containsKey(stageContainer.getStopEntered()))	{
+			this.isSubsidized  = true;
+			this.amountOfSubsidies = this.actBasedSubs.get(stageContainer.getStopEntered());
+		}
+		*/
+
+		return earningsPerBoardingPassenger + earningsPerMeterAndPassenger * stageContainer.getDistanceTravelledInMeter();
+
+		// new subsidy approach: Eine Schwierigkeit ist, dass eine Linie nur einmal am Tag Subventionen bekommt -> wie macht man das mit dem TimeProvider und dem StopProvider?
 	}
 	
 	@Override

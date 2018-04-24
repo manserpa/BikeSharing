@@ -65,21 +65,17 @@ class PTransitAgent extends PersonDriverAgentImpl implements MobsimDriverPasseng
 	@Override
 	public boolean getExitAtStop(final TransitStopFacility stop) {
 		EnrichedTransitRoute route = (EnrichedTransitRoute) getCurrentLeg().getRoute();
-		TransitRoute transitRoute = transitSchedule.getTransitLines().get(route.getTransitLineId()).getRoutes().get(route.getTransitRouteId());
-		Id<TransitStopFacility> egressStopId = transitRoute.getStops().get(route.getEgressStopIndex()).getStopFacility().getId();
-		return egressStopId.equals(stop.getId());
+		return route.getEgressStopId().equals(stop.getId());
 	}
 
 	@Override
 	public boolean getEnterTransitRoute(final TransitLine line, final TransitRoute transitRoute, final List<TransitRouteStop> stopsToCome, TransitVehicle transitVehicle) {
 		EnrichedTransitRoute route = (EnrichedTransitRoute) getCurrentLeg().getRoute();
-		TransitLine passengerLine = transitSchedule.getTransitLines().get(route.getTransitLineId());
-		TransitRoute passengerRoute = passengerLine.getRoutes().get(route.getTransitRouteId());
-		Id<TransitStopFacility> accessStopId = passengerRoute.getStops().get(route.getAccessStopIndex()).getStopFacility().getId();
-		Id<TransitStopFacility> egressStopId = passengerRoute.getStops().get(route.getEgressStopIndex()).getStopFacility().getId();
+		Id<TransitStopFacility> accessStopId = route.getAccessStopId();
+		Id<TransitStopFacility> egressStopId = route.getEgressStopId();
 		
 		if(containsId(stopsToCome, egressStopId))	{
-			if (passengerRoute.getId().toString().equalsIgnoreCase(transitRoute.getId().toString())) {
+			if (route.getTransitRouteId().toString().equalsIgnoreCase(transitRoute.getId().toString())) {
 				LinkedList<TransitRouteStop> tempStopsToCome = new LinkedList<>(stopsToCome);
 				tempStopsToCome.removeLast();
 				boolean egressStopFound = false;
@@ -105,12 +101,12 @@ class PTransitAgent extends PersonDriverAgentImpl implements MobsimDriverPasseng
 				return true;
 			}
 			
-			if (this.transitSchedule.getTransitLines().get(passengerLine.getId()) == null) {
+			if (this.transitSchedule.getTransitLines().get(route.getTransitLineId()) == null) {
 				// agent is still on an old line, which probably went bankrupt - enter anyway
 				return true;
 			}
-			
-			TransitRoute transitRoutePlanned = passengerRoute;
+
+			TransitRoute transitRoutePlanned = this.transitSchedule.getTransitLines().get(route.getTransitLineId()).getRoutes().get(route.getTransitRouteId());
 			if (transitRoutePlanned == null) {
 				// agent is still on an old route, which probably got dropped - enter anyway
 				return true;
@@ -186,11 +182,7 @@ class PTransitAgent extends PersonDriverAgentImpl implements MobsimDriverPasseng
 			return null;
 		} else {
 			EnrichedTransitRoute route = (EnrichedTransitRoute) leg.getRoute();
-			TransitLine passengerLine = transitSchedule.getTransitLines().get(route.getTransitLineId());
-			TransitRoute passengerRoute = passengerLine.getRoutes().get(route.getTransitRouteId());
-			Id<TransitStopFacility> accessStopId = passengerRoute.getStops().get(route.getAccessStopIndex()).getStopFacility().getId();
-
-            return accessStopId;
+            return route.getAccessStopId();
 		}
 	}
 	
@@ -206,11 +198,7 @@ class PTransitAgent extends PersonDriverAgentImpl implements MobsimDriverPasseng
 			return null;
 		} else {
 			EnrichedTransitRoute route = (EnrichedTransitRoute) leg.getRoute();
-			TransitLine passengerLine = transitSchedule.getTransitLines().get(route.getTransitLineId());
-			TransitRoute passengerRoute = passengerLine.getRoutes().get(route.getTransitRouteId());
-			Id<TransitStopFacility> egressStopId = passengerRoute.getStops().get(route.getEgressStopIndex()).getStopFacility().getId();
-
-			return egressStopId;
+			return route.getEgressStopId();
 		}
 	}
 }

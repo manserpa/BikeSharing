@@ -67,6 +67,7 @@ final class PControlerListener implements IterationStartsListener, StartupListen
 
 	private final PVehiclesFactory pVehiclesFactory;
 	private final POperators operators ;
+	@Inject private PTransitRouterFactory pTransitRouterFactory;
 
 	@Inject PControlerListener(Config config, POperators operators ){
 		PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.GROUP_NAME, PConfigGroup.class);
@@ -80,6 +81,8 @@ final class PControlerListener implements IterationStartsListener, StartupListen
 		pBox.notifyStartup(event);
 		addPTransitScheduleToOriginalOne(event.getServices().getScenario().getTransitSchedule(), pBox.getpTransitSchedule());
 		addPVehiclesToOriginalOnes(event.getServices().getScenario().getTransitVehicles(), this.pVehiclesFactory.createVehicles(pBox.getpTransitSchedule()));
+
+		this.pTransitRouterFactory.updateTransitSchedule();
 	}
 
 	@Override
@@ -95,6 +98,7 @@ final class PControlerListener implements IterationStartsListener, StartupListen
 			removePreviousPVehiclesFromScenario(event.getServices().getScenario().getTransitVehicles());
 			addPVehiclesToOriginalOnes(event.getServices().getScenario().getTransitVehicles(), this.pVehiclesFactory.createVehicles(pBox.getpTransitSchedule()));
 
+			this.pTransitRouterFactory.updateTransitSchedule();
 			// TODO (PM) I think this can be removed in the long term
 			//if((event.getIteration() + 1) % 2 == 0 && event.getIteration() <= 250)
 				//new PseudoReplanning(controler, event.getIteration());
