@@ -39,18 +39,56 @@
 	</distributionManagement>
 
 	<build>
-		<extensions>
-			<extension>
-				<groupId>io.packagecloud.maven.wagon</groupId>
-				<artifactId>maven-packagecloud-wagon</artifactId>
-				<version>0.0.6</version>
-			</extension>
-		</extensions>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>3.0.2</version>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<showWarnings>false</showWarnings>
+					<showDeprecation>false</showDeprecation>
+					<encoding>UTF-8</encoding>
+					<!-- configure initial and maximal memory for compiling -->
+					<fork>true</fork>
+					<meminitial>128m</meminitial>
+					<maxmem>512m</maxmem>
+					<compilerArguments>
+						<Xmaxwarns>4000</Xmaxwarns>
+						<Xmaxerrs>100</Xmaxerrs>
+					</compilerArguments>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<downloadSources>true</downloadSources>
+					<downloadJavadocs>true</downloadJavadocs>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<archive>
+						<manifest>
+							<mainClass>org.matsim.gui.MATSimGUI</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
@@ -90,9 +128,8 @@
 		<dependency>
 			<groupId>ch.ethz.matsim.projects</groupId>
 			<artifactId>astra</artifactId>
-			<version>0.0.1-PM</version>
+			<version>0.0.1-manserpa</version>
 		</dependency>
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

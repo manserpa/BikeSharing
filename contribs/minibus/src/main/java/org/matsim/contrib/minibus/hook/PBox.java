@@ -19,37 +19,13 @@
 
 package org.matsim.contrib.minibus.hook;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import javax.inject.Inject;
-
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
-import org.matsim.api.core.v01.population.Activity;
-import org.matsim.api.core.v01.population.Person;
-import org.matsim.api.core.v01.population.PlanElement;
-import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.contrib.minibus.PConstants.OperatorState;
 import org.matsim.contrib.minibus.fare.StageContainerCreator;
 import org.matsim.contrib.minibus.fare.TicketMachineI;
-import org.matsim.contrib.minibus.genericUtils.GridNode;
-import org.matsim.contrib.minibus.operator.Operator;
-import org.matsim.contrib.minibus.operator.OperatorInitializer;
-import org.matsim.contrib.minibus.operator.PFranchise;
-import org.matsim.contrib.minibus.operator.POperators;
-import org.matsim.contrib.minibus.operator.PPlan;
-import org.matsim.contrib.minibus.operator.PRouteOverlap;
-import org.matsim.contrib.minibus.operator.TimeProvider;
-import org.matsim.contrib.minibus.operator.WelfareAnalyzer;
-import org.matsim.contrib.minibus.operator.WelfareStatsContainer;
+import org.matsim.contrib.minibus.operator.*;
 import org.matsim.contrib.minibus.replanning.PStrategyManager;
 import org.matsim.contrib.minibus.schedule.PStopsFactory;
 import org.matsim.contrib.minibus.scoring.OperatorCostCollectorHandler;
@@ -59,14 +35,16 @@ import org.matsim.contrib.minibus.scoring.StageContainer2AgentMoneyEvent;
 import org.matsim.core.controler.events.IterationStartsEvent;
 import org.matsim.core.controler.events.ScoringEvent;
 import org.matsim.core.controler.events.StartupEvent;
-import org.matsim.core.utils.io.IOUtils;
 import org.matsim.pt.transitSchedule.TransitScheduleFactoryImpl;
 import org.matsim.pt.transitSchedule.TransitScheduleWriterV1;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
 import org.matsim.pt.transitSchedule.api.TransitStopFacility;
-import org.matsim.utils.objectattributes.ObjectAttributes;
-import org.matsim.utils.objectattributes.attributable.Attributes;
 import org.matsim.vehicles.Vehicle;
+
+import javax.inject.Inject;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 
 /**

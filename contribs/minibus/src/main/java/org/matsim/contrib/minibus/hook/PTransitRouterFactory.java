@@ -19,28 +19,18 @@
 
 package org.matsim.contrib.minibus.hook;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import javax.inject.Inject;
-import javax.inject.Provider;
 import org.apache.log4j.Logger;
-import org.matsim.contrib.minibus.PConfigGroup;
-import org.matsim.contrib.minibus.performance.raptor.Raptor;
-import org.matsim.contrib.minibus.performance.raptor.RaptorDisutility;
 import org.matsim.contrib.minibus.raptor.RaptorUtils;
 import org.matsim.contrib.minibus.raptor.SwissRailRaptor;
 import org.matsim.contrib.minibus.raptor.SwissRailRaptorData;
 import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.gbl.Gbl;
-import org.matsim.pt.router.PreparedTransitSchedule;
 import org.matsim.pt.router.TransitRouter;
-import org.matsim.pt.router.TransitRouterConfig;
-import org.matsim.pt.router.TransitRouterImpl;
-import org.matsim.pt.router.TransitRouterNetwork;
-import org.matsim.pt.router.TransitRouterNetworkTravelTimeAndDisutility;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
-import org.matsim.pt.transitSchedule.api.TransitStopFacility;
+
+import javax.inject.Inject;
+import javax.inject.Provider;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  *
@@ -48,38 +38,19 @@ import org.matsim.pt.transitSchedule.api.TransitStopFacility;
  *
  */
 class PTransitRouterFactory implements Provider<TransitRouter> {
-	// How is this working if nothing is injected?  But presumably it uses "Provider" only as a syntax clarifier, but the class
-	// is not injectable. kai, jun'16
 
 	private final static Logger log = Logger.getLogger(PTransitRouterFactory.class);
+
 	private final Config config;
-	private TransitRouterConfig transitRouterConfig;
-	private final String ptEnabler;
-	private final String ptRouter;
-	private final double costPerBoarding;
-	private final double costPerMeterTraveled;
 
 	private boolean needToUpdateRouter = true;
 	private boolean initializeRaptor = true;
-	private TransitRouterNetwork routerNetwork = null;
 	private Provider<TransitRouter> routerFactory = null;
+
 	@Inject private TransitSchedule schedule;
-	private RaptorDisutility raptorDisutility;
-	private SwissRailRaptorData raptorData;
 
 	public PTransitRouterFactory(Config config){
-		PConfigGroup pConfig = ConfigUtils.addOrGetModule(config, PConfigGroup.class) ;
 		this.config = config;
-		this.ptEnabler = pConfig.getPtEnabler() ;
-		this.ptRouter = pConfig.getPtRouter() ;
-		this.costPerBoarding = pConfig.getEarningsPerBoardingPassenger() ;
-		this.costPerMeterTraveled = pConfig.getEarningsPerKilometerAndPassenger() ;
-
-		this.createTransitRouterConfig(config);
-	}
-
-	private void createTransitRouterConfig(Config config) {
-		this.transitRouterConfig = new TransitRouterConfig(config.planCalcScore(), config.plansCalcRoute(), config.transitRouter(), config.vspExperimental());
 	}
 
 	void updateTransitSchedule() {

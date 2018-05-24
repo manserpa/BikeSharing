@@ -45,7 +45,8 @@ import java.util.List;
  * @author aneumann
  *
  */
-public final class OperatorCostCollectorHandler implements TransitDriverStartsEventHandler, LinkEnterEventHandler, PersonLeavesVehicleEventHandler, AfterMobsimListener {
+public final class OperatorCostCollectorHandler implements TransitDriverStartsEventHandler, LinkEnterEventHandler,
+		PersonLeavesVehicleEventHandler, AfterMobsimListener {
 	
 	private final static Logger log = Logger.getLogger(OperatorCostCollectorHandler.class);
 	

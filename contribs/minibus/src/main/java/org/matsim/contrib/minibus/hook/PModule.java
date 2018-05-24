@@ -22,16 +22,10 @@
 
 package org.matsim.contrib.minibus.hook;
 
-import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.contrib.minibus.fare.TicketMachineDefaultImpl;
 import org.matsim.contrib.minibus.fare.TicketMachineI;
 import org.matsim.contrib.minibus.operator.POperators;
 import org.matsim.contrib.minibus.stats.PStatsModule;
-import org.matsim.contrib.minibus.stats.abtractPAnalysisModules.BVGLines2PtModes;
-import org.matsim.contrib.minibus.stats.abtractPAnalysisModules.LineId2PtMode;
-import org.matsim.core.config.Config;
-import org.matsim.core.config.ConfigUtils;
-import org.matsim.core.config.groups.ControlerConfigGroup;
 import org.matsim.core.controler.AbstractModule;
 import org.matsim.pt.router.TransitRouter;
 
@@ -39,12 +33,11 @@ public final class PModule extends AbstractModule {
 
 	@Override public void install() {
 		final PTransitRouterFactory pTransitRouterFactory = new PTransitRouterFactory(this.getConfig());
-		bind( TransitRouter.class ).toProvider( pTransitRouterFactory );
+		bind(TransitRouter.class).toProvider(pTransitRouterFactory);
 		bind(PTransitRouterFactory.class).toInstance(pTransitRouterFactory);
 
-		addControlerListenerBinding().to( PControlerListener.class ) ;
+		addControlerListenerBinding().to(PControlerListener.class);
 		//addControlerListenerBinding().toInstance( pTransitRouterFactory ) ;
-
 
 		// (needs to be injected _after_ PControlerListener, so that it is executed _before_ PControlerListener.
 		// yyyy injecting the TransitRouterFactory besides the TransitRouter is a fix to re-configure the factory in every iteration.
@@ -61,9 +54,9 @@ public final class PModule extends AbstractModule {
 
 		bind(TicketMachineI.class).to(TicketMachineDefaultImpl.class);
 		bind(POperators.class).to(PBox.class).asEagerSingleton();
-		bindMobsim().toProvider(PQSimProvider.class) ;
+		bindMobsim().toProvider(PQSimProvider.class);
 
 		// TODO (PM) We can install PStats as an extra module, that's fine. But have another look at what we need and what we don't need
-		install( new PStatsModule() ) ;
+		install( new PStatsModule() );
 	}
 }
