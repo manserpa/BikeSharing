@@ -19,12 +19,11 @@
 
 package org.matsim.contrib.minibus.hook;
 
-import ch.ethz.matsim.baseline_scenario.analysis.transit.readers.EventsTransitTripReader;
+import com.google.inject.Inject;
 import org.apache.log4j.Logger;
 import org.matsim.api.core.v01.Id;
 import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.contrib.minibus.operator.POperators;
-import org.matsim.contrib.minibus.ptReplanningModule.PseudoReplanning;
 import org.matsim.core.config.Config;
 import org.matsim.core.config.ConfigUtils;
 import org.matsim.core.controler.MatsimServices;
@@ -34,12 +33,6 @@ import org.matsim.core.controler.events.StartupEvent;
 import org.matsim.core.controler.listener.IterationStartsListener;
 import org.matsim.core.controler.listener.ScoringListener;
 import org.matsim.core.controler.listener.StartupListener;
-import org.matsim.core.events.EventsManagerImpl;
-import org.matsim.core.events.EventsUtils;
-import org.matsim.core.population.algorithms.AbstractPersonAlgorithm;
-import org.matsim.core.population.algorithms.ParallelPersonAlgorithmUtils;
-import org.matsim.core.router.PlanRouter;
-import org.matsim.core.scenario.MutableScenario;
 import org.matsim.pt.transitSchedule.TransitScheduleWriterV1;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
@@ -48,8 +41,6 @@ import org.matsim.vehicles.Vehicle;
 import org.matsim.vehicles.VehicleType;
 import org.matsim.vehicles.VehicleWriterV1;
 import org.matsim.vehicles.Vehicles;
-
-import com.google.inject.Inject;
 
 import java.util.HashSet;
 import java.util.Set;

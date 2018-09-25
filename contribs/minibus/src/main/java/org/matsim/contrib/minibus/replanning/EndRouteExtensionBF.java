@@ -134,8 +134,8 @@ public final class EndRouteExtensionBF extends AbstractPStrategyModule {
 		if (CoordUtils.calcEuclideanDistance(baseStop.getCoord(), newStop.getCoord()) < CoordUtils.calcEuclideanDistance(remoteStop.getCoord(), newStop.getCoord())) {
 			double distanceBack = getShortestPath(newStop, baseStop);
 			double distanceForth = getShortestPath(this.pStops.getFacilities().get(reverseStopId(newStop.getId())), baseStop);
-			
-			if(distanceBack < distanceForth)
+
+			if(distanceBack > distanceForth)
 				newStopsToBeServed.add(0, newStop);
 			else	
 				newStopsToBeServed.add(0, this.pStops.getFacilities().get(reverseStopId(newStop.getId())));
@@ -143,7 +143,7 @@ public final class EndRouteExtensionBF extends AbstractPStrategyModule {
 		else {
 			double distanceBack = getShortestPath(remoteStop, newStop);
 			double distanceForth = getShortestPath(remoteStop, this.pStops.getFacilities().get(reverseStopId(newStop.getId())));
-			
+
 			if(distanceBack < distanceForth)	
 				newStopsToBeServed.add(newStopsToBeServed.indexOf(remoteStop) + 1, newStop);
 			else	
@@ -154,7 +154,7 @@ public final class EndRouteExtensionBF extends AbstractPStrategyModule {
 	}
 	
 	private double getShortestPath(TransitStopFacility fromStop, TransitStopFacility toStop)	{
-		Path path = this.routingAlgo.calcLeastCostPath(this.network.getLinks().get(fromStop.getLinkId()).getToNode(), this.network.getLinks().get(toStop.getLinkId()).getFromNode(), 0.0, null, null);
+		Path path = this.routingAlgo.calcLeastCostPath(this.network.getLinks().get(fromStop.getLinkId()).getFromNode(), this.network.getLinks().get(toStop.getLinkId()).getFromNode(), 0.0, null, null);
 		double distance = 0.0;
 		for (Link link : path.links) {
 			distance += link.getLength();
@@ -172,7 +172,6 @@ public final class EndRouteExtensionBF extends AbstractPStrategyModule {
 			reversedStop += "B";
 		else
 			reversedStop += "A";
-		
 		Id<TransitStopFacility> reversedStopId = Id.create(reversedStop, TransitStopFacility.class);
 		
 		return reversedStopId;

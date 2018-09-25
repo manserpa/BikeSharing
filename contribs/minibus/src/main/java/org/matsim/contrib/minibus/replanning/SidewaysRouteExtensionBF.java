@@ -144,7 +144,6 @@ public final class SidewaysRouteExtensionBF extends AbstractPStrategyModule {
 			}
 		}
 		
-		
 		// find index to insert
 		int index = Math.min(currentStopsToBeServed.indexOf(stopWithSecondSmallestDistance), currentStopsToBeServed.indexOf(stopWithSmallestDistance));
 		
@@ -152,13 +151,14 @@ public final class SidewaysRouteExtensionBF extends AbstractPStrategyModule {
 		
 		double distanceBack = getShortestPath(currentStopsToBeServed.get(index), newStop);
 		double distanceForth = getShortestPath(currentStopsToBeServed.get(index), this.pStops.getFacilities().get(reverseStopId(newStop.getId())));
-		
+
 		if(distanceBack < distanceForth)
 			newStopsToBeServed.add(index + 1, newStop);
 		else	
 			newStopsToBeServed.add(index + 1, this.pStops.getFacilities().get(reverseStopId(newStop.getId())));
-		
+
 		return newStopsToBeServed;
+
 		
 		/*
 		

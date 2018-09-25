@@ -22,13 +22,14 @@ package org.matsim.contrib.minibus.schedule;
 import com.vividsolutions.jts.geom.*;
 
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Coord;
 import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
 import org.matsim.api.core.v01.TransportMode;
-import org.matsim.api.core.v01.network.Link;
-import org.matsim.api.core.v01.network.Network;
-import org.matsim.api.core.v01.network.Node;
+import org.matsim.api.core.v01.network.*;
 import org.matsim.contrib.minibus.PConfigGroup;
-import org.matsim.core.network.algorithms.NetworkCalcTopoType;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.core.utils.geometry.geotools.MGC;
 import org.matsim.core.utils.gis.ShapeFileReader;
 import org.matsim.core.utils.io.IOUtils;
@@ -52,7 +53,7 @@ public final class CreatePStops{
 	
 	private final static Logger log = Logger.getLogger(CreatePStops.class);
 	
-	private final Network net;
+	private Network net;
 	private final PConfigGroup pConfigGroup;
 	private TransitSchedule transitSchedule;
 
@@ -61,10 +62,10 @@ public final class CreatePStops{
 	private final GeometryFactory factory;
 
 	private final LinkedHashMap<Id<Link>, TransitStopFacility> linkId2StopFacilityMap;
-
-	//private List<Integer> topoTypesForStops = null;
-
-	//private NetworkCalcTopoType networkCalcTopoType;
+	private final HashSet<Link> pNetworkLinks = new HashSet<>();
+	private final HashSet<Link> wayBack = new HashSet<>();
+	private final HashSet<Link> linksToRemove = new HashSet<>();
+	private final HashSet<Link> linksToAdd = new HashSet<>();
 	
 	public static TransitSchedule createPStops(Network network, PConfigGroup pConfigGroup){
 		return createPStops(network, pConfigGroup, null);
@@ -73,6 +74,8 @@ public final class CreatePStops{
 	public static TransitSchedule createPStops(Network network, PConfigGroup pConfigGroup, TransitSchedule realTransitSchedule) {
 		CreatePStops cS = new CreatePStops(network, pConfigGroup, realTransitSchedule);
 		cS.run();
+		new NetworkWriter(pConfigGroup.getPNetwork()).write("pNetwork.xml.gz");
+		new NetworkWriter(network).write("totNetwork.xml.gz");
 		return cS.getTransitSchedule();
 	}
 	
@@ -115,7 +118,7 @@ public final class CreatePStops{
 							warnCounter--;
 						}
 					} else {
-						this.linkId2StopFacilityMap.put(stopFacility.getLinkId(), stopFacility);
+						//this.linkId2StopFacilityMap.put(stopFacility.getLinkId(), stopFacility);
 					}
 				} else {
 					stopsWithoutLinkIds.add(stopFacility.getId());
@@ -257,11 +260,51 @@ public final class CreatePStops{
 		int stopsAdded = 0;
 		
 		for (Link link : this.net.getLinks().values()) {
+			if(link.getFreespeed() < 27.0 && link.getAllowedModes().contains(TransportMode.car)) {
+				pNetworkLinks.add(link);
+			}
 			if(link.getAllowedModes().contains(TransportMode.car) && !this.linkId2StopFacilityMap.containsKey(link.getId())){
-				stopsAdded += addStopOnLink(link);
+				if(!wayBack.contains(link))
+					stopsAdded += addStopOnLink(link);
 			}
 		}
-		
+
+		for(Link link : this.linksToRemove)	{
+			if (this.pNetworkLinks.contains(link))
+				this.pNetworkLinks.remove(link);
+		}
+
+		for(Link link : this.linksToAdd)
+			this.net.addLink(link);
+
+		Scenario pScenario = ScenarioUtils.createScenario(ConfigUtils.createConfig());
+		this.pConfigGroup.setPNetwork(pScenario.getNetwork());
+		Network pNetwork = this.pConfigGroup.getPNetwork();
+		NetworkFactory pFactory = pNetwork.getFactory();
+
+		//add links to pNetwork
+		for(Link link: this.pNetworkLinks)	{
+			Node pFromNode = pNetwork.getNodes().get(link.getFromNode().getId());
+			if(pFromNode == null) {
+				pFromNode = pFactory.createNode(link.getFromNode().getId(), link.getFromNode().getCoord());
+				pNetwork.addNode(pFromNode);
+			}
+
+			Node pToNode = pNetwork.getNodes().get(link.getToNode().getId());
+			if(pToNode == null) {
+				pToNode = pFactory.createNode(link.getToNode().getId(), link.getToNode().getCoord());
+				pNetwork.addNode(pToNode);
+			}
+
+			//Link pLink = pFactory.createLink(Id.createLinkId("pt_" + link.getId().toString()), pFromNode, pToNode);
+			Link pLink = pFactory.createLink(Id.createLinkId(link.getId().toString()), pFromNode, pToNode);
+			pLink.setLength(link.getLength());
+			pLink.setFreespeed(link.getFreespeed());
+			pLink.setCapacity(10000);
+			pLink.setNumberOfLanes(10000);
+			pLink.setAllowedModes(Collections.singleton(TransportMode.car));
+			pNetwork.addLink(pLink);
+		}
 		log.info("Added " + stopsAdded + " additional stops for paratransit services");
 	}
 	
@@ -269,15 +312,15 @@ public final class CreatePStops{
 		if(link == null){
 			return 0;
 		}
-		
+
+		if(!link.getAllowedModes().contains("car")){
+			return 0;
+		}
+
 		if(!linkToNodeInServiceArea(link)){
 			return 0;
 		}
-		
-		if (linkHasAlreadyAFormalPTStopFromTheGivenSchedule(link)) {
-			return 0;
-		}
-		
+
 		// manserpa: set speed limit for stops (80km/h -> 22.222222m/s)
 		if (link.getFreespeed() >= 22.5) {
 			return 0;
@@ -295,41 +338,82 @@ public final class CreatePStops{
 		
 		// wenn ein Link existiert mit fromNode = toNode UND toNode = fromNode
 		for (Link wayBack : this.net.getLinks().values())	{
-			if(wayBack.getFromNode().equals(toNode) && wayBack.getToNode().equals(fromNode))	{
-				
+			if(wayBack.getFromNode().equals(toNode) && wayBack.getToNode().equals(fromNode) && !linkId2StopFacilityMap.containsKey(wayBack.getId())
+					&& !wayBack.equals(link))	{
+				this.linksToRemove.add(link);
+				this.linksToRemove.add(wayBack);
+				this.wayBack.add(wayBack);
+
+				Coord stopCoord = new Coord((link.getFromNode().getCoord().getX() + link.getToNode().getCoord().getX()) / 2,
+						(link.getFromNode().getCoord().getY() + link.getToNode().getCoord().getY()) / 2);
+
+				Node node = this.net.getFactory().createNode(
+						Id.createNodeId(link.getFromNode().getId().toString()+"-"+link.getId().toString()), stopCoord);
+				this.net.addNode(node);
+
+				// way forth
+				Link link1 = this.net.getFactory().createLink(Id.createLinkId(link.getId().toString()+"-1"),
+						link.getFromNode(), node);
+				link1.setLength(link.getLength() / 2);
+				link1.setFreespeed(link.getFreespeed());
+				link1.setCapacity(link.getCapacity());
+				link1.setNumberOfLanes(link.getNumberOfLanes());
+				link1.setAllowedModes(Collections.singleton(TransportMode.pt));
+				this.linksToAdd.add(link1);
+				this.pNetworkLinks.add(link1);
+
+				Link link2 = this.net.getFactory().createLink(Id.createLinkId(link.getId().toString()+"-2"),
+						node, link.getToNode());
+				link2.setLength(link.getLength() / 2);
+				link2.setFreespeed(link.getFreespeed());
+				link2.setCapacity(link.getCapacity());
+				link2.setNumberOfLanes(link.getNumberOfLanes());
+				link2.setAllowedModes(Collections.singleton(TransportMode.pt));
+				this.linksToAdd.add(link2);
+				this.pNetworkLinks.add(link2);
+
 				Id<TransitStopFacility> stopId = Id.create(this.pConfigGroup.getPIdentifier() + link.getId() + "_A", TransitStopFacility.class);
-				TransitStopFacility stop = this.transitSchedule.getFactory().createTransitStopFacility(stopId, link.getToNode().getCoord(), false);
-				stop.setLinkId(link.getId());
+				TransitStopFacility stop = this.transitSchedule.getFactory().createTransitStopFacility(stopId, stopCoord, false);
+				stop.setLinkId(link1.getId());
 				stop.setName(Integer.toString(this.transitSchedule.getFacilities().size() + 1));
 				this.transitSchedule.addStopFacility(stop);
 				this.linkId2StopFacilityMap.put(link.getId(), stop);
-				
+
+				// way back
+				Link blink1 = this.net.getFactory().createLink(Id.createLinkId(wayBack.getId().toString()+"-1"),
+						wayBack.getFromNode(), node);
+				blink1.setLength(wayBack.getLength() / 2);
+				blink1.setFreespeed(wayBack.getFreespeed());
+				blink1.setCapacity(wayBack.getCapacity());
+				blink1.setNumberOfLanes(wayBack.getNumberOfLanes());
+				blink1.setAllowedModes(Collections.singleton(TransportMode.pt));
+				this.linksToAdd.add(blink1);
+				this.pNetworkLinks.add(blink1);
+
+				Link blink2 = this.net.getFactory().createLink(Id.createLinkId(wayBack.getId().toString()+"-2"),
+						node, wayBack.getToNode());
+				blink2.setLength(wayBack.getLength() / 2);
+				blink2.setFreespeed(wayBack.getFreespeed());
+				blink2.setCapacity(wayBack.getCapacity());
+				blink2.setNumberOfLanes(wayBack.getNumberOfLanes());
+				blink2.setAllowedModes(Collections.singleton(TransportMode.pt));
+				this.linksToAdd.add(blink2);
+				this.pNetworkLinks.add(blink2);
+
 				Id<TransitStopFacility> stopIdBack = Id.create(this.pConfigGroup.getPIdentifier() + link.getId() + "_B", TransitStopFacility.class);
-				TransitStopFacility stopBack = this.transitSchedule.getFactory().createTransitStopFacility(stopIdBack, wayBack.getToNode().getCoord(), false);
-				stopBack.setLinkId(wayBack.getId());
+				TransitStopFacility stopBack = this.transitSchedule.getFactory().createTransitStopFacility(stopIdBack, stopCoord, false);
+				stopBack.setLinkId(Id.createLinkId(blink1.getId().toString()));
 				stopBack.setName(Integer.toString(this.transitSchedule.getFacilities().size() + 1));
 				this.transitSchedule.addStopFacility(stopBack);
 				this.linkId2StopFacilityMap.put(wayBack.getId(), stopBack);
-				return 1;	
+
+				return 2;
 			}
 		}
 		return 0;
 	
 			
 	}
-	
-	/* manserpa: I don't need this one
-
-	private boolean topoTypeAllowed(Link link) {
-		if(this.topoTypesForStops == null){
-			// flag not set or null in config
-			return true;
-		}
-		Integer topoType = this.networkCalcTopoType.getTopoType(link.getToNode());
-		return this.topoTypesForStops.contains(topoType);
-	}
-	
-	*/
 
 	private boolean linkToNodeInServiceArea(Link link) {
 		Point pToNode = factory.createPoint(MGC.coord2Coordinate(link.getToNode().getCoord()));
@@ -341,19 +425,6 @@ public final class CreatePStops{
 			return true;
 		}
 		return false;
-	}
-
-	private boolean linkHasAlreadyAFormalPTStopFromTheGivenSchedule(Link link) {
-		if (this.linkId2StopFacilityMap.containsKey(link.getId())) {
-			// There is already a stop at this link, used by formal public transport - Use this one instead
-			
-			// manserpa: I don't want this stop in the choice set of the operators
-			
-			//this.transitSchedule.addStopFacility(this.linkId2StopFacilityMap.get(link.getId()));
-			return true;
-		} else {
-			return false;
-		}
 	}
 
 	private TransitSchedule getTransitSchedule() {

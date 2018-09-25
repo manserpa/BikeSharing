@@ -20,6 +20,7 @@ import org.matsim.contrib.minibus.operator.Operator;
 import org.matsim.contrib.minibus.operator.PPlan;
 import org.matsim.core.api.experimental.events.EventsManager;
 import org.matsim.core.network.NetworkUtils;
+import org.matsim.core.network.filter.NetworkLinkFilter;
 import org.matsim.core.population.routes.NetworkRoute;
 import org.matsim.core.population.routes.RouteUtils;
 import org.matsim.core.router.Dijkstra;
@@ -27,6 +28,7 @@ import org.matsim.core.router.DijkstraFactory;
 import org.matsim.core.router.costcalculators.FreespeedTravelTimeAndDisutility;
 import org.matsim.core.router.util.LeastCostPathCalculator;
 import org.matsim.core.router.util.LeastCostPathCalculator.Path;
+import org.matsim.core.utils.misc.Time;
 import org.matsim.pt.transitSchedule.api.Departure;
 import org.matsim.pt.transitSchedule.api.TransitLine;
 import org.matsim.pt.transitSchedule.api.TransitRoute;
@@ -65,7 +67,7 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 	private ArrayList<TransitStopFacility> stopsServedBackPattern;
 	
 	public BackAndForthScheduleProvider(TransitSchedule scheduleWithStopsOnly, Network network, RandomStopProvider randomStopProvider, RandomPVehicleProvider randomPVehicleProvider, double vehicleMaximumVelocity, double planningSpeedFactor, double driverRestTime, String pIdentifier, EventsManager eventsManager, final String transportMode, Collection<PVehicleSettings> pVehicleSettings) {
-		
+
 		this.net = network;
 		
 		this.pVehicleSettings = pVehicleSettings;
@@ -127,6 +129,7 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 		ArrayList<TransitStopFacility> stopsToBeServedReversed = new ArrayList<>();
 		ListIterator<TransitStopFacility> listIterator = this.stopsServedBackPattern.listIterator(this.stopsServedBackPattern.size());
 		while(listIterator.hasPrevious()) {
+
 			String[] stopName = listIterator.previous().getId().toString().split("_");
 			
 			StringBuilder builder = new StringBuilder();
@@ -143,6 +146,7 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 			String str = builder.toString();
 			
 			Id<TransitStopFacility> reversedStopID = Id.create(str, TransitStopFacility.class);
+
 			stopsToBeServedReversed.add(this.scheduleWithStopsOnly.getFacilities().get(reversedStopID));
 		}
 		
@@ -206,13 +210,11 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 		Id<Link> lastLinkId = null;
 		
 		List<Link> links = new LinkedList<>();
-		
 		// for each stop
 		for (TransitStopFacility stop : tempStopsToBeServed) {
 			if(startLinkId == null){
 				startLinkId = stop.getLinkId();
 			}
-			
 			if(lastLinkId != null){
 				links.add(this.net.getLinks().get(lastLinkId));
 				Path path = this.routingAlgo.calcLeastCostPath(this.net.getLinks().get(lastLinkId).getToNode(), this.net.getLinks().get(stop.getLinkId()).getFromNode(), 0.0, null, null);
@@ -221,18 +223,15 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 					links.add(link);
 				}
 			}
-			
 			lastLinkId = stop.getLinkId();
 		}
-		
-		// i don't really understand this one, maybe the first link is in the set twice
 		links.remove(0);
-		NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(startLinkId, lastLinkId);
-		route.setLinkIds(startLinkId, NetworkUtils.getLinkIds(links), lastLinkId);
+		NetworkRoute route = RouteUtils.createLinkNetworkRouteImpl(startLinkId, NetworkUtils.getLinkIds(links), lastLinkId);
+		//route.setLinkIds(startLinkId, NetworkUtils.getLinkIds(links), lastLinkId);
 
 		// get stops at Route
 		List<TransitRouteStop> stops = new LinkedList<>();
-		double runningTime = 0.0;
+		double runningTime = 60.0;
 		
 		
 		// get capacity of the vehicle
@@ -241,7 +240,6 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 		for (PVehicleSettings pVS : this.pVehicleSettings) {
 			
             if (pVehicleType.equals(pVS.getPVehicleName())) {
-            	
             	// manserpa: !!attention: the factor 10 is because of the downscaled scenario. Not really nice because it is hard-coded
             	capacity = pVS.getCapacityPerVehicle() * 10;
             }
@@ -292,7 +290,7 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 				}
 				
 				routeStop = this.scheduleWithStopsOnly.getFactory().createTransitRouteStop(tempStopsToBeServed.get(k), 
-						runningTime, runningTime + getMinStopTime(capacity));
+						(int) runningTime, ((int) runningTime) + getMinStopTime(capacity));
 				runningTime += getMinStopTime(capacity);
 				
 				tempStopsToBeServedNew.add(tempStopsToBeServed.get(k));
@@ -331,7 +329,7 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 					}
 					
 					routeStop = this.scheduleWithStopsOnly.getFactory().createTransitRouteStop(this.linkId2StopFacilityMap.get(link.getId()), 
-							runningTime, runningTime + getMinStopTime(capacity));
+							(int) runningTime, ((int) runningTime) + getMinStopTime(capacity));
 					runningTime += getMinStopTime(capacity);
 					
 					tempStopsToBeServedNew.add(this.linkId2StopFacilityMap.get(link.getId()));
@@ -359,7 +357,8 @@ final class BackAndForthScheduleProvider implements PRouteProvider{
 			}
 		}
 		
-		routeStop = this.scheduleWithStopsOnly.getFactory().createTransitRouteStop(tempStopsToBeServed.get(tempStopsToBeServed.size()-1), runningTime, runningTime + getMinStopTime(capacity));
+		routeStop = this.scheduleWithStopsOnly.getFactory().createTransitRouteStop(tempStopsToBeServed.get(tempStopsToBeServed.size()-1),
+				(int) runningTime, ((int) runningTime) + getMinStopTime(capacity));
 		routeStop.setAwaitDepartureTime(true);
 		stops.add(routeStop);
 		

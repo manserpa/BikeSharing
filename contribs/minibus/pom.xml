@@ -128,13 +128,7 @@
 		<dependency>
 			<groupId>ch.ethz.matsim.projects</groupId>
 			<artifactId>astra</artifactId>
-			<version>0.0.1-manserpa</version>
+			<version>0.0.1-PM</version>
 		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.12</version>
-			<scope>test</scope>
-		</dependency>
-    </dependencies>
+	</dependencies>
 </project>

@@ -20,11 +20,21 @@
 package org.matsim.contrib.minibus.routeProvider;
 
 import org.apache.log4j.Logger;
+import org.matsim.api.core.v01.Id;
+import org.matsim.api.core.v01.Scenario;
+import org.matsim.api.core.v01.TransportMode;
+import org.matsim.api.core.v01.network.Link;
 import org.matsim.api.core.v01.network.Network;
 import org.matsim.api.core.v01.population.Population;
 import org.matsim.contrib.minibus.PConfigGroup;
 import org.matsim.core.api.experimental.events.EventsManager;
+import org.matsim.core.config.Config;
+import org.matsim.core.config.ConfigUtils;
+import org.matsim.core.scenario.ScenarioUtils;
 import org.matsim.pt.transitSchedule.api.TransitSchedule;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 
@@ -36,14 +46,14 @@ public final class PRouteProviderFactory {
 
 	private final static Logger log = Logger.getLogger(PRouteProviderFactory.class);
 
-	public static PRouteProvider createRouteProvider(Network network, Population population, PConfigGroup pConfig, TransitSchedule pStopsOnly, String outputDir, EventsManager eventsManager) {
+	public static PRouteProvider createRouteProvider(Config config, Population population, PConfigGroup pConfig, TransitSchedule pStopsOnly, String outputDir, EventsManager eventsManager) {
 
 		RandomStopProvider randomStopProvider = new RandomStopProvider(pConfig, population, pStopsOnly, outputDir);
 		
 		RandomPVehicleProvider randomPVehicleProvider = new RandomPVehicleProvider(pConfig);
-		
+
 		// runs the new routing
-		return new BackAndForthScheduleProvider(pStopsOnly, network, randomStopProvider, randomPVehicleProvider, pConfig.getVehicleMaximumVelocity(), pConfig.getPlanningSpeedFactor(), pConfig.getDriverRestTime(), pConfig.getPIdentifier(), eventsManager, pConfig.getMode(), pConfig.getPVehicleSettings());
+		return new BackAndForthScheduleProvider(pStopsOnly, pConfig.getPNetwork(), randomStopProvider, randomPVehicleProvider, pConfig.getVehicleMaximumVelocity(), pConfig.getPlanningSpeedFactor(), pConfig.getDriverRestTime(), pConfig.getPIdentifier(), eventsManager, pConfig.getMode(), pConfig.getPVehicleSettings());
 		
 		/* old code by Neumann
 		 * 

@@ -53,10 +53,8 @@ public final class OperatorInitializer {
 			TimeProvider timeProvider, PRouteOverlap pRouteOverlap) {
 		this.pConfig = pConfig;
 		this.operatorFactory = new OperatorFactory(this.pConfig, franchise, pRouteOverlap);
-		if(this.pConfig.getPNetwork() == null)
-			this.routeProvider = PRouteProviderFactory.createRouteProvider(controler.getScenario().getNetwork(), controler.getScenario().getPopulation(), this.pConfig, pStopsOnly, controler.getControlerIO().getOutputPath(), controler.getEvents());
-		else
-			this.routeProvider = PRouteProviderFactory.createRouteProvider(this.pConfig.getPNetwork(), controler.getScenario().getPopulation(), this.pConfig, pStopsOnly, controler.getControlerIO().getOutputPath(), controler.getEvents());
+
+		this.routeProvider = PRouteProviderFactory.createRouteProvider(controler.getConfig(), controler.getScenario().getPopulation(), this.pConfig, pStopsOnly, controler.getControlerIO().getOutputPath(), controler.getEvents());
 
 		if (this.pConfig.getStartWith24Hours()) {
 			this.initialStrategy = new CreateNew24hPlan(new ArrayList<String>());

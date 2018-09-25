@@ -31,7 +31,8 @@ import org.matsim.pt.router.TransitRouter;
 
 public final class PModule extends AbstractModule {
 
-	@Override public void install() {
+	@Override
+	public void install() {
 		final PTransitRouterFactory pTransitRouterFactory = new PTransitRouterFactory(this.getConfig());
 		bind(TransitRouter.class).toProvider(pTransitRouterFactory);
 		bind(PTransitRouterFactory.class).toInstance(pTransitRouterFactory);
@@ -54,7 +55,7 @@ public final class PModule extends AbstractModule {
 
 		bind(TicketMachineI.class).to(TicketMachineDefaultImpl.class);
 		bind(POperators.class).to(PBox.class).asEagerSingleton();
-		bindMobsim().toProvider(PQSimProvider.class);
+		//bindMobsim().toProvider(PQSimProvider.class);
 
 		// TODO (PM) We can install PStats as an extra module, that's fine. But have another look at what we need and what we don't need
 		install( new PStatsModule() );
